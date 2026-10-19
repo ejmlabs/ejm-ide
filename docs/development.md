@@ -37,13 +37,13 @@ The Quality workflow checks out the IDE at `ejm-ide` and its shared harness at
 The npm cache uses `ejm-ide/package-lock.json`, and the Rust cache uses
 `ejm-ide/src-tauri/target`. Cargo uses at most four build jobs.
 
-By default, the harness repository is `ejmlabs-harness` under the same GitHub owner
+By default, the harness repository is `ejm-harness` under the same GitHub owner
 as the IDE. Checkout uses that repository's default branch. Repository variables
 can select a different source or pin a revision:
 
 | Repository variable | Value |
 | --- | --- |
-| `EJM_HARNESS_REPOSITORY` | `owner/repository`; defaults to the IDE owner's `ejmlabs-harness` repository |
+| `EJM_HARNESS_REPOSITORY` | `owner/repository`; defaults to the IDE owner's `ejm-harness` repository |
 | `EJM_HARNESS_REF` | Optional branch, tag, or commit; unset uses the harness repository's default branch |
 
 The harness repository must be accessible to the workflow's checkout action.
