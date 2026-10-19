@@ -146,3 +146,19 @@ recorded tests remain source-covered. Run no native/site suite, model call,
 hosted job, credential change, release, or publication for this preparation.
 The public documentation impact is source setup and contributor CI guidance;
 no public site behavior or download availability changes.
+
+## Canonical review-source formatting
+
+Admitted run `39294657006` fetched the trusted base harness pin successfully,
+then stopped at `npm run format:check`: Biome wanted to reformat both canonical
+review schemas. Keep those shared Git bytes exact. Use the installed Biome
+`files.includes` force-ignore rule `!!.github/review-context` for this static
+source directory only. Keep application rules unchanged and verify the exports
+against the canonical shared objects, including their manifest and safe modes.
+
+Task 2.7 covers local repair and focused format, lint, standards, documentation,
+OpenSpec, and diff checks. Record the failed hosted run and unrun gates plainly.
+Changing the head requires fresh human decisions and a new exact-head recovery
+decision if needed. Do not reuse the old admission, run CI, or claim hosted
+acceptance from local checks. This contributor-tooling repair changes no runtime
+contract, public site content, or download availability.

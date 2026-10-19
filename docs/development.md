@@ -49,7 +49,11 @@ The proposed revision requires boolean `complete: true` from each review pass.
 Missing, false, or nonboolean completion fails even with no findings. The
 [source manifest](../.github/review-context/manifest.json) identifies both exact
 workflow implementations supplied for static review. Those copies are review
-data and must never be executed or imported.
+data and must never be executed or imported. Biome excludes
+`.github/review-context` so formatting cannot change the canonical bytes.
+Validate those copies separately against the manifest and exact shared Git
+objects, including their hashes, modes, and total size. Application formatting
+and lint rules remain in force.
 
 A submitted caller does not replace the trusted workflow on the default
 branch. Local preparation proves neither hosted acceptance nor repair of that
@@ -71,9 +75,14 @@ The Quality job places the admitted IDE sources at `product` and the pinned
 harness at sibling `ejm-harness` under the runner workspace. npm commands run
 from `product`.
 
-Hosted IDE CI stays blocked while the harness is private, under the owner's
-decision to wait for a public harness and provision no private cross-repository
-token. The proposed `.github/harness-revision` now selects reviewed protected
+After harness publication, admitted run
+[`39294657006`](https://github.com/ejmlabs/ejm-ide/actions/runs/39294657006)
+successfully fetched trusted base pin
+`4a751c6a3f24d7d143140f79ff53517fb93e3531`. Quality then stopped at the
+canonical review-schema formatting conflict. The narrow Biome exclusion fixes
+that local failure; hosted quality still needs a fresh admitted run. The earlier
+decision to provision no private cross-repository token remains in force.
+The proposed `.github/harness-revision` selects reviewed protected
 harness main `09b779ee0452dda07b7f52503be22e65fe238373`. Prepare the sibling
 checkout at that exact revision with Rust 1.99.1 or newer. Its resolved core,
 auth, and execution production sources and harness lock match the earlier
