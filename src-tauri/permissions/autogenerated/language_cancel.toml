@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-language-cancel"
+description = "Enables the language_cancel command without any pre-configured scope."
+commands.allow = ["language_cancel"]
+
+[[permission]]
+identifier = "deny-language-cancel"
+description = "Denies the language_cancel command without any pre-configured scope."
+commands.deny = ["language_cancel"]

@@ -1,0 +1,9 @@
+{
+  "id": "selection-notebook",
+  "name": "Selection notebook",
+  "description": "Keep a checklist of source references and send a focused note to the agent.",
+  "apiVersion": 1,
+  "entry": "panel.tsx",
+  "capabilities": ["context.read", "chat.attach", "source.open"],
+  "commands": [{ "id": "clear", "title": "Clear notebook" }]
+}

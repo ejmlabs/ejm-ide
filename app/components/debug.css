@@ -1,0 +1,934 @@
+@layer workbench-debug {
+  .debug-pane {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+    min-width: 0;
+    overflow: hidden;
+    color: var(--ejm-ui-n14);
+    background: var(--ejm-ui-n3);
+    font-size: 11px;
+    container-type: inline-size;
+  }
+  .debug-toolbar,
+  .debug-connection-status,
+  .debug-actions,
+  .debug-summary,
+  .debug-summary > span,
+  .debug-tabs,
+  .debug-filterbar,
+  .debug-search,
+  .debug-error-filter,
+  .debug-active,
+  .debug-active > span,
+  .debug-tool,
+  .debug-footer,
+  .debug-footer > span,
+  .debug-error {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    gap: 6px;
+  }
+  .debug-toolbar {
+    min-height: 33px;
+    padding: 1px 7px 1px 12px;
+    flex-shrink: 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--ejm-ui-text-strong) 4%, transparent);
+  }
+  .debug-connection-status {
+    flex: 1;
+    gap: 7px;
+    font-size: 10px;
+  }
+  .debug-status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--ejm-ui-n11);
+    flex-shrink: 0;
+  }
+  .debug-status-dot.connected {
+    background: var(--ejm-ui-success);
+  }
+  .debug-paused {
+    color: var(--ejm-ui-warning);
+    padding-left: 4px;
+  }
+  .debug-actions {
+    gap: 1px;
+    flex-shrink: 0;
+  }
+  .debug-actions .icon-button {
+    min-height: 25px;
+    height: 25px;
+    width: 25px;
+    color: var(--ejm-ui-n13);
+  }
+  .debug-actions .icon-button[aria-pressed="true"] {
+    color: var(--ejm-ui-warning);
+    background: color-mix(in srgb, var(--ejm-ui-warning) 4%, transparent);
+  }
+  .debug-action-divider {
+    width: 1px;
+    height: 12px;
+    background: color-mix(in srgb, var(--ejm-ui-text-strong) 7%, transparent);
+    margin: 0 3px;
+  }
+  .debug-summary {
+    gap: 15px;
+    min-height: 28px;
+    padding: 4px 12px;
+    color: var(--ejm-ui-n13);
+    font-size: 10px;
+    flex-shrink: 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--ejm-ui-text-strong) 3%, transparent);
+    font-variant-numeric: tabular-nums;
+  }
+  .debug-summary > span {
+    gap: 4px;
+    white-space: nowrap;
+  }
+  .debug-summary strong {
+    font-weight: 550;
+    color: var(--ejm-ui-n14);
+  }
+  .debug-summary-transfer > span {
+    padding-left: 7px;
+  }
+  .debug-summary .debug-policy {
+    margin-left: auto;
+    color: var(--ejm-ui-n12);
+  }
+  .debug-tabs {
+    min-height: 30px;
+    gap: 0;
+    padding: 0 5px;
+    flex-shrink: 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--ejm-ui-text-strong) 4%, transparent);
+  }
+  .debug-tabs > button {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    align-self: stretch;
+    padding: 0 9px;
+    font-size: 10px;
+    color: var(--ejm-ui-n13);
+  }
+  .debug-tabs > button:hover {
+    background: color-mix(in srgb, var(--ejm-ui-text-strong) 2%, transparent);
+  }
+  .debug-tabs > button[aria-selected="true"] {
+    color: var(--ejm-ui-n14);
+    box-shadow: inset 0 -1px 0 var(--ejm-ui-accent);
+  }
+  .debug-tabs > :where(button) > span {
+    color: var(--ejm-ui-n12);
+    font-size: 9px;
+  }
+  .debug-capture-time {
+    margin-left: auto;
+    padding: 0 6px;
+    font-size: 9px;
+    color: var(--ejm-ui-n12);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .debug-view {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    min-width: 0;
+    overflow: hidden;
+  }
+  .debug-filterbar {
+    padding: 4px 10px;
+    min-height: 32px;
+    gap: 9px;
+    flex-shrink: 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--ejm-ui-text-strong) 3%, transparent);
+  }
+  .debug-search {
+    max-width: 260px;
+    flex: 1;
+    color: var(--ejm-ui-n13);
+  }
+  .debug-search input {
+    width: 100%;
+    padding: 3px 0;
+    border: 0;
+    background: none;
+    font-size: 10px;
+    caret-color: var(--ejm-ui-accent);
+  }
+  .debug-search input::placeholder {
+    color: var(--ejm-ui-n12);
+  }
+  .debug-filterbar select {
+    max-width: 105px;
+    background: var(--ejm-ui-n5);
+    border: 1px solid color-mix(in srgb, var(--ejm-ui-text-strong) 7%, transparent);
+    border-radius: 3px;
+    padding: 2px 4px;
+    font-size: 10px;
+    color: var(--ejm-ui-n13);
+  }
+  .debug-error-filter {
+    font-size: 10px;
+    padding: 4px 6px;
+    border-radius: 3px;
+    color: var(--ejm-ui-n13);
+  }
+  .debug-error-filter[aria-pressed="true"] {
+    color: var(--ejm-ui-error);
+    background: color-mix(in srgb, var(--ejm-ui-error) 6%, transparent);
+  }
+  .debug-event-count {
+    margin-left: auto;
+    color: var(--ejm-ui-n12);
+    font-size: 9px;
+    white-space: nowrap;
+  }
+  .debug-active {
+    gap: 6px 15px;
+    padding: 6px 11px;
+    flex-wrap: wrap;
+    flex-shrink: 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--ejm-ui-text-strong) 4%, transparent);
+    max-height: 66px;
+    overflow: auto;
+    color: var(--ejm-ui-accent-strong);
+  }
+  .debug-active > span {
+    max-width: 300px;
+  }
+  .debug-active code {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 10px;
+  }
+  .debug-active > :where(span) > span {
+    white-space: nowrap;
+    font-size: 9px;
+    color: var(--ejm-ui-n13);
+  }
+  .debug-activity-split {
+    display: grid;
+    grid-template-columns: minmax(240px, 1fr) minmax(280px, 46%);
+    min-height: 0;
+    min-width: 0;
+    flex: 1;
+  }
+  .debug-timeline,
+  .debug-inspector,
+  .debug-scroll {
+    min-height: 0;
+    min-width: 0;
+    overflow: auto;
+    overscroll-behavior: contain;
+  }
+  .debug-event-row {
+    display: flex;
+    align-items: center;
+    min-height: 29px;
+    width: 100%;
+    min-width: 0;
+    gap: 8px;
+    padding: 3px 10px;
+    font-size: 10px;
+    border-bottom: 1px solid color-mix(in srgb, var(--ejm-ui-text-strong) 1%, transparent);
+    text-align: left;
+    color: var(--ejm-ui-n13);
+    font-variant-numeric: tabular-nums;
+  }
+  .debug-event-row:hover {
+    background: color-mix(in srgb, var(--ejm-ui-text-strong) 2%, transparent);
+  }
+  .debug-event-row.selected {
+    background: color-mix(in srgb, var(--ejm-ui-primary) 11%, transparent);
+  }
+  .debug-event-row > time {
+    color: var(--ejm-ui-n12);
+    font-size: 9px;
+    flex-shrink: 0;
+  }
+  .debug-event-row > svg {
+    flex-shrink: 0;
+    color: var(--ejm-ui-n12);
+  }
+  .debug-event-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+    min-width: 0;
+  }
+  .debug-event-kind {
+    color: var(--ejm-ui-n12);
+    width: 56px;
+    font-size: 9px;
+    flex-shrink: 0;
+  }
+  .debug-event-phase {
+    width: 61px;
+    font-size: 9px;
+    flex-shrink: 0;
+  }
+  .debug-event-duration {
+    width: 45px;
+    color: var(--ejm-ui-n12);
+    text-align: right;
+    font-size: 9px;
+    flex-shrink: 0;
+  }
+  .debug-phase-failed,
+  .debug-phase-limit,
+  .debug-event-row:where(.debug-phase-failed) > svg,
+  .debug-event-row:where(.debug-phase-limit) > svg {
+    color: var(--ejm-ui-error);
+  }
+  .debug-phase-cancelled {
+    color: var(--ejm-ui-warning);
+  }
+  .debug-inspector {
+    background: var(--ejm-ui-n4);
+    border-left: 1px solid color-mix(in srgb, var(--ejm-ui-text-strong) 4%, transparent);
+  }
+  .debug-event-detail {
+    padding: 11px 13px;
+    user-select: text;
+  }
+  .debug-content-sections {
+    margin-top: 14px;
+  }
+  .debug-content-block {
+    min-width: 0;
+    margin-top: 14px;
+    border: 1px solid color-mix(in srgb, var(--ejm-ui-text-strong) 7%, transparent);
+    border-radius: 4px;
+    overflow: hidden;
+    background: var(--ejm-ui-n3);
+  }
+  .debug-content-heading {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 3px 7px 3px 9px;
+    border-bottom: 1px solid color-mix(in srgb, var(--ejm-ui-text-strong) 4%, transparent);
+  }
+  .debug-content-heading > h3 {
+    margin: 0;
+    color: var(--ejm-ui-n14);
+  }
+  .debug-content-heading > span {
+    color: var(--ejm-ui-n12);
+    font-size: 9px;
+  }
+  .debug-content-heading > button {
+    margin-left: auto;
+    width: 24px;
+    height: 24px;
+    min-height: 24px;
+    color: var(--ejm-ui-n13);
+  }
+  .debug-content-markers {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 10px;
+    padding: 6px 9px;
+    color: var(--ejm-ui-n12);
+    font-size: 9px;
+    line-height: 1.5;
+    font-variant-numeric: tabular-nums;
+  }
+  .debug-content-redaction,
+  .debug-content-truncation {
+    color: var(--ejm-ui-warning);
+  }
+  .debug-content-text {
+    max-height: 280px;
+    overflow: auto;
+    overscroll-behavior: contain;
+    user-select: text;
+  }
+  .debug-content-text > pre {
+    margin: 0;
+    padding: 6px 9px 10px;
+    white-space: pre;
+    overflow-wrap: normal;
+    word-break: normal;
+    user-select: text;
+    font-family: var(--font-mono, "JetBrains Mono", monospace);
+    font-size: 10px;
+    line-height: 1.65;
+    color: var(--ejm-ui-n14);
+    tab-size: 2;
+  }
+  .debug-content-text:focus-visible {
+    outline: 1px solid var(--ejm-ui-accent);
+    outline-offset: -2px;
+  }
+  .debug-content-state,
+  .debug-content-error {
+    margin: 12px 0 0;
+    font-size: 10px;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+  }
+  .debug-content-state {
+    color: var(--ejm-ui-n13);
+  }
+  .debug-content-error {
+    color: var(--ejm-ui-error);
+  }
+  .debug-content-error > p {
+    margin: 0 0 5px;
+  }
+  .debug-content-block > .debug-content-error {
+    margin: 0;
+    padding: 4px 9px 9px;
+  }
+  .debug-event-detail > strong {
+    display: block;
+    font-size: 11px;
+    font-weight: 550;
+    overflow-wrap: anywhere;
+    margin-bottom: 10px;
+  }
+  .debug-pane dl {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+    gap: 7px 12px;
+    margin: 0;
+    font-size: 10px;
+    line-height: 1.4;
+  }
+  .debug-pane dt {
+    color: var(--ejm-ui-n12);
+  }
+  .debug-pane dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+    font-variant-numeric: tabular-nums;
+  }
+  .debug-event-detail > p,
+  .debug-note {
+    color: var(--ejm-ui-n12);
+    font-size: 10px;
+    line-height: 1.7;
+    margin: 13px 0 0;
+  }
+  .debug-scroll > .debug-note {
+    margin: 9px 12px;
+  }
+  .debug-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 10px;
+    text-align: left;
+    white-space: nowrap;
+  }
+  .debug-table caption {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  .debug-table th,
+  .debug-table td {
+    padding: 7px 12px;
+    border-bottom: 1px solid color-mix(in srgb, var(--ejm-ui-text-strong) 3%, transparent);
+    font-variant-numeric: tabular-nums;
+  }
+  .debug-table th {
+    color: var(--ejm-ui-n12);
+    font-weight: 450;
+    background: var(--ejm-ui-n4);
+    position: sticky;
+    top: 0;
+  }
+  .debug-table :where(td) > code {
+    color: var(--ejm-ui-n13);
+    margin-right: 3px;
+  }
+  .debug-tool-group {
+    padding: 1px 12px 8px;
+  }
+  .debug-pane h3 {
+    color: var(--ejm-ui-n13);
+    font-size: 10px;
+    font-weight: 550;
+    margin: 10px 0 6px;
+  }
+  .debug-tool {
+    min-height: 27px;
+    gap: 8px;
+    border-bottom: 1px solid color-mix(in srgb, var(--ejm-ui-text-strong) 2%, transparent);
+    color: var(--ejm-ui-n13);
+  }
+  .debug-tool > code {
+    flex: 1;
+    color: var(--ejm-ui-n14);
+    font-size: 10px;
+    overflow-wrap: anywhere;
+  }
+  .debug-tool > span {
+    font-size: 9px;
+    color: var(--ejm-ui-n12);
+  }
+  .debug-limits {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+    padding: 2px 13px 15px;
+    align-content: start;
+  }
+  .debug-limits h3 {
+    margin-bottom: 10px;
+  }
+  .debug-limits dl {
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  }
+  .debug-engine {
+    grid-column: 1 / -1;
+  }
+  .debug-engine-heading {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .debug-engine-heading > code {
+    color: var(--ejm-ui-n12);
+    font-size: 10px;
+  }
+  .debug-engine-heading > span {
+    margin-left: auto;
+    color: var(--ejm-ui-n13);
+    font-size: 10px;
+  }
+  .debug-engine dl {
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1.4fr) minmax(0, 1fr);
+  }
+  .debug-engine > .debug-note {
+    margin-top: 8px;
+  }
+  .debug-footer {
+    justify-content: space-between;
+    min-height: 24px;
+    padding: 3px 11px;
+    font-size: 9px;
+    color: var(--ejm-ui-n12);
+    border-top: 1px solid color-mix(in srgb, var(--ejm-ui-text-strong) 4%, transparent);
+    flex-shrink: 0;
+    flex-wrap: wrap;
+  }
+  .debug-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 20px 14px;
+    min-height: 100px;
+    text-align: center;
+    color: var(--ejm-ui-n13);
+  }
+  .debug-empty > strong {
+    color: var(--ejm-ui-n14);
+    font-size: 11px;
+    font-weight: 550;
+  }
+  .debug-empty > p {
+    max-width: 330px;
+    margin: 0;
+    line-height: 1.6;
+    font-size: 10px;
+  }
+  .debug-empty-detail,
+  .debug-inline-empty {
+    color: var(--ejm-ui-n13);
+    padding: 4px 13px;
+    font-size: 10px;
+    line-height: 1.6;
+  }
+  .debug-error {
+    padding: 6px 11px;
+    gap: 7px;
+    flex-shrink: 0;
+    font-size: 10px;
+    color: var(--ejm-ui-error);
+    background: color-mix(in srgb, var(--ejm-ui-error) 3%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--ejm-ui-text-strong) 3%, transparent);
+  }
+  .debug-error > svg {
+    flex-shrink: 0;
+  }
+  .debug-error > span {
+    flex: 1;
+    overflow-wrap: anywhere;
+  }
+  .debug-error > button {
+    color: var(--ejm-ui-error);
+  }
+  .debug-trace-filterbar {
+    gap: 8px;
+    padding: 4px 9px;
+  }
+  .debug-trace-filterbar > select {
+    max-width: 290px;
+    width: 35%;
+    min-width: 115px;
+    text-overflow: ellipsis;
+  }
+  .debug-trace-filterbar .debug-search {
+    max-width: none;
+    min-width: 70px;
+  }
+  .debug-trace-split {
+    display: grid;
+    grid-template-columns: minmax(280px, 1fr) minmax(260px, 36%);
+    min-height: 0;
+    min-width: 0;
+    flex: 1;
+  }
+  .debug-waterfall {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    min-width: 0;
+  }
+  .debug-trace-heading {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 30px;
+    padding: 2px 8px;
+    flex-shrink: 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--ejm-ui-text-strong) 4%, transparent);
+    color: var(--ejm-ui-n13);
+    font-size: 9px;
+    font-variant-numeric: tabular-nums;
+  }
+  .debug-trace-heading > strong {
+    color: var(--ejm-ui-n14);
+    font-size: 10px;
+    font-weight: 500;
+  }
+  .debug-trace-status {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    text-transform: capitalize;
+  }
+  .debug-span-completed.debug-trace-status {
+    color: var(--ejm-ui-success);
+  }
+  .debug-span-running.debug-trace-status {
+    color: var(--ejm-ui-accent-strong);
+  }
+  .debug-span-failed.debug-trace-status {
+    color: var(--ejm-ui-error);
+  }
+  .debug-span-cancelled.debug-trace-status {
+    color: var(--ejm-ui-warning);
+  }
+  .debug-trace-id {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 4px;
+    color: var(--ejm-ui-n12);
+    margin-left: auto;
+    border-radius: 3px;
+  }
+  .debug-trace-id:hover {
+    color: var(--ejm-ui-n14);
+    background: color-mix(in srgb, var(--ejm-ui-text-strong) 3%, transparent);
+  }
+  .debug-trace-zoom {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 0;
+  }
+  .debug-trace-zoom .icon-button {
+    height: 22px;
+    min-height: 22px;
+    width: 22px;
+    color: var(--ejm-ui-n13);
+  }
+  .debug-trace-zoom > button {
+    min-width: 24px;
+    font-size: 9px;
+  }
+  .debug-trace-notice {
+    flex-shrink: 0;
+    margin: 0;
+    padding: 5px 10px;
+    color: var(--ejm-ui-warning);
+    font-size: 10px;
+    line-height: 1.5;
+    border-bottom: 1px solid color-mix(in srgb, var(--ejm-ui-text-strong) 3%, transparent);
+  }
+  .debug-waterfall-scroll {
+    flex: 1;
+    min-height: 0;
+    min-width: 0;
+    overflow: auto;
+    overscroll-behavior: contain;
+  }
+  .debug-waterfall-grid {
+    display: block;
+    border-collapse: collapse;
+    text-align: left;
+    --trace-label-width: 210px;
+    min-width: 460px;
+  }
+  .debug-waterfall-grid > thead,
+  .debug-waterfall-grid > tbody {
+    display: contents;
+  }
+  .debug-waterfall-grid th {
+    font-weight: 400;
+  }
+  .debug-waterfall-grid td {
+    min-width: 0;
+  }
+  .debug-waterfall-header,
+  .debug-waterfall-row {
+    display: grid;
+    grid-template-columns: var(--trace-label-width) minmax(180px, 1fr) 62px;
+    align-items: center;
+    font-size: 10px;
+    font-variant-numeric: tabular-nums;
+  }
+  .debug-waterfall-header {
+    height: 26px;
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    color: var(--ejm-ui-n12);
+    background: var(--ejm-ui-n4);
+    border-bottom: 1px solid color-mix(in srgb, var(--ejm-ui-text-strong) 4%, transparent);
+    font-size: 9px;
+  }
+  .debug-waterfall-axis {
+    position: relative;
+    height: 100%;
+    margin: 0 9px;
+  }
+  .debug-waterfall-axis > span {
+    position: absolute;
+    top: 6px;
+    white-space: nowrap;
+    transform: translateX(-50%);
+  }
+  .debug-waterfall-axis > span:first-child {
+    transform: none;
+  }
+  .debug-waterfall-axis > span:last-child {
+    transform: translateX(-100%);
+  }
+  .debug-waterfall-row {
+    min-height: 28px;
+    border-bottom: 1px solid color-mix(in srgb, var(--ejm-ui-text-strong) 2%, transparent);
+    color: var(--ejm-ui-n13);
+    cursor: default;
+    --trace-row-bg: var(--ejm-ui-n3);
+    background: var(--trace-row-bg);
+  }
+  .debug-waterfall-row:hover {
+    --trace-row-bg: var(--ejm-ui-n5);
+  }
+  .debug-waterfall-row.selected {
+    --trace-row-bg: var(--ejm-ui-n7);
+  }
+  .debug-waterfall-row:focus-visible {
+    outline: 1px solid var(--ejm-ui-accent);
+    outline-offset: -1px;
+  }
+  .debug-span-label {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    gap: 5px;
+    padding: 0 8px;
+    align-self: stretch;
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    background: var(--trace-row-bg, var(--ejm-ui-n4));
+  }
+  .debug-span-label > button {
+    display: grid;
+    place-items: center;
+    width: 14px;
+    height: 20px;
+    flex-shrink: 0;
+    color: var(--ejm-ui-n13);
+  }
+  .debug-span-label .expanded {
+    transform: rotate(90deg);
+  }
+  .debug-span-indent {
+    width: 14px;
+    flex-shrink: 0;
+  }
+  .debug-span-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 1px;
+    background: currentColor;
+    flex-shrink: 0;
+  }
+  .debug-span-name {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    min-width: 0;
+    overflow: hidden;
+  }
+  .debug-kind-turn {
+    color: var(--ejm-ui-accent);
+  }
+  .debug-kind-request {
+    color: var(--ejm-ui-special);
+  }
+  .debug-kind-tool {
+    color: var(--ejm-ui-n12);
+  }
+  .debug-kind-operation {
+    color: var(--ejm-ui-n12);
+  }
+  .debug-waterfall-lane {
+    position: relative;
+    height: 27px;
+    margin: 0 9px;
+  }
+  .debug-waterfall-guide {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: color-mix(in srgb, var(--ejm-ui-text-strong) 3%, transparent);
+  }
+  .debug-waterfall-bar {
+    position: absolute;
+    top: 9px;
+    height: 10px;
+    min-width: 2px;
+    border-radius: 2px;
+    background: currentColor;
+    opacity: 0.62;
+  }
+  .debug-span-failed .debug-span-dot,
+  .debug-span-failed .debug-waterfall-bar {
+    color: var(--ejm-ui-error);
+  }
+  .debug-span-cancelled .debug-span-dot,
+  .debug-span-cancelled .debug-waterfall-bar {
+    color: var(--ejm-ui-warning);
+  }
+  .debug-span-running .debug-waterfall-bar {
+    opacity: 0.9;
+    border-right: 2px dotted var(--ejm-ui-n14);
+  }
+  .debug-span-duration {
+    font-size: 9px;
+    text-align: right;
+    padding: 0 9px 0 3px;
+    color: var(--ejm-ui-n13);
+  }
+  .debug-waterfall-row.context-only .debug-span-name {
+    color: var(--ejm-ui-n12);
+  }
+  .debug-waterfall-hint {
+    flex-shrink: 0;
+    margin: 0;
+    padding: 4px 9px;
+    border-top: 1px solid color-mix(in srgb, var(--ejm-ui-text-strong) 3%, transparent);
+    color: var(--ejm-ui-n12);
+    font-size: 9px;
+  }
+  @container (max-width: 1000px) {
+    .debug-waterfall-grid {
+      --trace-label-width: 155px;
+      min-width: 405px;
+    }
+    .debug-trace-heading {
+      gap: 7px;
+    }
+  }
+  @container (max-width: 700px) {
+    .debug-event-kind,
+    .debug-summary-transfer,
+    .debug-capture-time {
+      display: none;
+    }
+    .debug-summary {
+      gap: 12px;
+    }
+    .debug-activity-split,
+    .debug-trace-split {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: minmax(110px, 48%) minmax(100px, 1fr);
+    }
+    .debug-inspector {
+      border-top: 1px solid color-mix(in srgb, var(--ejm-ui-text-strong) 4%, transparent);
+      border-left: 0;
+    }
+    .debug-event-row {
+      gap: 5px;
+      padding: 3px 7px;
+    }
+  }
+  @container (max-width: 480px) {
+    .debug-trace-filterbar {
+      gap: 5px;
+      flex-wrap: wrap;
+    }
+    .debug-trace-filterbar > select {
+      max-width: none;
+      width: 100%;
+    }
+    .debug-waterfall-hint {
+      display: none;
+    }
+    .debug-activity-split,
+    .debug-trace-split {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: minmax(105px, 48%) minmax(100px, 1fr);
+    }
+    .debug-inspector {
+      border-top: 1px solid color-mix(in srgb, var(--ejm-ui-text-strong) 4%, transparent);
+      border-left: 0;
+    }
+    .debug-summary .debug-policy,
+    .debug-event-count {
+      display: none;
+    }
+    .debug-event-detail {
+      padding: 8px 12px;
+    }
+    .debug-limits {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 5px;
+    }
+    .debug-engine dl {
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    }
+    .debug-tabs > button {
+      padding: 0 7px;
+    }
+  }
+}

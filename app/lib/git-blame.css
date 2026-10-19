@@ -1,0 +1,16 @@
+@layer workbench-git-blame {
+  .monaco-editor .git-blame-widget {
+    margin-left: 28px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--ejm-ui-n12);
+    background: var(--vscode-editor-background, var(--ejm-ui-n2));
+    font:
+      italic 11px "JetBrains Mono",
+      monospace;
+    user-select: none;
+    -webkit-user-select: none;
+    cursor: default;
+  }
+}

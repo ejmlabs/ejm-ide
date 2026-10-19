@@ -1,0 +1,153 @@
+@layer workbench-agent-presentation {
+  .chat-tool-call {
+    margin: 10px 0;
+    font-size: 11px;
+    color: var(--ejm-ui-n13);
+    min-width: 0;
+  }
+  .chat-tool-call > summary {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    list-style: none;
+    padding: 4px 0;
+  }
+  .chat-tool-call > summary::-webkit-details-marker {
+    display: none;
+  }
+  .chat-tool-call > summary:hover {
+    color: var(--ejm-ui-n14);
+  }
+  .chat-tool-call > summary > svg {
+    flex-shrink: 0;
+  }
+  .chat-tool-name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .chat-tool-call > summary > small {
+    color: var(--ejm-ui-n12);
+    font-size: 10px;
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+  .chat-tool-call > summary > .completed {
+    color: var(--ejm-ui-n12);
+  }
+  .chat-tool-call > summary > .failed,
+  .chat-tool-call > summary > .declined {
+    color: var(--ejm-ui-warning);
+  }
+  .chat-tool-call[open] > summary > .tool-disclosure {
+    transform: rotate(90deg);
+  }
+  .chat-tool-data {
+    margin: 9px 0 12px 18px;
+  }
+  .chat-tool-data > strong {
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--ejm-ui-n14);
+  }
+  .chat-tool-data > pre {
+    max-height: 220px;
+    overflow: auto;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    font:
+      10px / 1.65 "JetBrains Mono",
+      monospace;
+    margin: 5px 0 0;
+  }
+  .chat-tool-call > p {
+    font-size: 10px;
+    margin-left: 18px;
+  }
+  .chat-tool-call.has-edits {
+    border: 1px solid var(--ejm-ui-n7);
+    border-radius: 5px;
+    overflow: hidden;
+  }
+  .chat-tool-call:where(.has-edits) > summary {
+    padding: 8px;
+  }
+  .chat-tool-changes {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 5px;
+    flex-shrink: 0;
+    font-size: 10px;
+    color: var(--ejm-ui-n13);
+    white-space: nowrap;
+  }
+  .chat-tool-details {
+    border-top: 1px solid var(--ejm-ui-n7);
+    padding: 6px 8px;
+    color: var(--ejm-ui-n13);
+    font-size: 10px;
+  }
+  .chat-tool-details > summary {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    list-style: none;
+  }
+  .chat-tool-details > summary::-webkit-details-marker {
+    display: none;
+  }
+  .chat-tool-details[open] > summary > svg {
+    transform: rotate(90deg);
+  }
+  .chat-tool-details > .chat-tool-data {
+    margin: 9px 0 6px 16px;
+  }
+  .chat-presentation-heading {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .chat-presentation-heading h3 {
+    flex: 1;
+    margin: 0;
+    color: var(--ejm-ui-n14);
+    font-size: 12px;
+    font-weight: 550;
+    overflow-wrap: anywhere;
+  }
+  .agent-hint {
+    position: fixed;
+    z-index: 45;
+    padding: 7px 11px 11px;
+    background: var(--ejm-ui-n6);
+    box-shadow: 0 8px 28px #0006;
+    border-radius: 6px;
+    color: var(--ejm-ui-n14);
+    font-size: 12px;
+    pointer-events: auto;
+  }
+  .agent-hint > div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .agent-hint strong {
+    font-weight: 550;
+    font-size: 11px;
+  }
+  .agent-hint p {
+    margin: 4px 0 0;
+    line-height: 1.65;
+    overflow-wrap: anywhere;
+  }
+  .monaco-editor .agent-source-highlight {
+    background: color-mix(in srgb, var(--ejm-ui-primary) 15%, transparent);
+    border-bottom: 1px solid var(--ejm-ui-accent);
+  }
+}

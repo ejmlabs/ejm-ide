@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-language-save"
+description = "Enables the language_save command without any pre-configured scope."
+commands.allow = ["language_save"]
+
+[[permission]]
+identifier = "deny-language-save"
+description = "Denies the language_save command without any pre-configured scope."
+commands.deny = ["language_save"]

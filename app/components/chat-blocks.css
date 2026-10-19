@@ -1,0 +1,216 @@
+.chat-blocks {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+  color: var(--ejm-ui-n14);
+  font-size: 12px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+.chat-blocks > * {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.chat-block-callout {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--ejm-ui-n7);
+  border-left: 2px solid var(--ejm-ui-accent);
+  border-radius: 4px;
+  background: var(--ejm-ui-n4);
+}
+
+.chat-block-callout > svg {
+  margin-top: 3px;
+  color: var(--ejm-ui-accent);
+}
+
+.chat-block-callout strong {
+  display: block;
+  font-weight: 550;
+}
+
+.chat-block-callout p {
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.chat-block-callout-success {
+  border-left-color: var(--ejm-ui-success);
+}
+
+.chat-block-callout-success > svg {
+  color: var(--ejm-ui-success);
+}
+
+.chat-block-callout-warning {
+  border-left-color: var(--ejm-ui-warning);
+}
+
+.chat-block-callout-warning > svg {
+  color: var(--ejm-ui-warning);
+}
+
+.chat-block-table-scroll {
+  max-width: 100%;
+  max-height: 280px;
+  overflow: auto;
+  border: 1px solid var(--ejm-ui-n7);
+  border-radius: 4px;
+}
+
+.chat-block-table-scroll:focus-visible,
+.chat-block-fallback summary:focus-visible {
+  outline: 2px solid var(--ejm-ui-primary);
+  outline-offset: -2px;
+}
+
+.chat-block-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+  line-height: 1.5;
+  text-align: left;
+}
+
+.chat-block-table caption {
+  padding: 7px 8px;
+  color: var(--ejm-ui-n14);
+  text-align: left;
+}
+
+.chat-block-table th,
+.chat-block-table td {
+  min-width: 64px;
+  max-width: 240px;
+  padding: 6px 8px;
+  border-right: 1px solid var(--ejm-ui-n7);
+  border-bottom: 1px solid var(--ejm-ui-n7);
+  vertical-align: top;
+}
+
+.chat-block-table th {
+  position: sticky;
+  top: 0;
+  background: var(--ejm-ui-n5);
+  color: var(--ejm-ui-n14);
+  font-weight: 550;
+}
+
+.chat-block-table th:last-child,
+.chat-block-table td:last-child {
+  border-right: 0;
+}
+
+.chat-block-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.chat-block-chart,
+.chat-block-diagram-figure {
+  margin: 0;
+}
+
+.chat-block-chart figcaption,
+.chat-block-diagram-figure figcaption {
+  margin-bottom: 6px;
+  color: var(--ejm-ui-n14);
+  font-size: 12px;
+  font-weight: 550;
+}
+
+.chat-block-chart-frame {
+  width: 100%;
+  min-width: 0;
+  height: 200px;
+}
+
+.chat-block-chart .recharts-legend-item-text {
+  display: inline-block;
+  max-width: 110px;
+  overflow: hidden;
+  vertical-align: middle;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chat-block-fallback {
+  margin-top: 5px;
+  color: var(--ejm-ui-n12);
+  font-size: 11px;
+}
+
+.chat-block-fallback summary {
+  width: fit-content;
+  padding: 2px 0;
+  cursor: pointer;
+}
+
+.chat-block-fallback ul {
+  margin: 5px 0;
+  padding-left: 18px;
+}
+
+.chat-block-fallback .chat-block-table-scroll {
+  margin-top: 5px;
+  color: var(--ejm-ui-n14);
+}
+
+.chat-block-empty {
+  margin: 6px 0;
+  color: var(--ejm-ui-n12);
+}
+
+.chat-block-diagram {
+  height: 220px;
+  overflow: hidden;
+  border: 1px solid var(--ejm-ui-n7);
+  border-radius: 4px;
+  background: var(--ejm-ui-n3);
+}
+
+.chat-block-diagram .react-flow {
+  background: var(--ejm-ui-n3);
+  --xy-background-color: var(--ejm-ui-n3);
+  --xy-controls-button-background-color: var(--ejm-ui-n5);
+  --xy-controls-button-background-color-hover: var(--ejm-ui-n6);
+  --xy-controls-button-color: var(--ejm-ui-n14);
+  --xy-controls-button-border-color: var(--ejm-ui-n8);
+  --xy-controls-box-shadow: none;
+}
+
+.chat-block-diagram .react-flow__node-default {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 144px;
+  height: 48px;
+  overflow: hidden;
+  border: 1px solid var(--ejm-ui-n8);
+  border-radius: 4px;
+  background: var(--ejm-ui-n5);
+  color: var(--ejm-ui-n14);
+  font-size: 11px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.chat-block-diagram .react-flow__controls-button:focus-visible {
+  outline: 2px solid var(--ejm-ui-primary);
+  outline-offset: -2px;
+}
+
+.chat-block-markdown table {
+  display: block;
+  max-width: 100%;
+  overflow: auto;
+}
+
+.chat-block-markdown pre {
+  max-width: 100%;
+  overflow: auto;
+}

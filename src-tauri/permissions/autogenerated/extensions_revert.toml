@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-extensions-revert"
+description = "Enables the extensions_revert command without any pre-configured scope."
+commands.allow = ["extensions_revert"]
+
+[[permission]]
+identifier = "deny-extensions-revert"
+description = "Denies the extensions_revert command without any pre-configured scope."
+commands.deny = ["extensions_revert"]

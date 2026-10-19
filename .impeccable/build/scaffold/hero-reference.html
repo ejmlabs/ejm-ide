@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Scaffold reference: a-balanced.png</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Carlito:wght@400&display=swap">
+  <link rel="stylesheet" href="layout.css">
+  <style>html,body{margin:0}body{background:#202329}.region{box-sizing:border-box}.region.text p{white-space:pre-wrap}</style>
+</head>
+<body>
+<!-- Reference only. Every region sits at its measured box inside a comp-aspect frame. Take the boxes (layout.css), keep your own semantic structure. -->
+<main class="comp-frame" style="max-width:1586px">
+  <div class="r-titlebar region chrome" data-region="titlebar"><!-- Native controls, project, branch, command search --></div>
+  <div class="r-project region chrome" data-region="project"><!-- Activity rail and project tree --></div>
+  <div class="r-source region text" data-region="source"><!-- Tabs, breadcrumbs and source code. SF system interface, JetBrains Mono code as pinned in the brief. --><p style="font-size:var(--r-source-font);font-family:var(--r-source-family),sans-serif;font-weight:var(--r-source-weight);line-height:1.05;margin:0">source</p></div>
+  <div class="r-hierarchy region control" data-region="hierarchy"><!-- Focused caller and callee graph beneath the editor: rebuild the control's chrome from the crop (comp-spec.mjs --crop hierarchy); its ink box, border, fill, radius, and label size are the comp's --></div>
+  <div class="r-chat region text" data-region="chat"><!-- Codex conversation with context chips and anchored composer --><p style="font-size:var(--r-chat-font);line-height:1.05;margin:0">chat</p></div>
+</main>
+</body>
+</html>

@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-provider-save"
+description = "Enables the provider_save command without any pre-configured scope."
+commands.allow = ["provider_save"]
+
+[[permission]]
+identifier = "deny-provider-save"
+description = "Denies the provider_save command without any pre-configured scope."
+commands.deny = ["provider_save"]

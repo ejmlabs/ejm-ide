@@ -1,0 +1,259 @@
+{
+  "base": "vs",
+  "inherit": true,
+  "rules": [
+    {
+      "token": "comment",
+      "foreground": "66706A"
+    },
+    {
+      "token": "keyword",
+      "foreground": "9A4A22"
+    },
+    {
+      "token": "string",
+      "foreground": "4F7A28"
+    },
+    {
+      "token": "number",
+      "foreground": "2F5F9A"
+    },
+    {
+      "token": "type.identifier",
+      "foreground": "6A4BB0"
+    },
+    {
+      "token": "type",
+      "foreground": "6A4BB0"
+    },
+    {
+      "token": "class",
+      "foreground": "6A4BB0"
+    },
+    {
+      "token": "struct",
+      "foreground": "6A4BB0"
+    },
+    {
+      "token": "enum",
+      "foreground": "6A4BB0"
+    },
+    {
+      "token": "interface",
+      "foreground": "6A4BB0"
+    },
+    {
+      "token": "typeParameter",
+      "foreground": "7A4FA0"
+    },
+    {
+      "token": "function",
+      "foreground": "2563A8"
+    },
+    {
+      "token": "method",
+      "foreground": "2563A8"
+    },
+    {
+      "token": "macro",
+      "foreground": "6F6F1D"
+    },
+    {
+      "token": "parameter",
+      "foreground": "8A6A35"
+    },
+    {
+      "token": "property",
+      "foreground": "7A5A9A"
+    },
+    {
+      "token": "field",
+      "foreground": "7A5A9A"
+    },
+    {
+      "token": "enumMember",
+      "foreground": "8C6A2E"
+    },
+    {
+      "token": "variable.readonly",
+      "foreground": "8C6A2E"
+    },
+    {
+      "token": "constant",
+      "foreground": "8C6A2E"
+    },
+    {
+      "token": "namespace",
+      "foreground": "4A6A8A"
+    },
+    {
+      "token": "decorator",
+      "foreground": "6F6F1D"
+    },
+    {
+      "token": "regexp",
+      "foreground": "6F6F1D"
+    },
+    {
+      "token": "tag",
+      "foreground": "9A4A22"
+    },
+    {
+      "token": "attribute.name",
+      "foreground": "2563A8"
+    },
+    {
+      "token": "attribute.value",
+      "foreground": "4F7A28"
+    },
+    {
+      "token": "key",
+      "foreground": "2563A8"
+    },
+    {
+      "token": "identifier",
+      "foreground": "202721"
+    },
+    {
+      "token": "delimiter",
+      "foreground": "4C574E"
+    },
+    {
+      "token": "annotation",
+      "foreground": "6F6F1D"
+    },
+    {
+      "token": "entity.name.function",
+      "foreground": "2563A8"
+    },
+    {
+      "token": "support.function",
+      "foreground": "2563A8"
+    },
+    {
+      "token": "entity.name.type",
+      "foreground": "6A4BB0"
+    },
+    {
+      "token": "entity.name.class",
+      "foreground": "6A4BB0"
+    },
+    {
+      "token": "support.type",
+      "foreground": "6A4BB0"
+    },
+    {
+      "token": "storage",
+      "foreground": "9A4A22"
+    },
+    {
+      "token": "constant.numeric",
+      "foreground": "2F5F9A"
+    },
+    {
+      "token": "constant.language",
+      "foreground": "9A4A22"
+    },
+    {
+      "token": "constant.other",
+      "foreground": "8C6A2E"
+    },
+    {
+      "token": "variable.parameter",
+      "foreground": "8A6A35"
+    },
+    {
+      "token": "variable.other.property",
+      "foreground": "7A5A9A"
+    },
+    {
+      "token": "variable.other.constant",
+      "foreground": "8C6A2E"
+    },
+    {
+      "token": "entity.name.tag",
+      "foreground": "9A4A22"
+    },
+    {
+      "token": "entity.other.attribute-name",
+      "foreground": "2563A8"
+    },
+    {
+      "token": "support.type.property-name",
+      "foreground": "2563A8"
+    },
+    {
+      "token": "string.quoted.double.json",
+      "foreground": "4F7A28"
+    },
+    {
+      "token": "markup.heading",
+      "foreground": "2563A8"
+    },
+    {
+      "token": "markup.inline.raw",
+      "foreground": "4F7A28"
+    },
+    {
+      "token": "markup.fenced_code",
+      "foreground": "4F7A28"
+    },
+    {
+      "token": "markup.underline.link",
+      "foreground": "2563A8"
+    },
+    {
+      "token": "markup.heading",
+      "foreground": "2563A8",
+      "fontStyle": "bold"
+    },
+    {
+      "token": "markup.bold",
+      "fontStyle": "bold"
+    },
+    {
+      "token": "markup.italic",
+      "fontStyle": "italic"
+    }
+  ],
+  "colors": {
+    "editor.background": "#FAF9F5",
+    "editor.foreground": "#282F29",
+    "editorLineNumber.foreground": "#67796C",
+    "editorLineNumber.activeForeground": "#282F29",
+    "editor.lineHighlightBackground": "#F5F4EF",
+    "editor.selectionBackground": "#D3E0CF",
+    "editor.inactiveSelectionBackground": "#DBE5D7",
+    "editorCursor.foreground": "#29443B",
+    "editorIndentGuide.background1": "#ECEFE6",
+    "editorIndentGuide.activeBackground1": "#CFD5CE",
+    "editorWidget.background": "#F5F4EF",
+    "editorWidget.foreground": "#282F29",
+    "editorWidget.border": "#D3D9CE",
+    "editorHoverWidget.background": "#F5F4EF",
+    "editorHoverWidget.border": "#D3D9CE",
+    "editorSuggestWidget.background": "#F5F4EF",
+    "editorSuggestWidget.border": "#D3D9CE",
+    "editorSuggestWidget.selectedBackground": "#E3EBDF",
+    "focusBorder": "#29443B",
+    "editorGutter.background": "#FAF9F5",
+    "editorOverviewRuler.border": "#FAF9F5",
+    "peekViewEditor.background": "#F5F4EF",
+    "peekViewResult.background": "#F5F4EF",
+    "peekViewTitle.background": "#F2F3EC",
+    "menu.background": "#F2F3EC",
+    "menu.foreground": "#282F29",
+    "menu.border": "#D3D9CE",
+    "menu.selectionBackground": "#E3EBDF",
+    "menu.selectionForeground": "#202721",
+    "menu.separatorBackground": "#D3D9CE",
+    "list.hoverBackground": "#E3EBDF",
+    "list.hoverForeground": "#202721",
+    "disabledForeground": "#67796C",
+    "editorGhostText.foreground": "#67796C",
+    "editorError.foreground": "#A63A3A",
+    "editorWarning.foreground": "#8A5A12",
+    "diffEditor.insertedTextBackground": "#DAE2D7",
+    "diffEditor.removedTextBackground": "#EDDAD7"
+  }
+}

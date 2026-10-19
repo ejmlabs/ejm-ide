@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-extensions-mount"
+description = "Enables the extensions_mount command without any pre-configured scope."
+commands.allow = ["extensions_mount"]
+
+[[permission]]
+identifier = "deny-extensions-mount"
+description = "Denies the extensions_mount command without any pre-configured scope."
+commands.deny = ["extensions_mount"]

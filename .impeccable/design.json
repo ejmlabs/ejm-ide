@@ -1,0 +1,277 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-18T01:57:24.327Z",
+  "title": "Design System: Code Workbench",
+  "extensions": {
+    "colorMeta": {
+      "primary": {
+        "role": "primary",
+        "displayName": "Action blue"
+      },
+      "accent": {
+        "role": "primary",
+        "displayName": "Light blue"
+      },
+      "canvas": {
+        "role": "neutral",
+        "displayName": "Editor canvas"
+      },
+      "foreground": {
+        "role": "neutral",
+        "displayName": "Light gray text"
+      },
+      "chrome": {
+        "role": "neutral",
+        "displayName": "Graphite chrome"
+      },
+      "chat": {
+        "role": "neutral",
+        "displayName": "Codex graphite"
+      },
+      "border": {
+        "role": "neutral",
+        "displayName": "Control border"
+      },
+      "divider": {
+        "role": "neutral",
+        "displayName": "Pane divider"
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Muted text"
+      },
+      "success": {
+        "role": "secondary",
+        "displayName": "Success green"
+      },
+      "warning": {
+        "role": "secondary",
+        "displayName": "Warning amber"
+      },
+      "error": {
+        "role": "secondary",
+        "displayName": "Error red"
+      }
+    },
+    "typographyMeta": {
+      "title": {
+        "displayName": "Pane title",
+        "purpose": "Pane headers and message authors."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Chat prose and the composer."
+      },
+      "action": {
+        "displayName": "Action",
+        "purpose": "Standard text buttons."
+      },
+      "label": {
+        "displayName": "Compact label",
+        "purpose": "Tool tabs, breadcrumbs, and menu items."
+      },
+      "code": {
+        "displayName": "Source code",
+        "purpose": "Default Monaco editor scale, adjustable in Preferences."
+      }
+    },
+    "shadows": [
+      {
+        "name": "menu",
+        "value": "0 6px 25px #0006",
+        "purpose": "Floating dropdown menus."
+      },
+      {
+        "name": "tooltip",
+        "value": "0 5px 16px #0006",
+        "purpose": "Tooltip separation from docked chrome."
+      },
+      {
+        "name": "dialog",
+        "value": "0 15px 55px #0008",
+        "purpose": "Modal dialogs above the overlay."
+      },
+      {
+        "name": "notice",
+        "value": "0 7px 23px #0005",
+        "purpose": "Temporary notices above workspace content."
+      },
+      {
+        "name": "pane-hint",
+        "value": "0 8px 28px #0006",
+        "purpose": "Temporary hints above a named IDE pane."
+      }
+    ],
+    "motion": [
+      {
+        "name": "control-transition",
+        "value": "120ms",
+        "purpose": "Button color, composer border, and settings toggle transitions."
+      },
+      {
+        "name": "activity-spin",
+        "value": "spin 1s linear infinite",
+        "purpose": "Working and loading indicators."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "0.01ms",
+        "purpose": "Animation and transition duration when the OS requests reduced motion."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "compact-desktop",
+        "value": "1180px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Main action using the existing blue button variant.",
+      "html": "<button type=\"button\" class=\"ds-button-primary\">Send answers</button>",
+      "css": ".ds-button-primary{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:29px;padding:5px 11px;border:0;border-radius:5px;font-family:-apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif;font-size:12px;font-weight:500;white-space:nowrap;cursor:pointer;transition:background-color 120ms,color 120ms;background:var(--color-primary, #729df3);color:#15213a;}.ds-button-primary:hover:not(:disabled){background:#8eb1f7;}.ds-button-primary:focus-visible{outline:2px solid var(--color-primary, #729df3);outline-offset:-2px;border-radius:3px;}.ds-button-primary:disabled{opacity:.42;cursor:default;}"
+    },
+    {
+      "name": "Secondary button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Supporting action with a quiet inset border.",
+      "html": "<button type=\"button\" class=\"ds-button-secondary\">Sign in with ChatGPT</button>",
+      "css": ".ds-button-secondary{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:29px;padding:5px 11px;border:0;border-radius:5px;font-family:-apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif;font-size:12px;font-weight:500;white-space:nowrap;cursor:pointer;transition:background-color 120ms,color 120ms;background:#34373f;color:#dce0e9;box-shadow:inset 0 0 0 1px #474b56;}.ds-button-secondary:hover:not(:disabled){background:#414650;}.ds-button-secondary:focus-visible{outline:2px solid var(--color-primary, #729df3);outline-offset:-2px;border-radius:3px;}.ds-button-secondary:disabled{opacity:.42;cursor:default;}"
+    },
+    {
+      "name": "Ghost button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Low-emphasis action with a hover fill.",
+      "html": "<button type=\"button\" class=\"ds-button-ghost\">Cancel sign-in</button>",
+      "css": ".ds-button-ghost{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:29px;padding:5px 11px;border:0;border-radius:5px;font-family:-apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif;font-size:12px;font-weight:500;white-space:nowrap;cursor:pointer;transition:background-color 120ms,color 120ms;background:transparent;color:#adb3c0;}.ds-button-ghost:hover:not(:disabled){color:#e1e5ee;background:#ffffff0c;}.ds-button-ghost:focus-visible{outline:2px solid var(--color-primary, #729df3);outline-offset:-2px;border-radius:3px;}.ds-button-ghost:disabled{opacity:.42;cursor:default;}"
+    },
+    {
+      "name": "Danger button",
+      "kind": "button",
+      "refersTo": "button-danger",
+      "description": "Existing library variant for destructive actions; no separate hover color is defined.",
+      "html": "<button type=\"button\" class=\"ds-button-danger\">Revert</button>",
+      "css": ".ds-button-danger{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:29px;padding:5px 11px;border:0;border-radius:5px;font-family:-apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif;font-size:12px;font-weight:500;white-space:nowrap;cursor:pointer;transition:background-color 120ms,color 120ms;background:#8f3c3c38;color:#f2aaaa;}.ds-button-danger:focus-visible{outline:2px solid var(--color-primary, #729df3);outline-offset:-2px;border-radius:3px;}.ds-button-danger:disabled{opacity:.42;cursor:default;}"
+    },
+    {
+      "name": "Search field",
+      "kind": "input",
+      "refersTo": "search-field",
+      "description": "Recessed sidebar search with a focus border.",
+      "html": "<label class=\"ds-search\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"11\" cy=\"11\" r=\"8\"/><path d=\"m21 21-4.3-4.3\"/></svg><input aria-label=\"Search project\" placeholder=\"Search code\" /></label>",
+      "css": ".ds-search{display:flex;align-items:center;gap:7px;background:var(--background, #1e1f22);color:var(--foreground, #d7dae0);border:1px solid #4c515c;border-radius:4px;padding:7px;font-family:-apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif;}.ds-search:focus-within{border-color:var(--color-primary, #729df3);}.ds-search input{width:100%;min-width:0;background:none;border:0;color:inherit;font-family:-apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif;font-size:12px;}.ds-search input:focus-visible{outline:1px solid var(--color-primary, #729df3);outline-offset:2px;}"
+    },
+    {
+      "name": "Project navigation",
+      "kind": "nav",
+      "refersTo": "project-row",
+      "description": "Compact file rows with neutral selection and a source attachment action.",
+      "html": "<nav class=\"ds-project\" aria-label=\"Project\"><div class=\"ds-project-row ds-project-selected\"><button type=\"button\" class=\"ds-project-target\" aria-current=\"page\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4 12.15V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.706.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2h-3.35\"/><path d=\"M14 2v5a1 1 0 0 0 1 1h5\"/><path d=\"m5 16-3 3 3 3\"/><path d=\"m9 22 3-3-3-3\"/></svg><span>orders.rs</span></button><button type=\"button\" class=\"ds-project-attach\" aria-label=\"Add orders.rs to chat\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2zM12 8v6M9 11h6\"/></svg></button></div><div class=\"ds-project-row\"><button type=\"button\" class=\"ds-project-target\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4 12.15V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.706.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2h-3.35\"/><path d=\"M14 2v5a1 1 0 0 0 1 1h5\"/><path d=\"m5 16-3 3 3 3\"/><path d=\"m9 22 3-3-3-3\"/></svg><span>payments.rs</span></button></div></nav>",
+      "css": ".ds-project{background:#25262a;color:var(--foreground, #d7dae0);font-family:-apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif;}.ds-project-row{display:flex;align-items:center;min-height:25px;padding:0 5px 0 25px;}.ds-project-row:hover{background:#ffffff06;}.ds-project-selected{background:#ffffff0c;color:#e0e8f8;}.ds-project-target{display:flex;align-items:center;gap:6px;flex:1;min-width:0;height:25px;padding:0 5px 0 0;background:none;border:0;color:inherit;text-align:left;cursor:pointer;font-family:-apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif;font-size:12px;}.ds-project-target span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}.ds-project-target svg{width:15px;height:15px;color:#c8906a;flex-shrink:0;}.ds-project-attach{width:22px;height:22px;min-height:22px;border:0;border-radius:5px;background:none;color:#adb3c0;opacity:0;cursor:pointer;}.ds-project-row:hover .ds-project-attach,.ds-project-row:focus-within .ds-project-attach{opacity:1;}.ds-project-attach:hover{background:#ffffff0c;color:#e1e5ee;}.ds-project-target:focus-visible,.ds-project-attach:focus-visible{outline:2px solid var(--color-primary, #729df3);outline-offset:-2px;border-radius:3px;}"
+    },
+    {
+      "name": "Source reference chip",
+      "kind": "chip",
+      "refersTo": "reference-chip",
+      "description": "Captured code reference with separate preview and remove controls.",
+      "html": "<span class=\"ds-reference\"><button type=\"button\" class=\"ds-reference-label\" title=\"Preview orders.rs\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4 12.15V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.706.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2h-3.35\"/><path d=\"M14 2v5a1 1 0 0 0 1 1h5\"/><path d=\"m5 16-3 3 3 3\"/><path d=\"m9 22 3-3-3-3\"/></svg><span>orders.rs:7-20</span></button><button type=\"button\" class=\"ds-reference-remove\" aria-label=\"Remove orders.rs reference\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m18 6-12 12M6 6l12 12\"/></svg></button></span>",
+      "css": ".ds-reference{display:inline-flex;align-items:center;gap:4px;background:#2b3039;border:1px solid #495262;border-radius:5px;height:25px;max-width:100%;color:#c3cfe2;font-family:-apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif;}.ds-reference-label{display:flex;align-items:center;gap:5px;min-width:0;padding:0 6px;height:100%;border:0;background:none;color:inherit;cursor:pointer;font-family:-apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif;font-size:10px;}.ds-reference-label span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}.ds-reference svg{width:12px;height:12px;flex-shrink:0;}.ds-reference-remove{display:flex;align-items:center;height:100%;padding:0 5px 0 0;border:0;background:none;color:#a9b6cc;cursor:pointer;}.ds-reference-label:focus-visible,.ds-reference-remove:focus-visible{outline:2px solid var(--color-primary, #729df3);outline-offset:-2px;border-radius:3px;}.ds-reference.ds-reference-stale{border-color:#a68c54;}"
+    },
+    {
+      "name": "Model and effort controls",
+      "kind": "custom",
+      "refersTo": "model-controls",
+      "description": "Icon selectors keep current choices in tooltips and full labels in menus.",
+      "html": "<div class=\"ds-model-controls\"><button type=\"button\" class=\"ds-model-control\" aria-label=\"Model: Codex default\" title=\"Model: Codex default\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 8V4H8\"/><rect width=\"16\" height=\"12\" x=\"4\" y=\"8\" rx=\"2\"/><path d=\"M2 14h2M20 14h2M15 13v2M9 13v2\"/></svg></button><button type=\"button\" class=\"ds-effort-control\" aria-label=\"Reasoning: Codex default\" title=\"Reasoning: Codex default\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m12 14 4-4M3.34 19a10 10 0 1 1 17.32 0\"/></svg></button></div>",
+      "css": ".ds-model-controls{display:flex;align-items:center;gap:2px;}.ds-model-control,.ds-effort-control{display:inline-flex;align-items:center;justify-content:center;min-width:0;width:27px;height:27px;padding:0;border:0;border-radius:4px;background:none;cursor:pointer;}.ds-model-control{color:#c9d0dd;}.ds-effort-control{color:#aab2c0;}.ds-model-control:hover:not(:disabled),.ds-effort-control:hover:not(:disabled){background:#ffffff09;}.ds-model-control:focus-visible,.ds-effort-control:focus-visible{outline:2px solid var(--color-primary, #729df3);outline-offset:-2px;border-radius:3px;}.ds-model-control:disabled,.ds-effort-control:disabled{opacity:.42;cursor:default;}"
+    },
+    {
+      "name": "Chat composer",
+      "kind": "custom",
+      "refersTo": "composer",
+      "description": "Single compact toolbar with context, model, effort, fixed Auto-review status, and Send.",
+      "html": "<form class=\"ds-composer\"><textarea aria-label=\"Message Codex\" rows=\"2\" placeholder=\"Ask a question or describe a change…\"></textarea><div class=\"ds-composer-toolbar\"><button type=\"button\" class=\"ds-composer-icon\" aria-label=\"Add context\" title=\"Add context (@)\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"4\"/><path d=\"M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8\"/></svg></button><button type=\"button\" class=\"ds-composer-model\" aria-label=\"Model: Codex default\" title=\"Model: Codex default\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 8V4H8\"/><rect width=\"16\" height=\"12\" x=\"4\" y=\"8\" rx=\"2\"/><path d=\"M2 14h2M20 14h2M15 13v2M9 13v2\"/></svg></button><button type=\"button\" class=\"ds-composer-effort\" aria-label=\"Reasoning: Codex default\" title=\"Reasoning: Codex default\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m12 14 4-4M3.34 19a10 10 0 1 1 17.32 0\"/></svg></button><span class=\"ds-composer-spacer\"></span><span class=\"ds-review-status\" role=\"img\" aria-label=\"Automatic approval review\" title=\"Auto-review\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z\"/><path d=\"m9 12 2 2 4-4\"/></svg></span><button type=\"submit\" class=\"ds-composer-send\" aria-label=\"Send message\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m5 12 7-7 7 7M12 19V5\"/></svg></button></div></form>",
+      "css": ".ds-composer{border:1px solid #474c56;border-radius:6px;background:#25272c;color:var(--foreground, #d7dae0);overflow:hidden;transition:border-color 120ms;font-family:-apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif;}.ds-composer:focus-within{border-color:#718ebd;box-shadow:0 0 0 1px #5473a31a;}.ds-composer textarea{width:100%;display:block;background:none;border:0;outline:0;padding:12px 11px 5px;resize:none;min-height:66px;max-height:240px;color:inherit;font-family:-apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif;font-size:12px;line-height:1.7;caret-color:#9dc0ff;}.ds-composer textarea::placeholder{color:#a4acba;}.ds-composer-toolbar{display:flex;align-items:center;gap:3px;padding:3px 5px 5px;min-height:32px;}.ds-composer-spacer{flex:1;}.ds-composer-icon,.ds-composer-model,.ds-composer-effort,.ds-composer-send{display:inline-flex;align-items:center;justify-content:center;width:27px;height:27px;min-height:27px;padding:0;border:0;border-radius:4px;background:none;cursor:pointer;}.ds-composer-icon{color:#adb3c0;font-size:16px;}.ds-composer-model{color:#c9d0dd;}.ds-composer-effort{color:#aab2c0;}.ds-composer-icon:hover:not(:disabled){background:#ffffff0c;color:#e1e5ee;}.ds-composer-model:hover:not(:disabled),.ds-composer-effort:hover:not(:disabled){background:#ffffff09;}.ds-review-status{display:inline-flex;align-items:center;justify-content:center;width:27px;height:27px;color:#acb9aa;}.ds-review-status svg{width:12px;height:12px;}.ds-composer-send{border-radius:5px;background:var(--color-primary, #729df3);color:#15213a;transition:background-color 120ms,color 120ms;}.ds-composer-send:hover:not(:disabled){background:#8eb1f7;}.ds-composer-toolbar button:focus-visible{outline:2px solid var(--color-primary, #729df3);outline-offset:-2px;border-radius:3px;}.ds-composer-toolbar button:disabled{opacity:.42;cursor:default;}"
+    },
+    {
+      "name": "Dialog surface",
+      "kind": "card",
+      "refersTo": "dialog",
+      "description": "Bordered floating surface used for preferences and source previews; shown without the viewport overlay.",
+      "html": "<section class=\"ds-dialog\" aria-labelledby=\"ds-dialog-title\"><h2 id=\"ds-dialog-title\">Preferences</h2><p>Editor settings</p><div class=\"ds-dialog-actions\"><button type=\"button\" class=\"ds-dialog-close\">Close</button></div></section>",
+      "css": ".ds-dialog{width:min(640px,90vw);max-height:85vh;overflow:auto;background:#292c32;border:1px solid #535b69;border-radius:7px;box-shadow:0 15px 55px #0008;padding:20px;color:var(--foreground, #d7dae0);font-family:-apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif;}.ds-dialog h2{font-size:15px;margin:0 0 7px;font-weight:550;color:#dce5f4;}.ds-dialog p{font-size:12px;color:#aebbd0;line-height:1.7;margin:0;}.ds-dialog-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-top:18px;}.ds-dialog-close{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:29px;padding:5px 11px;border:0;border-radius:5px;font-family:-apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif;font-size:12px;font-weight:500;white-space:nowrap;cursor:pointer;transition:background-color 120ms,color 120ms;background:#34373f;color:#dce0e9;box-shadow:inset 0 0 0 1px #474b56;}.ds-dialog-close:hover:not(:disabled){background:#414650;}.ds-dialog-close:focus-visible{outline:2px solid var(--color-primary, #729df3);outline-offset:-2px;border-radius:3px;}.ds-dialog-close:disabled{opacity:.42;cursor:default;}"
+    },
+    {
+      "name": "Chat callout",
+      "kind": "card",
+      "refersTo": "chat-callout",
+      "description": "Compact structured message block with a quiet fill and status edge.",
+      "html": "<aside class=\"ds-chat-callout\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"M12 16v-4M12 8h.01\"/></svg><div><strong>Check complete</strong><p>The source snapshot is ready to review.</p></div></aside>",
+      "css": ".ds-chat-callout{display:flex;align-items:flex-start;gap:8px;padding:8px 10px;border:1px solid #3c4350;border-left:2px solid #87aff7;border-radius:4px;background:#25272c;color:#cfd7e5;font-family:-apple-system,BlinkMacSystemFont,\"Segoe UI\",sans-serif;font-size:12px;line-height:1.7;overflow-wrap:anywhere;}.ds-chat-callout>svg{margin-top:3px;color:#87aff7;}.ds-chat-callout strong{display:block;font-weight:550;}.ds-chat-callout p{margin:0;white-space:pre-wrap;}"
+    },
+    {
+      "name": "Tool activity",
+      "kind": "custom",
+      "refersTo": "tool-activity",
+      "description": "Expandable tool status with arguments and results kept within the chat width.",
+      "html": "<details class=\"ds-tool-activity\"><summary><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m9 18 6-6-6-6\"/></svg><span>Search source</span><small>Completed</small></summary><div><strong>Result</strong><pre>Found 3 matching symbols.</pre></div></details>",
+      "css": ".ds-tool-activity{margin:10px 0;font-size:11px;color:#b4bdcc;min-width:0;font-family:-apple-system,BlinkMacSystemFont,\"Segoe UI\",sans-serif;}.ds-tool-activity>summary{display:flex;align-items:center;gap:6px;cursor:pointer;list-style:none;padding:4px 0;}.ds-tool-activity>summary::-webkit-details-marker{display:none;}.ds-tool-activity>summary>span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}.ds-tool-activity small{color:#a3a8b3;font-size:10px;}.ds-tool-activity>div{margin:9px 0 12px 18px;}.ds-tool-activity strong{font-size:10px;font-weight:500;color:#d7dae0;}.ds-tool-activity pre{max-height:220px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;font:10px/1.65 \"JetBrains Mono\",monospace;margin:5px 0 0;}.ds-tool-activity summary:focus-visible{outline:2px solid #729df3;outline-offset:-2px;border-radius:3px;}"
+    },
+    {
+      "name": "Temporary pane hint",
+      "kind": "card",
+      "refersTo": "pane-hint",
+      "description": "Floating text hint anchored above a named pane with a close control.",
+      "html": "<aside class=\"ds-pane-hint\"><div><strong>Source graph</strong><button type=\"button\" aria-label=\"Dismiss pane hint\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m18 6-12 12M6 6l12 12\"/></svg></button></div><p>Select a node to open its source.</p></aside>",
+      "css": ".ds-pane-hint{padding:7px 11px 11px;background:#30333a;box-shadow:0 8px 28px #0006;border-radius:6px;color:#e0e5ef;font-size:12px;font-family:-apple-system,BlinkMacSystemFont,\"Segoe UI\",sans-serif;}.ds-pane-hint>div{display:flex;align-items:center;justify-content:space-between;gap:8px;}.ds-pane-hint strong{font-weight:550;font-size:11px;}.ds-pane-hint p{margin:4px 0 0;line-height:1.65;overflow-wrap:anywhere;}.ds-pane-hint button{display:inline-flex;align-items:center;justify-content:center;width:27px;height:27px;padding:0;border:0;border-radius:5px;background:none;color:#adb3c0;cursor:pointer;}.ds-pane-hint button:hover{background:#ffffff0c;color:#e1e5ee;}.ds-pane-hint button:focus-visible{outline:2px solid #729df3;outline-offset:-2px;border-radius:3px;}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Compact Workbench",
+    "overview": "A compact desktop IDE keeps source code central. Graphite surfaces, quiet dividers, system labels, and readable monospace code follow the accepted JetBrains and early Cursor references. Codex sits beside the editor as a companion.\n\nThe current compact layout removes repeated workspace labels and chat onboarding. Most controls use small line icons with tooltips; menus retain full labels. Density comes from slim chrome and closed tools, while source text keeps its own readable scale.",
+    "keyCharacteristics": [
+      "Source code gets the flexible center column.",
+      "Docked panes use tonal separation and thin dividers.",
+      "Blue marks actions, selection, and keyboard focus.",
+      "Compact icons keep labels available through tooltips and menus."
+    ],
+    "rules": [
+      {
+        "name": "The State Accent Rule",
+        "body": "Use blue for actions, current selection, and focus. Use status colors to explain state.",
+        "section": "colors"
+      },
+      {
+        "name": "The Readable Code Rule",
+        "body": "Compact chrome does not shrink source text. Keep the editor at its configured size, with a default of 13px.",
+        "section": "typography"
+      },
+      {
+        "name": "The Docked Surface Rule",
+        "body": "Keep docked panes flat. Use shadows to separate floating menus, tooltips, dialogs, and notices.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do keep Project and Codex docked at startup, with bottom tools collapsed.",
+      "Do reveal tool windows when navigation or a user action needs them.",
+      "Do use the existing line icons, quiet borders, and short sentence case labels.",
+      "Do name icon controls with accessible labels and tooltips.",
+      "Do keep model and reasoning choices in labelled menus and show Auto-review as fixed status.",
+      "Do preserve keyboard focus and source reference actions in compact views."
+    ],
+    "donts": [
+      "Don't add Ask/Edit modes or an approval-policy picker.",
+      "Don't restore repeated workspace titles or chat onboarding to the working surface.",
+      "Don't turn docked panes into floating cards or add decorative shadows.",
+      "Don't reduce the editor font to make chrome fit.",
+      "Don't treat macOS capture indicators or browser-preview labels as native product branding."
+    ]
+  }
+}

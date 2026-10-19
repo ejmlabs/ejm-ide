@@ -1,0 +1,271 @@
+{
+  "tool": "build-phase",
+  "version": 2,
+  "startedAt": "2026-10-17T23:37:30.197Z",
+  "comp": ".impeccable/mocks/a-balanced.png",
+  "direction": "bdf281c6",
+  "breakpoint": "1440x950",
+  "artifact": null,
+  "phase": "review",
+  "phases": {
+    "comps": {
+      "status": "closed",
+      "openedAt": "2026-10-17T23:37:30.196Z",
+      "closedAt": "2026-10-17T23:56:27.879Z",
+      "attempts": 2,
+      "notes": [],
+      "gate": {
+        "ok": true,
+        "reasons": [],
+        "summary": "3 comps, 1 approved",
+        "approved": ".impeccable/mocks/a-balanced.png",
+        "at": "2026-10-17T23:56:27.879Z"
+      },
+      "forced": null
+    },
+    "spec": {
+      "status": "closed",
+      "openedAt": "2026-10-17T23:56:27.879Z",
+      "closedAt": "2026-10-18T00:51:00.675Z",
+      "attempts": 2,
+      "notes": [],
+      "gate": {
+        "ok": true,
+        "reasons": [],
+        "summary": "5 regions, 0 plates, 2 text regions measured",
+        "at": "2026-10-18T00:51:00.675Z"
+      },
+      "forced": null
+    },
+    "plates": {
+      "status": "closed",
+      "openedAt": "2026-10-18T00:51:00.675Z",
+      "closedAt": "2026-10-18T00:53:05.537Z",
+      "attempts": 1,
+      "notes": [],
+      "gate": {
+        "ok": true,
+        "reasons": [],
+        "summary": "no plates owed",
+        "at": "2026-10-18T00:53:05.537Z"
+      },
+      "forced": null
+    },
+    "hero": {
+      "status": "closed",
+      "openedAt": "2026-10-18T00:53:05.537Z",
+      "closedAt": "2026-10-18T01:25:50.142Z",
+      "attempts": 2,
+      "notes": [
+        {
+          "at": "2026-10-18T01:10:03.597Z",
+          "text": "The user later required slimmer Notion/Linear chrome and removed Ask/Edit controls. Preserve the approved three-pane topology while judging current density and composer against those explicit refinements."
+        },
+        {
+          "at": "2026-10-18T01:22:26.358Z",
+          "text": "Latest user direction is JetBrains compact/simple mode: bottom dock collapsed, quieter titlebar, no repeated workspace labels or chat onboarding. These requests supersede the approved mockup density while preserving project-editor-chat topology."
+        }
+      ],
+      "gate": {
+        "ok": false,
+        "reasons": [
+          "hero overall 56.2% < 72% (structure 76%, color 83%, detail 35%)",
+          "region hierarchy is missing (detail 0%, structure 58%): the comp shows material the build does not",
+          "READINGS, each one CSS edit (2):",
+          "text source: 12 lines in the build, 4 in the comp; the measure (max-width, font-size, letter-spacing) wraps it differently, so the block is a different shape",
+          "text chat: its first line starts 15px lower than in the comp (23px vs 8px into the region box); the spacing above it is too large",
+          "the build carries ink in 8 grid cells where the comp is calm (I0, A4, B9, C9, D9, E9, F9, G9); nothing exists on the page that the comp does not show (a kicker, an extra nav item, a divider, a second row of controls); remove it or name it in a stated decision after the hero passes"
+        ],
+        "summary": "hero 56% (contradicted)",
+        "score": 0.5621,
+        "verdict": "contradicted",
+        "report": ".impeccable/review/diff/hero/report.json",
+        "sideBySide": "/Users/everettmorgan/Desktop/ide/.impeccable/review/diff/hero/side-by-side.png",
+        "worst": [
+          "hierarchy missing 41%",
+          "chat drift 54%",
+          "titlebar drift 59%"
+        ],
+        "worstIds": [
+          "hierarchy",
+          "chat",
+          "titlebar"
+        ],
+        "worstCrops": [
+          {
+            "id": "hierarchy",
+            "verdict": "missing",
+            "score": {
+              "overall": 0.4054,
+              "structure": 0.5759,
+              "color": 0.4177,
+              "colorIntersection": 0.2453,
+              "paletteMatch": 0.5105,
+              "detail": 0.0003,
+              "detailRaw": 0.0003,
+              "detailAdded": 0,
+              "bands": 0.4
+            },
+            "file": ".impeccable/review/diff/hero/regions/hierarchy.png"
+          },
+          {
+            "id": "chat",
+            "verdict": "drift",
+            "score": {
+              "overall": 0.5361,
+              "structure": 0.6149,
+              "color": 0.5538,
+              "colorIntersection": 0.32,
+              "paletteMatch": 0.6797,
+              "detail": 0.3081,
+              "detailRaw": 0.4175,
+              "detailAdded": 0.2188,
+              "bands": 0.44
+            },
+            "file": ".impeccable/review/diff/hero/regions/chat.png"
+          },
+          {
+            "id": "titlebar",
+            "verdict": "drift",
+            "score": {
+              "overall": 0.5914,
+              "structure": 0.8981,
+              "color": 0.9015,
+              "colorIntersection": 0.8343,
+              "paletteMatch": 0.9376,
+              "detail": 0.2067,
+              "detailRaw": 0.3473,
+              "detailAdded": 0.2813,
+              "bands": 0
+            },
+            "file": ".impeccable/review/diff/hero/regions/titlebar.png"
+          }
+        ],
+        "regionVerdicts": {
+          "titlebar": "drift",
+          "project": "drift",
+          "source": "drift",
+          "hierarchy": "missing",
+          "chat": "drift"
+        },
+        "at": "2026-10-18T01:25:50.139Z"
+      },
+      "forced": {
+        "at": "2026-10-18T01:25:50.142Z",
+        "reason": "The user said \"declutter the UI\" and \"mimic jetbrains compact/simple mode\". This explicitly supersedes the comp: remove the always-visible bottom graph, app title, repeated workspace labels and onboarding. Both current captures passed fresh finish review for layout. Native viewport is 1440x950 logical, retina 2880x1900. UI is 12px system type and source is 13px JetBrains Mono.",
+        "reasons": [
+          "hero overall 56.2% < 72% (structure 76%, color 83%, detail 35%)",
+          "region hierarchy is missing (detail 0%, structure 58%): the comp shows material the build does not",
+          "READINGS, each one CSS edit (2):",
+          "text source: 12 lines in the build, 4 in the comp; the measure (max-width, font-size, letter-spacing) wraps it differently, so the block is a different shape",
+          "text chat: its first line starts 15px lower than in the comp (23px vs 8px into the region box); the spacing above it is too large",
+          "the build carries ink in 8 grid cells where the comp is calm (I0, A4, B9, C9, D9, E9, F9, G9); nothing exists on the page that the comp does not show (a kicker, an extra nav item, a divider, a second row of controls); remove it or name it in a stated decision after the hero passes"
+        ]
+      },
+      "readingsSeen": {
+        "text source: 10 lines in the build, 4 in the comp; the measure (max-width, font-size, letter-spacing) wraps it differently, so the block is a different shape": 1,
+        "text source: 12 lines in the build, 4 in the comp; the measure (max-width, font-size, letter-spacing) wraps it differently, so the block is a different shape": 1,
+        "text chat: its first line starts 15px lower than in the comp (23px vs 8px into the region box); the spacing above it is too large": 1
+      },
+      "records": 1,
+      "history": [
+        {
+          "at": "2026-10-18T01:25:50.142Z",
+          "score": 0.5621,
+          "worstIds": [
+            "hierarchy",
+            "chat",
+            "titlebar"
+          ],
+          "regionVerdicts": {
+            "titlebar": "drift",
+            "project": "drift",
+            "source": "drift",
+            "hierarchy": "missing",
+            "chat": "drift"
+          },
+          "artifactHash": "df313fe72756"
+        }
+      ]
+    },
+    "sections": {
+      "status": "closed",
+      "openedAt": "2026-10-18T01:25:50.142Z",
+      "closedAt": "2026-10-18T01:26:02.728Z",
+      "attempts": 1,
+      "notes": [
+        {
+          "at": "2026-10-18T01:26:02.540Z",
+          "text": "The full desktop surface is implemented: Project, Search, Changes, Extensions, editor, on-demand hierarchy/Problems/command runner/diff/Markdown preview, and Codex. Current capture evidence is compact-browser.png and compact-native.png. Latest compact request hides secondary tools at launch."
+        }
+      ],
+      "gate": {
+        "ok": true,
+        "reasons": [],
+        "summary": "no mechanical gate",
+        "at": "2026-10-18T01:26:02.727Z"
+      },
+      "forced": null
+    },
+    "motion": {
+      "status": "closed",
+      "openedAt": "2026-10-18T01:26:02.728Z",
+      "closedAt": "2026-10-18T01:27:31.924Z",
+      "attempts": 1,
+      "notes": [
+        {
+          "at": "2026-10-18T01:27:31.863Z",
+          "text": "Motion stays functional for this code-first IDE: Monaco caret/scroll behavior, bounded loading indicators, hover/focus feedback, and reduced-motion overrides. No decorative reveals are needed in compact mode."
+        }
+      ],
+      "gate": {
+        "ok": true,
+        "reasons": [],
+        "summary": "no mechanical gate",
+        "at": "2026-10-18T01:27:31.924Z"
+      },
+      "forced": null
+    },
+    "responsive": {
+      "status": "closed",
+      "openedAt": "2026-10-18T01:27:31.924Z",
+      "closedAt": "2026-10-18T01:27:54.947Z",
+      "attempts": 3,
+      "notes": [
+        {
+          "at": "2026-10-18T01:27:31.971Z",
+          "text": "Desktop-only scope, macOS first. Both required desktop sizes were inspected: compact-browser.png at1280x720 and compact-native.png at1440x950 logical (2880x1900 retina). Fresh reviewer found no layout/contrast/control blocker. Source13px JetBrains Mono; UI12px system labels. Mobile is not a shipped target."
+        }
+      ],
+      "gate": {
+        "ok": false,
+        "reasons": [
+          "no .impeccable/review/mobile.png: capture the page at 390 wide, full page, into that path"
+        ],
+        "at": "2026-10-18T01:27:54.939Z"
+      },
+      "forced": {
+        "at": "2026-10-18T01:27:54.947Z",
+        "reason": "The user said \"declutter the UI\" and \"mimic jetbrains compact/simple mode\". This explicitly supersedes the comp: remove the always-visible bottom graph, app title, repeated workspace labels and onboarding. Both current captures passed fresh finish review for layout. Native viewport is1440x950 logical, retina2880x1900. This is a desktop Tauri IDE with no mobile target; PRODUCT.md records macOS first.",
+        "reasons": [
+          "no .impeccable/review/mobile.png: capture the page at 390 wide, full page, into that path"
+        ]
+      }
+    },
+    "review": {
+      "status": "closed",
+      "openedAt": "2026-10-18T01:27:54.947Z",
+      "closedAt": "2026-10-18T01:28:45.069Z",
+      "attempts": 0,
+      "notes": [],
+      "gate": null,
+      "forced": null
+    }
+  },
+  "finish": {
+    "disposition": "ship",
+    "at": "2026-10-18T01:28:45.068Z",
+    "phaseAtFinish": "review"
+  },
+  "plates": {}
+}

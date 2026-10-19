@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-harness-clear"
+description = "Enables the harness_clear command without any pre-configured scope."
+commands.allow = ["harness_clear"]
+
+[[permission]]
+identifier = "deny-harness-clear"
+description = "Denies the harness_clear command without any pre-configured scope."
+commands.deny = ["harness_clear"]

@@ -1,0 +1,259 @@
+{
+  "base": "vs-dark",
+  "inherit": true,
+  "rules": [
+    {
+      "token": "comment",
+      "foreground": "858B95"
+    },
+    {
+      "token": "keyword",
+      "foreground": "CF8E6D"
+    },
+    {
+      "token": "string",
+      "foreground": "9DBB80"
+    },
+    {
+      "token": "number",
+      "foreground": "AAC2E8"
+    },
+    {
+      "token": "type.identifier",
+      "foreground": "B7A6E8"
+    },
+    {
+      "token": "type",
+      "foreground": "B7A6E8"
+    },
+    {
+      "token": "class",
+      "foreground": "B7A6E8"
+    },
+    {
+      "token": "struct",
+      "foreground": "B7A6E8"
+    },
+    {
+      "token": "enum",
+      "foreground": "B7A6E8"
+    },
+    {
+      "token": "interface",
+      "foreground": "B7A6E8"
+    },
+    {
+      "token": "typeParameter",
+      "foreground": "C1A8DA"
+    },
+    {
+      "token": "function",
+      "foreground": "8CB5EB"
+    },
+    {
+      "token": "method",
+      "foreground": "8CB5EB"
+    },
+    {
+      "token": "macro",
+      "foreground": "B5B980"
+    },
+    {
+      "token": "parameter",
+      "foreground": "C9B394"
+    },
+    {
+      "token": "property",
+      "foreground": "B9A4CB"
+    },
+    {
+      "token": "field",
+      "foreground": "B9A4CB"
+    },
+    {
+      "token": "enumMember",
+      "foreground": "C5AB88"
+    },
+    {
+      "token": "variable.readonly",
+      "foreground": "C5AB88"
+    },
+    {
+      "token": "constant",
+      "foreground": "C5AB88"
+    },
+    {
+      "token": "namespace",
+      "foreground": "A8B9C9"
+    },
+    {
+      "token": "decorator",
+      "foreground": "B5B980"
+    },
+    {
+      "token": "regexp",
+      "foreground": "B5B980"
+    },
+    {
+      "token": "tag",
+      "foreground": "CF8E6D"
+    },
+    {
+      "token": "attribute.name",
+      "foreground": "8CB5EB"
+    },
+    {
+      "token": "attribute.value",
+      "foreground": "9DBB80"
+    },
+    {
+      "token": "key",
+      "foreground": "8CB5EB"
+    },
+    {
+      "token": "identifier",
+      "foreground": "D7DAE0"
+    },
+    {
+      "token": "delimiter",
+      "foreground": "C5CAD4"
+    },
+    {
+      "token": "annotation",
+      "foreground": "B5B980"
+    },
+    {
+      "token": "entity.name.function",
+      "foreground": "8CB5EB"
+    },
+    {
+      "token": "support.function",
+      "foreground": "8CB5EB"
+    },
+    {
+      "token": "entity.name.type",
+      "foreground": "B7A6E8"
+    },
+    {
+      "token": "entity.name.class",
+      "foreground": "B7A6E8"
+    },
+    {
+      "token": "support.type",
+      "foreground": "B7A6E8"
+    },
+    {
+      "token": "storage",
+      "foreground": "CF8E6D"
+    },
+    {
+      "token": "constant.numeric",
+      "foreground": "AAC2E8"
+    },
+    {
+      "token": "constant.language",
+      "foreground": "CF8E6D"
+    },
+    {
+      "token": "constant.other",
+      "foreground": "C5AB88"
+    },
+    {
+      "token": "variable.parameter",
+      "foreground": "C9B394"
+    },
+    {
+      "token": "variable.other.property",
+      "foreground": "B9A4CB"
+    },
+    {
+      "token": "variable.other.constant",
+      "foreground": "C5AB88"
+    },
+    {
+      "token": "entity.name.tag",
+      "foreground": "CF8E6D"
+    },
+    {
+      "token": "entity.other.attribute-name",
+      "foreground": "8CB5EB"
+    },
+    {
+      "token": "support.type.property-name",
+      "foreground": "8CB5EB"
+    },
+    {
+      "token": "string.quoted.double.json",
+      "foreground": "9DBB80"
+    },
+    {
+      "token": "markup.heading",
+      "foreground": "8CB5EB"
+    },
+    {
+      "token": "markup.inline.raw",
+      "foreground": "9DBB80"
+    },
+    {
+      "token": "markup.fenced_code",
+      "foreground": "9DBB80"
+    },
+    {
+      "token": "markup.underline.link",
+      "foreground": "8CB5EB"
+    },
+    {
+      "token": "markup.heading",
+      "foreground": "8CB5EB",
+      "fontStyle": "bold"
+    },
+    {
+      "token": "markup.bold",
+      "fontStyle": "bold"
+    },
+    {
+      "token": "markup.italic",
+      "fontStyle": "italic"
+    }
+  ],
+  "colors": {
+    "editor.background": "#1C211D",
+    "editor.foreground": "#E3E5DC",
+    "editorLineNumber.foreground": "#849682",
+    "editorLineNumber.activeForeground": "#E3E5DC",
+    "editor.lineHighlightBackground": "#262C27",
+    "editor.selectionBackground": "#2F4A3E",
+    "editor.inactiveSelectionBackground": "#3B453D",
+    "editorCursor.foreground": "#B8C6AA",
+    "editorIndentGuide.background1": "#313A33",
+    "editorIndentGuide.activeBackground1": "#57665B",
+    "editorWidget.background": "#262C27",
+    "editorWidget.foreground": "#E3E5DC",
+    "editorWidget.border": "#465349",
+    "editorHoverWidget.background": "#262C27",
+    "editorHoverWidget.border": "#465349",
+    "editorSuggestWidget.background": "#262C27",
+    "editorSuggestWidget.border": "#465349",
+    "editorSuggestWidget.selectedBackground": "#3B453D",
+    "focusBorder": "#8A9A7B",
+    "editorGutter.background": "#1C211D",
+    "editorOverviewRuler.border": "#1C211D",
+    "peekViewEditor.background": "#262C27",
+    "peekViewResult.background": "#262C27",
+    "peekViewTitle.background": "#2A322C",
+    "menu.background": "#2A322C",
+    "menu.foreground": "#E3E5DC",
+    "menu.border": "#465349",
+    "menu.selectionBackground": "#3B453D",
+    "menu.selectionForeground": "#F6F5EF",
+    "menu.separatorBackground": "#465349",
+    "list.hoverBackground": "#3B453D",
+    "list.hoverForeground": "#F6F5EF",
+    "disabledForeground": "#849682",
+    "editorGhostText.foreground": "#849682",
+    "editorError.foreground": "#EEA0A0",
+    "editorWarning.foreground": "#D7B87C",
+    "diffEditor.insertedTextBackground": "#2F392F",
+    "diffEditor.removedTextBackground": "#3E3532"
+  }
+}

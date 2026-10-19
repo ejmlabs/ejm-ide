@@ -1,0 +1,245 @@
+@layer workbench-editor-workspace {
+  .editor-workspace,
+  .editor-split,
+  .editor-group {
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+  }
+  .editor-workspace {
+    flex: 1;
+    overflow: hidden;
+  }
+  .editor-group {
+    display: flex;
+    flex-direction: column;
+    background: var(--ejm-ui-n2);
+  }
+  .editor-group-header {
+    display: flex;
+    min-width: 0;
+    height: 32px;
+    min-height: 32px;
+    background: var(--ejm-ui-n4);
+    border-bottom: 1px solid var(--ejm-ui-n7);
+  }
+  .editor-group-header .editor-tabs {
+    container: editor-tabs / inline-size;
+    display: flex;
+    flex: 1;
+    align-items: stretch;
+    min-width: 0;
+    height: 31px;
+    min-height: 31px;
+    border: 0;
+    scrollbar-width: none;
+  }
+  .editor-group .editor-tab.active::before {
+    background: var(--ejm-ui-n9);
+  }
+  .editor-group.focused .editor-tab.active::before {
+    background: var(--ejm-ui-primary);
+  }
+  .editor-group .editor-tab {
+    flex: 0 0 auto;
+    max-width: min(280px, calc(100cqi - 24px));
+    gap: 3px;
+    padding: 0 5px 0 10px;
+  }
+  .editor-group .editor-tab > button:first-child {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    height: 100%;
+    font-size: 12px;
+    outline: none;
+  }
+  .editor-group .editor-tab:has([role="tab"]:focus-visible) {
+    box-shadow: inset 0 0 0 1px var(--ejm-ui-primary);
+  }
+  .editor-tab-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .editor-tab > button:first-child > svg,
+  .editor-tab .tab-close {
+    flex-shrink: 0;
+  }
+  .editor-group .editor-tab .tab-close {
+    visibility: hidden;
+    margin-left: 2px;
+  }
+  .editor-group .editor-tab:is(.active, .dirty, :hover, :focus-within) .tab-close {
+    visibility: visible;
+  }
+  .editor-tab.dirty .tab-close > svg {
+    display: none;
+  }
+  .editor-tab.dirty:is(:hover, :focus-within) .tab-close > svg {
+    display: block;
+  }
+  .editor-tab.dirty:is(:hover, :focus-within) .tab-close > .unsaved-dot {
+    display: none;
+  }
+  .editor-tab.drop-before::after {
+    position: absolute;
+    z-index: 1;
+    inset: 0 auto 0 0;
+    width: 2px;
+    background: var(--ejm-ui-accent);
+    content: "";
+  }
+  .editor-tab-kind,
+  .editor-tab-directory {
+    color: var(--ejm-ui-n11);
+    font-size: 10px;
+  }
+  .editor-tab-kind {
+    flex-shrink: 0;
+  }
+  .editor-tab-directory {
+    overflow: hidden;
+    max-width: 90px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  @container editor-tabs (width <= 300px) {
+    .editor-tab-kind,
+    .editor-tab-directory {
+      display: none;
+    }
+  }
+  .editor-tab-space {
+    flex: 1 0 24px;
+    min-width: 24px;
+  }
+  .editor-group-actions {
+    display: flex;
+    align-items: center;
+    padding: 0 3px;
+    flex-shrink: 0;
+    gap: 1px;
+  }
+  .editor-group-actions .button {
+    width: 25px;
+    height: 25px;
+    color: var(--ejm-ui-n12);
+  }
+  .editor-group-content {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+    min-width: 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .editor-tab-menu {
+    min-width: 205px;
+  }
+  .editor-tab-menu .dropdown-item {
+    gap: 8px;
+    font-size: 11px;
+  }
+  .editor-menu-key {
+    margin-left: auto;
+    padding-left: 14px;
+    color: var(--ejm-ui-n11);
+    font-size: 10px;
+  }
+  .editor-open-menu {
+    min-width: 230px;
+    max-width: min(420px, calc(100vw - 16px));
+    max-height: min(420px, var(--radix-dropdown-menu-content-available-height));
+    overflow: auto;
+  }
+  .editor-open-menu .dropdown-item {
+    gap: 7px;
+  }
+  .editor-menu-check {
+    display: flex;
+    flex: 0 0 13px;
+    width: 13px;
+  }
+  .editor-open-name {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .editor-tab-menu .dropdown-item[data-disabled] {
+    opacity: 0.4;
+    cursor: default;
+  }
+  .editor-drop-hint {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    pointer-events: none;
+    display: grid;
+    place-items: center;
+    padding: 18px;
+    text-align: center;
+    color: var(--ejm-ui-accent-strong);
+    font-size: 12px;
+    background: color-mix(in srgb, var(--ejm-ui-n11) 18%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ejm-ui-primary) 55%, transparent);
+  }
+  .editor-drop-hint.right {
+    left: 50%;
+  }
+  .editor-drop-hint.bottom {
+    top: 50%;
+  }
+  .editor-drop-hint > span {
+    padding: 6px 10px;
+    border: 1px solid var(--ejm-ui-n11);
+    border-radius: 4px;
+    background: var(--ejm-ui-tint-1);
+  }
+  .editor-group-empty {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 20px;
+    color: var(--ejm-ui-n12);
+    font-size: 12px;
+  }
+  .editor-group-empty > div {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .editor-untitled-hint {
+    color: var(--ejm-ui-n12);
+    font-size: 10px;
+  }
+  .save-as-field {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    margin: 18px 0;
+    color: var(--ejm-ui-n13);
+    font-size: 12px;
+  }
+  .save-as-field > input {
+    height: 34px;
+    padding: 0 10px;
+    background: var(--ejm-ui-n2);
+    border: 1px solid var(--ejm-ui-n8);
+    border-radius: 5px;
+    outline: none;
+    color: var(--ejm-ui-n14);
+    font:
+      12px "JetBrains Mono",
+      monospace;
+  }
+  .save-as-field > input:focus {
+    border-color: var(--ejm-ui-primary);
+  }
+}

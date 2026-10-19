@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-agent-ide-ack"
+description = "Enables the agent_ide_ack command without any pre-configured scope."
+commands.allow = ["agent_ide_ack"]
+
+[[permission]]
+identifier = "deny-agent-ide-ack"
+description = "Denies the agent_ide_ack command without any pre-configured scope."
+commands.deny = ["agent_ide_ack"]

@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-index-traverse"
+description = "Enables the index_traverse command without any pre-configured scope."
+commands.allow = ["index_traverse"]
+
+[[permission]]
+identifier = "deny-index-traverse"
+description = "Denies the index_traverse command without any pre-configured scope."
+commands.deny = ["index_traverse"]

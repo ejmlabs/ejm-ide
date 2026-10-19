@@ -1,0 +1,67 @@
+@layer workbench-document-preview {
+  .markdown-pane {
+    container: markdown-document / inline-size;
+    min-width: 0;
+  }
+  .markdown-pane .markdown-pane-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex: 0 0 30px;
+    padding: 0 8px;
+  }
+  .markdown-pane .markdown-outline-toggle {
+    width: 25px;
+    min-height: 24px;
+    height: 24px;
+    padding: 0;
+  }
+  .markdown-outline-toggle[aria-expanded="true"] {
+    background: var(--ejm-ui-n7);
+    color: var(--ejm-ui-accent-strong);
+  }
+  .markdown-pane .markdown-pane-body {
+    min-width: 0;
+    overflow: hidden;
+  }
+  .markdown-pane .markdown-outline {
+    flex-basis: 190px;
+    padding-block: 8px;
+  }
+  .markdown-outline[hidden] {
+    display: none;
+  }
+  .markdown-pane .markdown-preview {
+    padding: 18px clamp(20px, 5cqw, 64px) 64px;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+  }
+  .markdown-pane .markdown-preview-content {
+    width: 100%;
+    max-width: 75ch;
+    margin-inline: auto;
+    overflow-wrap: anywhere;
+  }
+  .markdown-preview-content > :first-child {
+    margin-top: 0;
+  }
+  .markdown-preview-content [data-heading-id] {
+    scroll-margin-top: 20px;
+  }
+  @container markdown-document (width <= 520px) {
+    .markdown-pane .markdown-pane-body {
+      flex-direction: column;
+    }
+    .markdown-pane .markdown-outline {
+      flex: 0 1 auto;
+      max-width: none;
+      max-height: 35%;
+      border-right: 0;
+      border-bottom: 1px solid var(--ejm-ui-n6);
+      padding-inline: 16px;
+    }
+    .markdown-pane .markdown-preview {
+      padding-inline: 20px;
+    }
+  }
+}

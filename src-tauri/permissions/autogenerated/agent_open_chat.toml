@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-agent-open-chat"
+description = "Enables the agent_open_chat command without any pre-configured scope."
+commands.allow = ["agent_open_chat"]
+
+[[permission]]
+identifier = "deny-agent-open-chat"
+description = "Denies the agent_open_chat command without any pre-configured scope."
+commands.deny = ["agent_open_chat"]

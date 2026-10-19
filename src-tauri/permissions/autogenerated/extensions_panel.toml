@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-extensions-panel"
+description = "Enables the extensions_panel command without any pre-configured scope."
+commands.allow = ["extensions_panel"]
+
+[[permission]]
+identifier = "deny-extensions-panel"
+description = "Denies the extensions_panel command without any pre-configured scope."
+commands.deny = ["extensions_panel"]

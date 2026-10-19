@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-language-request"
+description = "Enables the language_request command without any pre-configured scope."
+commands.allow = ["language_request"]
+
+[[permission]]
+identifier = "deny-language-request"
+description = "Denies the language_request command without any pre-configured scope."
+commands.deny = ["language_request"]

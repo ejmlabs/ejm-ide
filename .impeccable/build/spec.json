@@ -1,0 +1,370 @@
+{
+  "tool": "comp-spec",
+  "version": 1,
+  "createdAt": "2026-10-18T00:16:12.448Z",
+  "comp": ".impeccable/mocks/a-balanced.png",
+  "warnings": [],
+  "uncoveredInkCells": [],
+  "compSize": {
+    "width": 1586,
+    "height": 992
+  },
+  "aspect": 1.5988,
+  "orientation": "landscape",
+  "palette": [
+    {
+      "hex": "#202329",
+      "coverage": 0.9776
+    },
+    {
+      "hex": "#424a60",
+      "coverage": 0.0081
+    },
+    {
+      "hex": "#7d808d",
+      "coverage": 0.0058
+    },
+    {
+      "hex": "#4c5555",
+      "coverage": 0.0052
+    },
+    {
+      "hex": "#bdbdcd",
+      "coverage": 0.0033
+    }
+  ],
+  "bands": [
+    {
+      "y": 0.2375,
+      "strength": 0.2181
+    },
+    {
+      "y": 0.4125,
+      "strength": 0.2068
+    }
+  ],
+  "regions": [
+    {
+      "id": "titlebar",
+      "kind": "chrome",
+      "note": "Native controls, project, branch, command search",
+      "grid": "A0:J0",
+      "box": {
+        "x": 0,
+        "y": 0,
+        "w": 1,
+        "h": 0.1
+      },
+      "px": {
+        "x": 0,
+        "y": 0,
+        "w": 1586,
+        "h": 99
+      },
+      "aspect": 16.0202,
+      "palette": [
+        {
+          "hex": "#26272a",
+          "coverage": 0.9753
+        },
+        {
+          "hex": "#a5aab5",
+          "coverage": 0.0099
+        },
+        {
+          "hex": "#676975",
+          "coverage": 0.0062
+        },
+        {
+          "hex": "#40474e",
+          "coverage": 0.0052
+        },
+        {
+          "hex": "#eeeeee",
+          "coverage": 0.0034
+        }
+      ],
+      "detail": {
+        "energy": 15.653
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null
+    },
+    {
+      "id": "project",
+      "kind": "chrome",
+      "note": "Activity rail and project tree",
+      "grid": "A1:B9",
+      "box": {
+        "x": 0,
+        "y": 0.1,
+        "w": 0.2,
+        "h": 0.9
+      },
+      "px": {
+        "x": 0,
+        "y": 99,
+        "w": 317,
+        "h": 893
+      },
+      "aspect": 0.355,
+      "palette": [
+        {
+          "hex": "#272728",
+          "coverage": 0.9576
+        },
+        {
+          "hex": "#38435a",
+          "coverage": 0.0327
+        },
+        {
+          "hex": "#3e4a4a",
+          "coverage": 0.004
+        },
+        {
+          "hex": "#747480",
+          "coverage": 0.0032
+        },
+        {
+          "hex": "#080c14",
+          "coverage": 0.0025
+        }
+      ],
+      "detail": {
+        "energy": 8.1366
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null
+    },
+    {
+      "id": "source",
+      "kind": "text",
+      "note": "Tabs, breadcrumbs and source code. SF system interface, JetBrains Mono code as pinned in the brief.",
+      "grid": "C1:H5",
+      "coverBox": {
+        "x": 0.2,
+        "y": 0.1,
+        "w": 0.6,
+        "h": 0.5
+      },
+      "box": {
+        "x": 0.1999,
+        "y": 0.0998,
+        "w": 0.5259,
+        "h": 0.4657
+      },
+      "px": {
+        "x": 317,
+        "y": 99,
+        "w": 834,
+        "h": 462
+      },
+      "aspect": 1.8052,
+      "palette": [
+        {
+          "hex": "#1d1d28",
+          "coverage": 0.9428
+        },
+        {
+          "hex": "#373c40",
+          "coverage": 0.0305
+        },
+        {
+          "hex": "#70757f",
+          "coverage": 0.0123
+        },
+        {
+          "hex": "#385684",
+          "coverage": 0.0081
+        },
+        {
+          "hex": "#a5aab5",
+          "coverage": 0.0063
+        }
+      ],
+      "detail": {
+        "energy": 15.4768
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null,
+      "type": {
+        "comp": {
+          "lines": 4,
+          "glyphs": 203,
+          "capHeightPx": 13,
+          "inkIsDark": false,
+          "allCaps": false,
+          "advance": 0.5769,
+          "advTall": 0.5758,
+          "advX": 0.6181,
+          "gap": 0.127,
+          "xRatio": 0.7154,
+          "stemW": 0.1787,
+          "contrast": 1.1096,
+          "serif": 0.9392,
+          "densTall": 0.5073,
+          "densX": 0.681,
+          "weight": 0.5073
+        },
+        "widthClass": "normal",
+        "weightClass": "medium",
+        "chosen": {
+          "family": "Carlito",
+          "weight": 400,
+          "fontSizePx": 18,
+          "source": "index",
+          "fp": {
+            "lines": 1,
+            "glyphs": 28,
+            "capHeightPx": 12.9,
+            "inkIsDark": true,
+            "allCaps": false,
+            "advance": 0.5435,
+            "advTall": 0.4852,
+            "advX": 0.6211,
+            "gap": 0.1165,
+            "xRatio": 0.6896,
+            "stemW": 0.179,
+            "contrast": 1.0995,
+            "serif": 0.9152,
+            "densTall": 0.5657,
+            "densX": 0.6217,
+            "weight": 0.5657
+          },
+          "stamp": "7fb6a424d5fa"
+        }
+      }
+    },
+    {
+      "id": "hierarchy",
+      "kind": "control",
+      "note": "Focused caller and callee graph beneath the editor",
+      "grid": "C6:H9",
+      "coverBox": {
+        "x": 0.2,
+        "y": 0.6,
+        "w": 0.6,
+        "h": 0.4
+      },
+      "box": {
+        "x": 0.3979,
+        "y": 0.7752,
+        "w": 0.1337,
+        "h": 0.0726
+      },
+      "px": {
+        "x": 631,
+        "y": 769,
+        "w": 212,
+        "h": 72
+      },
+      "aspect": 2.9444,
+      "palette": [
+        {
+          "hex": "#28394a",
+          "coverage": 0.5628
+        },
+        {
+          "hex": "#191926",
+          "coverage": 0.321
+        },
+        {
+          "hex": "#5888d5",
+          "coverage": 0.0518
+        },
+        {
+          "hex": "#1b2a2a",
+          "coverage": 0.0375
+        },
+        {
+          "hex": "#9296a5",
+          "coverage": 0.0269
+        }
+      ],
+      "detail": {
+        "energy": 20.2416
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null
+    },
+    {
+      "id": "chat",
+      "kind": "text",
+      "note": "Codex conversation with context chips and anchored composer",
+      "grid": "I1:J9",
+      "coverBox": {
+        "x": 0.8,
+        "y": 0.1,
+        "w": 0.2,
+        "h": 0.9
+      },
+      "box": {
+        "x": 0.8922,
+        "y": 0.876,
+        "w": 0.0984,
+        "h": 0.0524
+      },
+      "px": {
+        "x": 1415,
+        "y": 869,
+        "w": 156,
+        "h": 52
+      },
+      "aspect": 3,
+      "palette": [
+        {
+          "hex": "#1f2828",
+          "coverage": 0.7462
+        },
+        {
+          "hex": "#6393ea",
+          "coverage": 0.1433
+        },
+        {
+          "hex": "#1c1e2e",
+          "coverage": 0.0755
+        },
+        {
+          "hex": "#466da4",
+          "coverage": 0.0197
+        },
+        {
+          "hex": "#7e818d",
+          "coverage": 0.0153
+        }
+      ],
+      "detail": {
+        "energy": 12.9673
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null,
+      "type": {
+        "comp": {
+          "lines": 1,
+          "glyphs": 12,
+          "capHeightPx": 11.1,
+          "inkIsDark": false,
+          "allCaps": false,
+          "advance": 0.5723,
+          "advTall": 0.3012,
+          "advX": 0.5874,
+          "gap": 0.1205,
+          "xRatio": 0.5967,
+          "stemW": 0.1486,
+          "contrast": 1.0206,
+          "serif": 1.6287,
+          "densTall": 0.5065,
+          "densX": 0.5514,
+          "weight": 0.5065
+        },
+        "widthClass": "normal",
+        "weightClass": "medium"
+      }
+    }
+  ]
+}

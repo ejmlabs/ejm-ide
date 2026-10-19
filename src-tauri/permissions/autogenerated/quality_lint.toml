@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-quality-lint"
+description = "Enables the quality_lint command without any pre-configured scope."
+commands.allow = ["quality_lint"]
+
+[[permission]]
+identifier = "deny-quality-lint"
+description = "Denies the quality_lint command without any pre-configured scope."
+commands.deny = ["quality_lint"]

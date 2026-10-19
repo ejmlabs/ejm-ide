@@ -1,0 +1,214 @@
+@layer workbench-extension-panels {
+  .extension-header-actions,
+  .extension-identity,
+  .extension-next-action {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .extensions-panel > .pane-heading {
+    gap: 4px;
+    padding-inline: 10px;
+  }
+  .extension-heading-title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    white-space: nowrap;
+  }
+  .extension-heading-title svg {
+    flex-shrink: 0;
+  }
+  .extension-header-actions {
+    flex-shrink: 0;
+    gap: 4px;
+  }
+  .extension-header-actions .icon-button {
+    width: 25px;
+    height: 25px;
+  }
+  .extension-preview-note {
+    flex-shrink: 0;
+    margin: 0;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--ejm-ui-n6);
+    color: var(--ejm-ui-n12);
+    font-size: 11px;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+  }
+  .extension-toolbar {
+    flex-shrink: 0;
+    padding: 12px;
+    border-bottom: 1px solid var(--ejm-ui-n6);
+  }
+  .extension-identity {
+    justify-content: space-between;
+    min-width: 0;
+  }
+  .extension-identity h3 {
+    overflow: hidden;
+    margin: 0;
+    font-size: 12px;
+    font-weight: 550;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .extension-select {
+    width: 100%;
+    min-width: 0;
+    min-height: 27px;
+    padding: 2px 6px;
+    border: 1px solid var(--ejm-ui-n8);
+    border-radius: 4px;
+    background: var(--ejm-ui-n4);
+    color: var(--ejm-ui-n14);
+    font-size: 11px;
+  }
+  .extension-select:focus-visible {
+    outline: 2px solid var(--ejm-ui-primary);
+    outline-offset: 1px;
+  }
+  .extension-state {
+    flex-shrink: 0;
+    color: var(--ejm-ui-n12);
+    font-size: 10px;
+  }
+  .extension-state[data-active="true"] {
+    color: var(--ejm-ui-success);
+  }
+  .extension-description {
+    margin: 4px 0 10px;
+    color: var(--ejm-ui-n12);
+    font-size: 11px;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+  }
+  .extension-next-action {
+    margin-top: 9px;
+  }
+  .extension-details {
+    margin-top: 10px;
+    color: var(--ejm-ui-n12);
+    font-size: 11px;
+  }
+  .extension-details summary {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    width: fit-content;
+    min-height: 24px;
+    list-style: none;
+    cursor: pointer;
+  }
+  .extension-details summary::-webkit-details-marker {
+    display: none;
+  }
+  .extension-details summary svg {
+    transform: rotate(-90deg);
+  }
+  .extension-details[open] summary svg {
+    transform: rotate(0);
+  }
+  .extension-details summary:hover {
+    color: var(--ejm-ui-n14);
+  }
+  .extension-details summary:focus-visible,
+  .extension-authoring-link:focus-visible {
+    outline: 2px solid var(--ejm-ui-primary);
+    outline-offset: 2px;
+    border-radius: 3px;
+  }
+  .extension-details-body {
+    padding: 4px 0 0 17px;
+    line-height: 1.5;
+  }
+  .extension-capabilities {
+    display: grid;
+    gap: 3px;
+    margin: 0;
+    padding: 0;
+    color: var(--ejm-ui-n13);
+    list-style: none;
+  }
+  .extension-sandbox {
+    margin: 6px 0;
+    color: var(--ejm-ui-n12);
+    font-size: 10px;
+  }
+  .extension-version {
+    display: flex;
+    gap: 8px;
+    margin: 6px 0;
+    font-size: 10px;
+  }
+  .extension-version dd {
+    min-width: 0;
+    margin: 0;
+    color: var(--ejm-ui-n13);
+  }
+  .extension-commands {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+    margin-top: 8px;
+  }
+  .extension-commands p {
+    flex-basis: 100%;
+    margin: 0 0 2px;
+  }
+  .extension-menu {
+    min-width: 196px;
+    max-height: var(--radix-dropdown-menu-content-available-height);
+    overflow: auto;
+  }
+  .extension-error,
+  .extension-notice {
+    margin: 0;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--ejm-ui-n6);
+    font-size: 11px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+  .extension-error {
+    color: var(--ejm-ui-error);
+    background: color-mix(in srgb, var(--ejm-ui-error) 3%, transparent);
+  }
+  .extension-notice {
+    color: var(--ejm-ui-n12);
+  }
+  .extension-empty {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 24px;
+    text-align: center;
+    font-size: 12px;
+    color: var(--ejm-ui-n12);
+  }
+  .extension-empty h3 {
+    margin: 0;
+    color: var(--ejm-ui-n14);
+    font-size: 12px;
+    font-weight: 550;
+  }
+  .extension-empty p {
+    max-width: 32ch;
+    margin: 0 0 3px;
+    line-height: 1.6;
+  }
+  .extension-authoring-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--ejm-ui-accent);
+    font-size: 11px;
+  }
+}

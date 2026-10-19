@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-agent-new-chat"
+description = "Enables the agent_new_chat command without any pre-configured scope."
+commands.allow = ["agent_new_chat"]
+
+[[permission]]
+identifier = "deny-agent-new-chat"
+description = "Denies the agent_new_chat command without any pre-configured scope."
+commands.deny = ["agent_new_chat"]

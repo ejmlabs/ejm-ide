@@ -1,0 +1,17 @@
+{
+  "$schema": "https://unpkg.com/wrangler/config-schema.json",
+  "name": "ejmlabs-ide",
+  "main": "worker.ts",
+  "compatibility_date": "2026-10-18",
+  "workers_dev": false,
+  "preview_urls": false,
+  "routes": [{ "pattern": "ide.ejmlabs.com", "custom_domain": true }],
+  "assets": {
+    "directory": "../website/dist",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api", "/api/*", "/downloads", "/downloads/*"],
+    "not_found_handling": "404-page"
+  },
+  "r2_buckets": [{ "binding": "RELEASES", "bucket_name": "ejmlabs-ide-releases" }],
+  "observability": { "enabled": false }
+}

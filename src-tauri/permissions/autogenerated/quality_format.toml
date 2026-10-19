@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-quality-format"
+description = "Enables the quality_format command without any pre-configured scope."
+commands.allow = ["quality_format"]
+
+[[permission]]
+identifier = "deny-quality-format"
+description = "Denies the quality_format command without any pre-configured scope."
+commands.deny = ["quality_format"]

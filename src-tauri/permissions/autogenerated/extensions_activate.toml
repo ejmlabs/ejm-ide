@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-extensions-activate"
+description = "Enables the extensions_activate command without any pre-configured scope."
+commands.allow = ["extensions_activate"]
+
+[[permission]]
+identifier = "deny-extensions-activate"
+description = "Denies the extensions_activate command without any pre-configured scope."
+commands.deny = ["extensions_activate"]

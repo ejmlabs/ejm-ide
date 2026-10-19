@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-host-confirm-close"
+description = "Enables the host_confirm_close command without any pre-configured scope."
+commands.allow = ["host_confirm_close"]
+
+[[permission]]
+identifier = "deny-host-confirm-close"
+description = "Denies the host_confirm_close command without any pre-configured scope."
+commands.deny = ["host_confirm_close"]

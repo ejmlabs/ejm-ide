@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-agent-archive-chat"
+description = "Enables the agent_archive_chat command without any pre-configured scope."
+commands.allow = ["agent_archive_chat"]
+
+[[permission]]
+identifier = "deny-agent-archive-chat"
+description = "Denies the agent_archive_chat command without any pre-configured scope."
+commands.deny = ["agent_archive_chat"]

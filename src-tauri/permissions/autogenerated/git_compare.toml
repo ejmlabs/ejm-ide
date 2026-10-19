@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-git-compare"
+description = "Enables the git_compare command without any pre-configured scope."
+commands.allow = ["git_compare"]
+
+[[permission]]
+identifier = "deny-git-compare"
+description = "Denies the git_compare command without any pre-configured scope."
+commands.deny = ["git_compare"]

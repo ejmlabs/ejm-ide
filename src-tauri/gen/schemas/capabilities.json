@@ -1,0 +1,1 @@
+{"main-window":{"identifier":"main-window","description":"Only the main ejm-ide webview can use the desktop bridge.","local":true,"windows":["main"],"permissions":["core:window:allow-start-dragging","core:window:allow-internal-toggle-maximize","workspace","language","quality","external-links","index","terminal","agent","extensions"]}}

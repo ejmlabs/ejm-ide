@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-workspace-diff"
+description = "Enables the workspace_diff command without any pre-configured scope."
+commands.allow = ["workspace_diff"]
+
+[[permission]]
+identifier = "deny-workspace-diff"
+description = "Denies the workspace_diff command without any pre-configured scope."
+commands.deny = ["workspace_diff"]

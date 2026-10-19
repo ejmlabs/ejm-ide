@@ -1,0 +1,55 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "ejm-ide",
+  "version": "0.1.0",
+  "identifier": "dev.workbench.ide",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "ejm-ide",
+        "create": false,
+        "width": 1440,
+        "height": 950,
+        "minWidth": 1024,
+        "minHeight": 680,
+        "backgroundColor": "#1C221D",
+        "titleBarStyle": "Overlay",
+        "hiddenTitle": true,
+        "trafficLightPosition": {
+          "x": 18,
+          "y": 22
+        }
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' asset: http://asset.localhost data:; font-src 'self' data:; connect-src ipc: http://ipc.localhost http://localhost:1420 ws://localhost:1420; worker-src 'self' blob:; frame-src 'self' blob: workbench-extension: http://workbench-extension.localhost; object-src 'none'; base-uri 'self'",
+      "devCsp": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' http://localhost:1420; style-src 'self' 'unsafe-inline'; img-src 'self' asset: http://asset.localhost data:; font-src 'self' data:; connect-src ipc: http://ipc.localhost http://localhost:1420 ws://localhost:1420; worker-src 'self' blob:; frame-src 'self' blob: workbench-extension: http://workbench-extension.localhost; object-src 'none'; base-uri 'self'"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["app", "dmg"],
+    "category": "DeveloperTool",
+    "shortDescription": "A coding IDE built on the shared ejm-harness",
+    "icon": ["icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.icns"],
+    "resources": {
+      "../extension-template/": "extension-template/",
+      "../node_modules/esbuild/": "node_modules/esbuild/",
+      "../node_modules/@esbuild/darwin-arm64/": "node_modules/@esbuild/darwin-arm64/",
+      "../node_modules/@biomejs/cli-darwin-arm64/": "node_modules/@biomejs/cli-darwin-arm64/",
+      "../node_modules/react/": "node_modules/react/",
+      "../node_modules/react-dom/": "node_modules/react-dom/",
+      "../node_modules/scheduler/": "node_modules/scheduler/",
+      "../node_modules/pyright/": "node_modules/pyright/",
+      "../node_modules/typescript-language-server/": "node_modules/typescript-language-server/",
+      "../node_modules/typescript/": "node_modules/typescript/"
+    }
+  }
+}

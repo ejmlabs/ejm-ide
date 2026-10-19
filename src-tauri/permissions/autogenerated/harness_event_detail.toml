@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-harness-event-detail"
+description = "Enables the harness_event_detail command without any pre-configured scope."
+commands.allow = ["harness_event_detail"]
+
+[[permission]]
+identifier = "deny-harness-event-detail"
+description = "Denies the harness_event_detail command without any pre-configured scope."
+commands.deny = ["harness_event_detail"]

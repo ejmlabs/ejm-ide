@@ -1,0 +1,163 @@
+@layer workbench-chat-edits {
+  .chat-edits {
+    min-width: 0;
+    overflow: hidden;
+    font-size: 11px;
+  }
+  .chat-edit-file {
+    border-top: 1px solid var(--ejm-ui-n7);
+    min-width: 0;
+  }
+  .chat-edit-file > summary {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    min-height: 32px;
+    padding: 3px 7px;
+    cursor: pointer;
+    list-style: none;
+  }
+  .chat-edit-file > summary::-webkit-details-marker {
+    display: none;
+  }
+  .chat-edit-file > summary:hover {
+    background: color-mix(in srgb, var(--ejm-ui-text-strong) 2%, transparent);
+  }
+  .chat-edit-file .edit-disclosure {
+    flex-shrink: 0;
+  }
+  .chat-edit-file[open] > summary .edit-disclosure {
+    transform: rotate(90deg);
+  }
+  .chat-edit-path {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--ejm-ui-n14);
+  }
+  .chat-edit-kind {
+    font-size: 9px;
+    color: var(--ejm-ui-n13);
+  }
+  .chat-edit-added,
+  .chat-edit-removed {
+    font-size: 10px;
+    font-variant-numeric: tabular-nums;
+  }
+  .chat-edit-added {
+    color: var(--ejm-ui-n12);
+  }
+  .chat-edit-removed {
+    color: var(--ejm-ui-error);
+  }
+  .chat-edit-action {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 23px;
+    height: 24px;
+    border-radius: 3px;
+    color: var(--ejm-ui-n13);
+  }
+  .chat-edit-action:hover {
+    background: color-mix(in srgb, var(--ejm-ui-text-strong) 4%, transparent);
+    color: var(--ejm-ui-n14);
+  }
+  .chat-edit-code {
+    overflow: auto;
+    max-height: 280px;
+    background: var(--ejm-ui-n2);
+    overscroll-behavior: contain;
+  }
+  .chat-edit-code table {
+    width: 100%;
+    border-collapse: collapse;
+    font:
+      10px / 1.8 "JetBrains Mono",
+      monospace;
+  }
+  .chat-edit-code td {
+    padding: 0;
+    border: 0;
+    white-space: pre;
+    vertical-align: top;
+  }
+  .chat-edit-code .chat-edit-number {
+    width: 3ch;
+    min-width: 3ch;
+    text-align: right;
+    padding: 0 4px;
+    color: var(--ejm-ui-n12);
+    user-select: none;
+    font-variant-numeric: tabular-nums;
+  }
+  .chat-edit-code .chat-edit-source {
+    padding-right: 8px;
+    color: var(--ejm-ui-n14);
+  }
+  .chat-edit-sign {
+    display: inline-block;
+    width: 2ch;
+    color: var(--ejm-ui-n12);
+    user-select: none;
+  }
+  .chat-edit-line.add {
+    background: color-mix(in srgb, var(--ejm-ui-success) 24%, transparent);
+  }
+  .chat-edit-line.delete {
+    background: color-mix(in srgb, var(--ejm-ui-error) 26%, transparent);
+  }
+  .chat-edit-line.add .chat-edit-sign {
+    color: var(--ejm-ui-n12);
+  }
+  .chat-edit-line.delete .chat-edit-sign {
+    color: var(--ejm-ui-error);
+  }
+  .chat-edit-line.meta {
+    color: var(--ejm-ui-n13);
+    font-style: italic;
+  }
+  .chat-edit-hunk td {
+    padding: 3px 6px;
+    background: color-mix(in srgb, var(--ejm-ui-n6) 40%, transparent);
+    color: var(--ejm-ui-n13);
+    font-size: 9px;
+  }
+  .chat-edit-note {
+    color: var(--ejm-ui-n13);
+    font-size: 10px;
+    line-height: 1.6;
+    margin: 0;
+    padding: 4px 8px 8px;
+    overflow-wrap: anywhere;
+  }
+  .chat-edit-fallback {
+    font:
+      10px / 1.7 "JetBrains Mono",
+      monospace;
+    max-height: 250px;
+    overflow: auto;
+    margin: 0;
+    padding: 7px;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+  .chat-jump-latest {
+    display: flex;
+    align-items: center;
+    align-self: center;
+    gap: 5px;
+    padding: 5px 9px;
+    margin: 0 auto 8px;
+    border: 1px solid var(--ejm-ui-n8);
+    border-radius: 4px;
+    font-size: 10px;
+    color: var(--ejm-ui-n13);
+  }
+  .chat-jump-latest:hover {
+    background: color-mix(in srgb, var(--ejm-ui-text-strong) 3%, transparent);
+  }
+}

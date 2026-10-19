@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-harness-snapshot"
+description = "Enables the harness_snapshot command without any pre-configured scope."
+commands.allow = ["harness_snapshot"]
+
+[[permission]]
+identifier = "deny-harness-snapshot"
+description = "Denies the harness_snapshot command without any pre-configured scope."
+commands.deny = ["harness_snapshot"]

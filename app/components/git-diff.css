@@ -1,0 +1,56 @@
+@layer workbench-git-diff {
+  .git-diff-pane {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+    min-width: 0;
+    height: 100%;
+  }
+  .git-diff-title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 11px;
+  }
+  .git-diff-title > svg {
+    flex-shrink: 0;
+  }
+  .git-diff-scope {
+    flex-shrink: 0;
+    padding: 0 8px;
+    color: var(--ejm-ui-n12);
+    font-size: 10px;
+  }
+  .git-diff-notice,
+  .git-diff-caption {
+    margin: 0;
+    padding: 6px 10px;
+    font-size: 10px;
+    color: var(--ejm-ui-n13);
+    overflow-wrap: anywhere;
+  }
+  .git-diff-caption {
+    border-bottom: 1px solid var(--ejm-ui-n6);
+  }
+  .git-monaco-diff {
+    flex: 1;
+    min-height: 0;
+  }
+  .git-unified-diff {
+    flex: 1;
+    overflow: auto;
+    margin: 0;
+    padding: 8px 12px;
+    font:
+      11px / 1.7 "JetBrains Mono",
+      monospace;
+    white-space: pre;
+    color: var(--ejm-ui-n14);
+  }
+}
