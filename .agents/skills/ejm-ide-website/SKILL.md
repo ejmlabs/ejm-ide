@@ -66,7 +66,8 @@ Forest band with a few honest numbers, a "get" section, and an Ink footer.
 2. Look at 320, 375, 768, and 1440 px, light and dark. Tab through the page.
 3. Confirm `scrollWidth` equals `clientWidth` at 320 and 375.
 4. Recapture the screenshot if the app's labels or theme changed.
-5. Update `.impeccable/download-site-brief.md` and the asset provenance file.
+5. Keep [the public download site guidance](../../../DESIGN.md#public-download-site)
+   and [asset provenance](../../../.impeccable/download-site-assets.json) current.
 
 Deploy needs the user's Cloudflare login (`wrangler` OAuth). If auth fails, ask
 the user to run `wrangler login`; do not retry in a loop. After deploy, request

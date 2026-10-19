@@ -37,7 +37,7 @@ storage keys.
 | `docs/` | Subsystem guides; read the one for the area you change |
 | `extension-template/` | Fixed SDK and sample for local extensions |
 | `examples/harbor/` | Disposable sample workspace |
-| `.impeccable/` | Site brief and asset provenance |
+| `.impeccable/` | Asset provenance and retained visual references |
 
 Commands and gates are in [docs/development.md](docs/development.md).
 Run `npm run verify` before calling a change done.
