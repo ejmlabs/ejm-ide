@@ -2,6 +2,57 @@ use ejm_ide_lib::workspace::WorkspaceState;
 use std::fs;
 
 #[test]
+fn workspace_trust_requires_the_current_root_and_expires_on_every_open() {
+    let first = tempfile::tempdir().unwrap();
+    let second = tempfile::tempdir().unwrap();
+    let first_root = first.path().canonicalize().unwrap();
+    let second_root = second.path().canonicalize().unwrap();
+    let workspace = WorkspaceState::default();
+    assert!(workspace.trusted_root_path().is_err());
+    assert!(workspace.trust(&first_root).is_err());
+
+    let opened = workspace.open_folder(&first_root).unwrap();
+    assert!(!opened.trusted);
+    assert!(workspace.trusted_root_path().is_err());
+    let path = first_root.join("editable.rs");
+    let document = workspace.create_document(&path, "before").unwrap();
+    workspace
+        .save_document(&path, "after", &document.version)
+        .unwrap();
+    assert_eq!(workspace.read_document(&path).unwrap().content, "after");
+    assert!(workspace.trust(&second_root).is_err());
+    assert!(workspace.trusted_root_path().is_err());
+
+    workspace.trust(&first_root).unwrap();
+    assert_eq!(workspace.trusted_root_path().unwrap(), first_root);
+    assert!(!workspace.open_folder(&second_root).unwrap().trusted);
+    assert!(workspace.trust(&first_root).is_err());
+    assert!(workspace.trusted_root_path().is_err());
+    workspace.trust(&second_root).unwrap();
+    assert!(!workspace.open_folder(&second_root).unwrap().trusted);
+    assert!(workspace.trusted_root_path().is_err());
+}
+
+#[cfg(unix)]
+#[test]
+fn workspace_trust_uses_the_selected_canonical_root() {
+    let parent = tempfile::tempdir().unwrap();
+    let root = parent.path().join("project");
+    let alias = parent.path().join("alias");
+    fs::create_dir(&root).unwrap();
+    std::os::unix::fs::symlink(&root, &alias).unwrap();
+    let workspace = WorkspaceState::default();
+    let opened = workspace.open_folder(&alias).unwrap();
+    assert_eq!(opened.root, root.canonicalize().unwrap().to_string_lossy());
+    assert!(workspace.trust(&alias).is_err());
+    workspace.trust(std::path::Path::new(&opened.root)).unwrap();
+    assert_eq!(
+        workspace.trusted_root_path().unwrap(),
+        root.canonicalize().unwrap()
+    );
+}
+
+#[test]
 fn new_files_publish_complete_text_without_overwriting_existing_files() {
     let folder = tempfile::tempdir().unwrap();
     let root = folder.path().canonicalize().unwrap();

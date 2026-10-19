@@ -1,17 +1,26 @@
 # ejm-ide
 
+## Overview
+
 An open-source desktop IDE for writing and understanding code, with an agent
 beside the editor. The agent is named Edi, which is IDE in reverse. Built with React, Monaco, Tauri, Rust, and the shared
 **ejm-harness**. The current target is macOS on Apple Silicon.
 
-## Run
+## Status
 
-Install Node.js 24 LTS, stable Rust, and the
-[Tauri prerequisites](https://v2.tauri.app/start/prerequisites/).
-Keep the shared harness checkout beside this project:
+This is development source at version 0.1.0. The current target is macOS on
+Apple Silicon. Source checks do not establish signed installer readiness or
+support for other platforms. Only use download links backed by verified releases.
+See [distribution](docs/distribution.md) for the remaining native release gates.
+
+## Requirements
+
+Install Git, Node.js 24 LTS, stable Rust, and the
+[Tauri prerequisites](https://v2.tauri.app/start/prerequisites/). Keep the shared
+harness checkout beside this project:
 
 ```text
-Desktop/
+workspace/
   ejm-ide/
   ejm-harness/
     crates/ejm-harness/
@@ -19,9 +28,17 @@ Desktop/
 ```
 
 The native app depends on `../../ejm-harness/crates/ejm-harness` from
-`src-tauri`. Run these commands from `ejm-ide`:
+`src-tauri`.
+
+## Quick start
+
+Clone both repositories into the same parent folder. Private repositories
+require GitHub access until they become public.
 
 ```sh
+git clone https://github.com/ejmlabs/ejm-harness.git
+git clone https://github.com/ejmlabs/ejm-ide.git
+cd ejm-ide
 npm ci
 rustup component add rust-analyzer rustfmt clippy
 npm run dev:desktop
@@ -36,7 +53,22 @@ watcher. Saving Rust in the IDE or its harness dependency will not close the
 running app for a rebuild. Restart this command after verified native changes.
 Use `npm run tauri dev` when you want automatic native rebuilds.
 
-## Connect a model
+## Usage
+
+### Trust a workspace
+
+Newly opened folders start with automatic language servers and native format
+and lint tools off. Use **Trust workspace** to enable them for the current open
+session. These tools can run project code with your permissions, including Rust
+build scripts and Ruby configuration. Trust only source you know. Opening a
+folder again requires a new decision.
+
+You can browse, edit, and save without trust. Built-in JSON, HTML, CSS, and
+Markdown tools still work. Terminal commands and other explicit execution
+actions remain deliberate actions; inspect unfamiliar commands before running
+them. Workspace trust does not sandbox the project.
+
+### Connect a model
 
 Open **Model providers** and add an OpenAI-compatible endpoint or Anthropic.
 Set its model IDs, output limit, and supported reasoning mode. Provider model
@@ -61,7 +93,7 @@ auth API. An external Claude Code login is a separate execution integration.
 Reported token usage is visible, while exact charges and plan limits remain
 with the provider.
 
-## Work in the editor
+### Work in the editor
 
 - Hover for signatures and documentation. Use F12 for definitions and Shift+F12
   for references.
@@ -77,7 +109,8 @@ with the provider.
   graphs. Dashed graph links are inferred from syntax; ambiguous links are
   labelled.
 - Format and lint on save are enabled by default. Preferences has separate
-  switches. Project tool settings control the result.
+  switches. Native project tools also require workspace trust. Project tool
+  settings control the result.
 - Markdown has a live GFM preview, a heading outline, section attachments, and
   local formatting and linting. Open its preview from the editor tab bar.
 - Inline completion predicts nearby code after a pause. Tab accepts, Escape
@@ -107,7 +140,7 @@ The agent searches the same local index and call graph as the IDE. Indexed
 files stay local until their contents are attached to chat or returned through
 a tool call. See [Index and shared context](docs/indexing.md).
 
-## Arrange editors
+### Arrange editors
 
 Use **Split editor right** in the editor toolbar, or **Split down** in the group
 menu. Drag tabs between groups, or use a tab's menu to move them. Source views
@@ -117,7 +150,7 @@ Double click empty space in a tab strip to open an untitled file. Press **⌘ S*
 to save it to a path inside the workspace. The parent folder must exist. A
 failed save keeps the draft open, and an existing file is never overwritten.
 
-## Work with Git
+### Work with Git
 
 - Open **Source control** for staged and unstaged changes. Stage or unstage a
   file or a whole group, then **Commit staged**. A file can appear in both groups.
@@ -144,7 +177,7 @@ Source control is visible. Browser preview uses labelled read-only sample data.
 Remote operations, branch checkout, rebase, stash, and hosted pull-request
 integration are not yet included.
 
-## Inspect the agent runtime
+### Inspect the agent runtime
 
 Open **Debug > Traces** for a nested span waterfall. Follow chat turns through
 model calls, tools, and review, or inspect saves, formatting, language services,
@@ -161,7 +194,7 @@ ejm-harness owns the agent loop, shared resource governor, canonical messages
 and events, and execution limits. The IDE supplies provider adapters, reviewed
 file tools, rich chat records, and UI actions. See [Harness design](docs/harness.md).
 
-## Set up languages
+### Set up languages
 
 See [Language support](docs/languages.md) for server installation, formatter and
 linter requirements, executable overrides, and capability limits. Python and
@@ -174,7 +207,7 @@ syntax highlighting. Other UTF-8 text files open as plain text. Shiki supplies
 TextMate syntax colors; language-server semantic tokens refine them where
 supported.
 
-## Checks and builds
+## Development
 
 ```sh
 npm run format
@@ -186,14 +219,16 @@ npm run tauri build -- --debug --bundles app
 Biome enforces TypeScript, TSX, CSS, and JSON rules. rustfmt and Clippy enforce
 Rust rules. CI runs the same verification command. See [Development checks](docs/development.md).
 
-CI checks out the sibling harness from the same GitHub owner's `ejm-harness`
-repository and uses its default branch. Set the repository variables
-`EJM_HARNESS_REPOSITORY` and `EJM_HARNESS_REF` to choose another repository
-or pin a compatible revision. The [development guide](docs/development.md#ci-checkout-layout)
-describes the checkout and cache paths.
+CI starts after a human maintainer admits the current PR commit with
+`/ready FULL_HEAD_SHA`. The shared workflow uses the full harness revision in
+`.github/harness-revision` from the base branch. The
+[development guide](docs/development.md#ci-checkout-layout) describes the checkout
+and credential boundaries. See [Contributing](CONTRIBUTING.md) for the required
+human approval and two AI review passes.
 
-## More
+## Documentation
 
+- [Documentation index](docs/README.md)
 - [Project rules and skills](AGENTS.md)
 - [Architecture](ARCHITECTURE.md)
 - [Package audit](docs/package-audit.md)
@@ -206,11 +241,7 @@ describes the checkout and cache paths.
 This is a working foundation. Language features depend on server capabilities;
 inferred calls can be incomplete, and completion latency depends on the provider.
 
-## License
-
-[MIT](LICENSE). Copyright 2026 ejm-ide contributors.
-
-## Website and desktop downloads
+### Website and desktop downloads
 
 The public download site targets [ide.ejmlabs.com](https://ide.ejmlabs.com).
 It builds independently of the desktop UI and uses Cloudflare Worker Static
@@ -225,3 +256,25 @@ npm run site:build
 npm run site:check
 npm run site:preview
 ```
+
+## Contributing
+
+Read [CONTRIBUTING.md](CONTRIBUTING.md) and the [code of conduct](CODE_OF_CONDUCT.md).
+Every PR head needs human maintainer admission before checks or AI review run.
+Passing checks and current maintainer approval are required before merging.
+
+## Security
+
+Report vulnerabilities through the private route in [SECURITY.md](SECURITY.md).
+Keep credentials and private workspace content out of issues, logs, and screenshots.
+
+## Support
+
+See [SUPPORT.md](SUPPORT.md) for help and bug reports. Use GitHub issues for
+reproducible product defects, and follow the security policy for vulnerabilities.
+
+## License
+
+[MIT](LICENSE). Copyright 2026 ejm-ide contributors. See
+[third-party and brand notices](THIRD_PARTY_NOTICES.md) for bundled assets and
+the separate terms for ejmlabs marks.

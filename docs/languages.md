@@ -2,7 +2,17 @@
 
 ejm-ide uses language servers for code insight and a configured model provider
 for chat and inline predictions. Open the project root so the language server can read its build and
-dependency files. A server starts when you open the first file for its language.
+dependency files. After you grant **Trust workspace**, a server starts when you
+open the first file for its language. Trust lasts for the current open session.
+
+Language servers, native formatters, and linters run with your permissions and
+can execute project code. Rust tools may run build scripts and procedural macros;
+Ruby tools may load code from project configuration. Offline or locked dependency
+flags do not prevent this execution. Newly opened folders keep these tools off
+until you trust the selected canonical root. Browsing, editing, saving, syntax
+highlighting, and bundled JSON, HTML, CSS, and Markdown tools remain available.
+Workspace trust does not sandbox explicit terminal commands or other execution
+actions you request.
 
 ## Languages and tools
 

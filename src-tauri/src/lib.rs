@@ -254,7 +254,11 @@ pub struct HostAccessState(String);
 
 impl HostAccessState {
     pub fn check(&self, window: &WebviewWindow, auth: &str) -> Result<(), String> {
-        if window.label() != "main" || auth != self.0 {
+        self.check_label(window.label(), auth)
+    }
+
+    fn check_label(&self, label: &str, auth: &str) -> Result<(), String> {
+        if label != "main" || auth != self.0 {
             return Err(
                 "This desktop operation is only available to the main ejm-ide interface.".into(),
             );
@@ -314,6 +318,7 @@ pub fn run() {
             host_cancel_close,
             host_open_external,
             workspace::workspace_open,
+            workspace::workspace_trust,
             workspace::workspace_current,
             workspace::workspace_entries,
             workspace::workspace_read,
@@ -404,6 +409,58 @@ pub fn run() {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn every_registered_command_has_a_generated_declaration_and_main_capability() {
+        use std::collections::BTreeSet;
+        let source = include_str!("lib.rs");
+        let commands = source
+            .split_once(".invoke_handler(tauri::generate_handler![")
+            .unwrap()
+            .1
+            .split_once("])")
+            .unwrap()
+            .0;
+        let registered: BTreeSet<_> = commands
+            .split(',')
+            .map(str::trim)
+            .filter(|name| !name.is_empty())
+            .map(|name| name.rsplit("::").next().unwrap())
+            .collect();
+        let manifest: serde_json::Value =
+            serde_json::from_str(include_str!("../gen/schemas/acl-manifests.json")).unwrap();
+        let permissions = manifest["__app-acl__"]["permissions"].as_object().unwrap();
+        let capability: serde_json::Value =
+            serde_json::from_str(include_str!("../capabilities/main.json")).unwrap();
+        assert_eq!(capability["windows"], serde_json::json!(["main"]));
+        assert!(capability.get("remote").is_none());
+        let granted: BTreeSet<_> = capability["permissions"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .filter_map(serde_json::Value::as_str)
+            .filter_map(|name| permissions.get(name))
+            .flat_map(|permission| permission["commands"]["allow"].as_array().unwrap())
+            .filter_map(serde_json::Value::as_str)
+            .collect();
+        assert_eq!(registered, granted);
+        for name in registered {
+            let generated = format!("allow-{}", name.replace('_', "-"));
+            assert!(
+                permissions.contains_key(&generated),
+                "missing declaration: {name}"
+            );
+        }
+    }
+
+    #[test]
+    fn panels_cannot_authorize_native_operations_without_the_main_frame_token() {
+        let host = HostAccessState("test-host-token".into());
+        assert!(host.check_label("main", "test-host-token").is_ok());
+        assert!(host.check_label("main", "").is_err());
+        assert!(host.check_label("main", "panel-token").is_err());
+        assert!(host.check_label("extension", "test-host-token").is_err());
+    }
 
     #[test]
     fn external_links_accept_web_and_mail_schemes_without_commands_or_controls() {

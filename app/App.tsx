@@ -157,6 +157,9 @@ let initialWorkspace: Promise<Workspace | null> | undefined;
 
 function App() {
   const [workspace, setWorkspace] = useState<Workspace | null>(null);
+  const [trustPrompt, setTrustPrompt] = useState<string | null>(null);
+  const [trustWorking, setTrustWorking] = useState(false);
+  const [trustError, setTrustError] = useState('');
   const [documents, setDocuments] = useState<EditorDocument[]>([]);
   const [activePath, setActivePath] = useState('');
   const [editorLayout, setEditorLayout] = useState(createEditorLayout);
@@ -457,6 +460,45 @@ function App() {
     },
     [updateEditorLayout],
   );
+  const startLanguageDocument = useCallback((doc: EditorDocument) => {
+    const root = workspaceRef.current?.root;
+    const { path, language } = doc;
+    if (!workspaceRef.current?.trusted) {
+      configureLanguageModel(path);
+      setLanguageStates((old) => ({
+        ...old,
+        [path]: {
+          language,
+          status: 'untrusted',
+          message: 'Trust this workspace to enable language tools.',
+        },
+      }));
+      return;
+    }
+    setLanguageStates((old) => ({ ...old, [path]: { language, status: 'starting' } }));
+    void openLanguageDocument(path, doc.content, doc.modelVersion)
+      .then((status) => {
+        if (
+          root !== workspaceRef.current?.root ||
+          !docsRef.current.some((item) => item.path === path)
+        )
+          return;
+        configureLanguageModel(path, status.status === 'ready' ? status.capabilities : undefined);
+        setLanguageStates((old) => ({ ...old, [path]: status }));
+      })
+      .catch((error) => {
+        if (
+          root !== workspaceRef.current?.root ||
+          !docsRef.current.some((item) => item.path === path)
+        )
+          return;
+        configureLanguageModel(path);
+        setLanguageStates((old) => ({
+          ...old,
+          [path]: { language, status: 'error', message: String(error) },
+        }));
+      });
+  }, []);
   const openDocument = useCallback(
     async (path: string, range?: SourceRange, remember = true, guard?: SourceGuard) => {
       const openedRoot = workspaceRef.current?.root;
@@ -483,34 +525,7 @@ function App() {
             };
             docsRef.current = [...docsRef.current, doc];
             setDocuments(docsRef.current);
-            const language = doc.language;
-            setLanguageStates((old) => ({ ...old, [path]: { language, status: 'starting' } }));
-            const root = workspaceRef.current?.root;
-            void openLanguageDocument(path, doc.content, 1)
-              .then((status) => {
-                if (
-                  root === workspaceRef.current?.root &&
-                  docsRef.current.some((item) => item.path === path)
-                ) {
-                  configureLanguageModel(
-                    path,
-                    status.status === 'ready' ? status.capabilities : undefined,
-                  );
-                  setLanguageStates((old) => ({ ...old, [path]: status }));
-                }
-              })
-              .catch((e) => {
-                if (
-                  root !== workspaceRef.current?.root ||
-                  !docsRef.current.some((item) => item.path === path)
-                )
-                  return;
-                configureLanguageModel(path);
-                setLanguageStates((old) => ({
-                  ...old,
-                  [path]: { language, status: 'error', message: String(e) },
-                }));
-              });
+            startLanguageDocument(doc);
           }
         }
         if (guard && (!guard.current() || !sourceMatchesVersion(doc, guard.version))) return false;
@@ -543,7 +558,7 @@ function App() {
         return false;
       }
     },
-    [notify, updateEditorLayout],
+    [notify, startLanguageDocument, updateEditorLayout],
   );
   function showMarkdownPreview(
     path = activeRef.current,
@@ -1213,6 +1228,7 @@ function App() {
     [attachTarget],
   );
   function lintSavedDocument(doc: EditorDocument, root: string) {
+    if (doc.language !== 'markdown' && !workspaceRef.current?.trusted) return;
     const request = (lintRequests.current.get(doc.path) || 0) + 1;
     lintRequests.current.set(doc.path, request);
     const lint =
@@ -1301,6 +1317,7 @@ function App() {
             original.modelVersion,
             {
               lsp: !!languageStates[path]?.capabilities?.documentFormattingProvider,
+              trusted: workspaceRef.current?.trusted === true,
               tabSize: modelOptions?.tabSize || 4,
               insertSpaces: modelOptions?.insertSpaces ?? true,
             },
@@ -1426,21 +1443,7 @@ function App() {
       updateEditorLayout(
         replaceEditorFile(layoutRef.current, request.path, created.path, basename(created.path)),
       );
-      setLanguageStates((old) => ({ ...old, [created.path]: { language, status: 'starting' } }));
-      void openLanguageDocument(created.path, realModel.getValue(), realModel.getVersionId())
-        .then((status) => {
-          if (
-            workspaceRef.current?.root !== root ||
-            !docsRef.current.some((doc) => doc.path === created.path)
-          )
-            return;
-          configureLanguageModel(
-            created.path,
-            status.status === 'ready' ? status.capabilities : undefined,
-          );
-          setLanguageStates((old) => ({ ...old, [created.path]: status }));
-        })
-        .catch((error) => notify(String(error), true));
+      startLanguageDocument(next);
       queueModelDisposal(request.path);
       saveAsRequest.current = null;
       setSaveAs(null);
@@ -1557,11 +1560,37 @@ function App() {
           setGitStatus(null);
           setGitHistoryPath(undefined);
           setWorkspace(next);
+          setTrustPrompt(null);
+          setTrustError('');
           historyRef.current = [];
           historyIndex.current = -1;
         })
         .catch((e) => notify(String(e), true));
     });
+  }
+  async function trustWorkspace() {
+    const root = trustPrompt;
+    if (!root) return;
+    setTrustWorking(true);
+    setTrustError('');
+    try {
+      await invoke('workspace_trust', { root });
+      const current = workspaceRef.current;
+      if (!current || current.root !== root)
+        throw new Error('The workspace changed. Review the current folder.');
+      const next = { ...current, trusted: true };
+      workspaceRef.current = next;
+      setWorkspace(next);
+      setTrustPrompt(null);
+      for (const doc of docsRef.current) {
+        if (!isUntitled(doc.path)) startLanguageDocument(doc);
+      }
+      setTimeout(() => editorRef.current?.focus(), 0);
+    } catch (error) {
+      setTrustError(String(error));
+    } finally {
+      setTrustWorking(false);
+    }
   }
   function flushModelDisposals() {
     for (const uri of orphanModels.current) {
@@ -2280,6 +2309,49 @@ function App() {
             <GitBranch size={14} />
             {workspace.branch}
           </span>
+        )}
+        {workspace && !workspace.trusted && (
+          <Dialog.Root
+            open={!!trustPrompt}
+            onOpenChange={(open) => {
+              if (trustWorking) return;
+              setTrustError('');
+              setTrustPrompt(open ? workspace.root : null);
+            }}
+          >
+            <Dialog.Trigger asChild>
+              <Button variant="secondary" size="sm">
+                Trust workspace
+              </Button>
+            </Dialog.Trigger>
+            <Dialog.Portal>
+              <Dialog.Overlay className="dialog-overlay" />
+              <Dialog.Content className="dialog-content trust-dialog">
+                <Dialog.Title>Enable project tools?</Dialog.Title>
+                <Dialog.Description>
+                  Language servers, formatters, and linters may run project code with your
+                  permissions. Trust this folder only if you know its source. Editing works while
+                  these tools are off.
+                </Dialog.Description>
+                <pre className="reference-snapshot">{trustPrompt}</pre>
+                {trustError && (
+                  <p className="error-text" role="alert">
+                    {trustError}
+                  </p>
+                )}
+                <div className="dialog-footer">
+                  <Dialog.Close asChild>
+                    <Button variant="ghost" size="sm" disabled={trustWorking}>
+                      Keep tools off
+                    </Button>
+                  </Dialog.Close>
+                  <Button size="sm" disabled={trustWorking} onClick={() => void trustWorkspace()}>
+                    {trustWorking ? 'Enabling…' : 'Trust workspace'}
+                  </Button>
+                </div>
+              </Dialog.Content>
+            </Dialog.Portal>
+          </Dialog.Root>
         )}
         <div className="title-spacer" data-tauri-drag-region />
         <button

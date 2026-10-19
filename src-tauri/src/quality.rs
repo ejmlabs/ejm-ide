@@ -253,7 +253,7 @@ pub async fn quality_format(
         .begin_operation("quality.format");
     activity.record_request(&serde_json::json!({"path": path, "content": content}));
     let result: Result<FormatResult, String> = async {
-        let root = workspace.root_path()?;
+        let root = workspace.trusted_root_path()?;
         let path = workspace.validate_path(&path, false)?;
         if content.len() > FILE_LIMIT || content.contains('\0') {
             return Err("Formatting requires a UTF-8 text buffer smaller than 2 MiB.".into());
@@ -295,7 +295,11 @@ pub async fn quality_format(
             _ => unreachable!(),
         }
         let input = content.as_bytes().to_vec();
+        let selected_workspace = workspace.inner().clone();
         let result = tauri::async_runtime::spawn_blocking(move || {
+            if selected_workspace.trusted_root_path()? != root {
+                return Err("The workspace changed before formatting started.".into());
+            }
             run_bounded_input(command, Duration::from_secs(5), FILE_LIMIT + 1, input)
         })
         .await
@@ -370,7 +374,9 @@ fn saved_version_matches(
     path: &Path,
     version: &str,
 ) -> bool {
-    workspace.root_path().is_ok_and(|selected| selected == root)
+    workspace
+        .trusted_root_path()
+        .is_ok_and(|selected| selected == root)
         && workspace
             .read_document(path)
             .is_ok_and(|document| document.version == version)
@@ -398,7 +404,7 @@ pub async fn quality_lint(
         .begin_operation("quality.lint");
     activity.record_request(&serde_json::json!({"path": path, "version": version}));
     let result: Result<LintResult, String> = async {
-        let root = workspace.root_path()?;
+        let root = workspace.trusted_root_path()?;
         let path = workspace.validate_path(&path, false)?;
         let tool = tool_for_path(&path);
         if version.len() != 64 || !version.bytes().all(|byte| byte.is_ascii_hexdigit()) {
@@ -503,7 +509,12 @@ pub async fn quality_lint(
             }
             Tool::Gofmt => unreachable!(),
         };
+        let selected_workspace = workspace.inner().clone();
+        let process_root = root.clone();
         let process = tauri::async_runtime::spawn_blocking(move || {
+            if selected_workspace.trusted_root_path()? != process_root {
+                return Err("The workspace changed before linting started.".into());
+            }
             run_bounded_input(command, Duration::from_secs(30), 4 * FILE_LIMIT, input)
         })
         .await
@@ -972,6 +983,13 @@ mod tests {
         let workspace = WorkspaceState::default();
         workspace.open_folder(&root).unwrap();
         let document = workspace.read_document(&path).unwrap();
+        assert!(!saved_version_matches(
+            &workspace,
+            &root,
+            &path,
+            &document.version
+        ));
+        workspace.trust(&root).unwrap();
         assert!(saved_version_matches(
             &workspace,
             &root,

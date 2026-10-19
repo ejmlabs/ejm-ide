@@ -25,9 +25,10 @@ const TREE_LIMIT: usize = 10_000;
 pub(crate) struct WorkspaceRoot {
     pub(crate) path: PathBuf,
     pub(crate) directory: Arc<Dir>,
+    trusted: bool,
 }
 
-#[derive(Default)]
+#[derive(Clone, Default)]
 pub struct WorkspaceState {
     root: Arc<Mutex<Option<WorkspaceRoot>>>,
     saves: Arc<Mutex<()>>,
@@ -46,6 +47,7 @@ pub struct Entry {
 pub struct Workspace {
     pub root: String,
     pub name: String,
+    pub trusted: bool,
     pub entries: Vec<Entry>,
     pub branch: Option<String>,
 }
@@ -85,6 +87,32 @@ impl WorkspaceState {
         Ok(self.snapshot()?.path)
     }
 
+    pub fn trusted_root_path(&self) -> Result<PathBuf, String> {
+        let root = self.snapshot()?;
+        if !root.trusted {
+            return Err(
+                "Trust this workspace before starting language servers or project quality tools."
+                    .into(),
+            );
+        }
+        Ok(root.path)
+    }
+
+    pub fn trust(&self, expected_root: &Path) -> Result<(), String> {
+        let mut selected = self
+            .root
+            .lock()
+            .map_err(|_| "Workspace state is unavailable")?;
+        let root = selected.as_mut().ok_or("Open a workspace folder first.")?;
+        if root.path != expected_root {
+            return Err(
+                "The workspace changed. Review the current folder before trusting it.".into(),
+            );
+        }
+        root.trusted = true;
+        Ok(())
+    }
+
     pub fn validate_path(&self, path: &str, allow_missing: bool) -> Result<PathBuf, String> {
         let root = self.snapshot()?;
         let path = Path::new(path);
@@ -119,6 +147,7 @@ impl WorkspaceState {
         let root = WorkspaceRoot {
             path,
             directory: Arc::new(directory),
+            trusted: false,
         };
         let view = root.view()?;
         *self
@@ -279,12 +308,14 @@ impl WorkspaceRoot {
         Ok(Self {
             path: parent_path,
             directory: Arc::new(directory),
+            trusted: self.trusted,
         })
     }
 
     fn view(&self) -> Result<Workspace, String> {
         Ok(Workspace {
             root: self.path.to_string_lossy().into_owned(),
+            trusted: self.trusted,
             name: self
                 .path
                 .file_name()
@@ -553,6 +584,18 @@ pub async fn workspace_open(
         languages.clear();
     }
     opened
+}
+
+#[tauri::command]
+pub fn workspace_trust(
+    window: WebviewWindow,
+    host: State<'_, HostAccessState>,
+    workspace: State<'_, WorkspaceState>,
+    auth: String,
+    root: String,
+) -> Result<(), String> {
+    host.check(&window, &auth)?;
+    workspace.trust(Path::new(&root))
 }
 
 #[tauri::command]

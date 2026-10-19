@@ -3,6 +3,10 @@ name = "ejm-ide"
 version = "0.1.0"
 description = "A coding IDE built on the shared ejm-harness"
 license = "MIT"
+repository = "https://github.com/ejmlabs/ejm-ide"
+homepage = "https://ide.ejmlabs.com"
+readme = "../README.md"
+publish = false
 edition = "2024"
 
 [lib]

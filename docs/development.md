@@ -32,25 +32,71 @@ only for behavior the shared API cannot yet preserve, and record that gap.
 
 ## CI checkout layout
 
-The Quality workflow checks out the IDE at `ejm-ide` and its shared harness at
-`ejm-harness` under the runner workspace. npm commands run from `ejm-ide`.
-The npm cache uses `ejm-ide/package-lock.json`, and the Rust cache uses
-`ejm-ide/src-tauri/target`. Cargo uses at most four build jobs.
+The PR workflow calls an immutable shared governance workflow. Opening or
+updating a PR starts no checks or AI review. A human maintainer first posts
+`/ready FULL_HEAD_SHA` for the current commit. Comment edits and deletions also
+recheck that admission. See [Contributing](../CONTRIBUTING.md) for approval,
+revocation, and retry rules.
 
-By default, the harness repository is `ejm-harness` under the same GitHub owner
-as the IDE. Checkout uses that repository's default branch. Repository variables
-can select a different source or pin a revision:
+The default branch currently uses shared revision
+`af4ee77e9ee8da606c4ae3a0838bc3b46fd9d7f3`. Its earlier AI invocation
+failure remains unresolved there, and it has no explicit review completion
+guard. This change prepares revision
+`c4f2873ef0eef5bc3c7d75cf71fa3489a911d134`; the earlier local
+`965cd684713ae91a7804745eddd452cc392af11d` preparation is recorded in the
+[change tasks](../openspec/changes/public-repository-standards/tasks.md).
+The proposed revision requires boolean `complete: true` from each review pass.
+Missing, false, or nonboolean completion fails even with no findings. The
+[source manifest](../.github/review-context/manifest.json) identifies both exact
+workflow implementations supplied for static review. Those copies are review
+data and must never be executed or imported. Biome excludes
+`.github/review-context` so formatting cannot change the canonical bytes.
+Validate those copies separately against the manifest and exact shared Git
+objects, including their hashes, modes, and total size. Application formatting
+and lint rules remain in force.
 
-| Repository variable | Value |
-| --- | --- |
-| `EJM_HARNESS_REPOSITORY` | `owner/repository`; defaults to the IDE owner's `ejm-harness` repository |
-| `EJM_HARNESS_REF` | Optional branch, tag, or commit; unset uses the harness repository's default branch |
+A submitted caller does not replace the trusted workflow on the default
+branch. Local preparation proves neither hosted acceptance nor repair of that
+default caller. This preparation authorizes no IDE readiness decision or
+recovery exception. Live acceptance remains open in the change tasks.
+The initial combined draft exceeded the shared 1,000,000-byte review diff
+limit. Seven generated OpenSpec skill files were preserved unchanged in
+[tooling PR #3](https://github.com/ejmlabs/ejm-ide/pull/3). Configuration and
+this change's plans remain here. Merge this product PR first, then refresh the
+tooling draft's base and obtain new human decisions for its current head.
+Project-local skill installation remains pending until that tooling draft
+lands. Check the full assembled diff before admission; keep both exact review
+source sets and the shared limit intact.
 
-The harness repository must be accessible to the workflow's checkout action.
-A private harness repository needs a repository secret named `EJM_HARNESS_TOKEN`,
-a fine-grained token with read-only Contents access to that repository. Without
-the secret, checkout uses the workflow token, which can read only this repository.
-Pin a compatible revision when releasing the IDE.
+Trusted preparation reads `.github/harness-revision` from the base branch. It
+must contain a full commit SHA for a compatible `ejmlabs/ejm-harness` revision.
+Changing that pin in a PR does not change the harness used to check that PR.
+The Quality job places the admitted IDE sources at `product` and the pinned
+harness at sibling `ejm-harness` under the runner workspace. npm commands run
+from `product`.
+
+After harness publication, admitted run
+[`39294657006`](https://github.com/ejmlabs/ejm-ide/actions/runs/39294657006)
+successfully fetched trusted base pin
+`4a751c6a3f24d7d143140f79ff53517fb93e3531`. Quality then stopped at the
+canonical review-schema formatting conflict. The narrow Biome exclusion fixes
+that local failure; hosted quality still needs a fresh admitted run. The earlier
+decision to provision no private cross-repository token remains in force.
+The proposed `.github/harness-revision` selects reviewed protected
+harness main `09b779ee0452dda07b7f52503be22e65fe238373`. Prepare the sibling
+checkout at that exact revision with Rust 1.99.1 or newer. Its resolved core,
+auth, and execution production sources and harness lock match the earlier
+verified dependency source. The pin refresh changes no IDE runtime source,
+dependency lock, credentials, or access.
+
+This product PR still tests trusted base pin
+`4a751c6a3f24d7d143140f79ff53517fb93e3531`; the submitted pin cannot change
+its own Quality checkout. After this PR lands, refresh [tooling PR #3](https://github.com/ejmlabs/ejm-ide/pull/3)
+onto that base and obtain fresh human decisions. That run must prove the
+installed new harness pin and shared caller `c4f2873ef0eef5bc3c7d75cf71fa3489a911d134`,
+with both complete actual Codex passes and every required gate. Preserve the
+historical old-pin evidence. Neither local preparation nor an old-pin Quality
+result establishes the new hosted checkout or authorizes a recovery exception.
 
 ## Commands
 

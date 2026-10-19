@@ -191,9 +191,14 @@ export function invokePreview<T>(
       value = {
         root: previewRoot,
         name: 'harbor',
+        trusted: false,
         entries: previewEntries(previewRoot, previewRoot),
         branch: null,
       } satisfies Workspace;
+      break;
+    case 'workspace_trust':
+      if (args.root !== previewRoot) throw new Error('The workspace changed.');
+      value = null;
       break;
     case 'workspace_entries':
       value = previewEntries(String(args.path), previewRoot);
