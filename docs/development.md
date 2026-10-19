@@ -32,25 +32,22 @@ only for behavior the shared API cannot yet preserve, and record that gap.
 
 ## CI checkout layout
 
-The Quality workflow checks out the IDE at `ejm-ide` and its shared harness at
+The PR workflow calls an immutable shared governance workflow. Opening or
+updating a PR starts no checks or AI review. A human maintainer first posts
+`/ready FULL_HEAD_SHA` for the current commit. Comment edits and deletions also
+recheck that admission. See [Contributing](../CONTRIBUTING.md) for approval,
+revocation, and retry rules.
+
+Trusted preparation reads `.github/harness-revision` from the base branch. It
+must contain a full commit SHA for a compatible `ejmlabs/ejm-harness` revision.
+Changing that pin in a PR does not change the harness used to check that PR.
+The workflow checks out the IDE at `ejm-ide` and the pinned harness at
 `ejm-harness` under the runner workspace. npm commands run from `ejm-ide`.
-The npm cache uses `ejm-ide/package-lock.json`, and the Rust cache uses
-`ejm-ide/src-tauri/target`. Cargo uses at most four build jobs.
 
-By default, the harness repository is `ejm-harness` under the same GitHub owner
-as the IDE. Checkout uses that repository's default branch. Repository variables
-can select a different source or pin a revision:
-
-| Repository variable | Value |
-| --- | --- |
-| `EJM_HARNESS_REPOSITORY` | `owner/repository`; defaults to the IDE owner's `ejm-harness` repository |
-| `EJM_HARNESS_REF` | Optional branch, tag, or commit; unset uses the harness repository's default branch |
-
-The harness repository must be accessible to the workflow's checkout action.
-A private harness repository needs a repository secret named `EJM_HARNESS_TOKEN`,
-a fine-grained token with read-only Contents access to that repository. Without
-the secret, checkout uses the workflow token, which can read only this repository.
-Pin a compatible revision when releasing the IDE.
+If the harness is private, a fine-grained token with read-only Contents access
+may be stored as `EJM_HARNESS_TOKEN`. Only trusted preparation receives this
+token. Build jobs run the prepared source without that credential. Keep the
+harness pin current when updating the shared API or preparing a release.
 
 ## Commands
 

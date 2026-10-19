@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-workspace-trust"
+description = "Enables the workspace_trust command without any pre-configured scope."
+commands.allow = ["workspace_trust"]
+
+[[permission]]
+identifier = "deny-workspace-trust"
+description = "Denies the workspace_trust command without any pre-configured scope."
+commands.deny = ["workspace_trust"]

@@ -75,7 +75,7 @@ export async function formatDocumentContent(
   path: string,
   content: string,
   version: number,
-  options: { lsp: boolean; tabSize: number; insertSpaces: boolean },
+  options: { lsp: boolean; tabSize: number; insertSpaces: boolean; trusted?: boolean },
 ): Promise<{ content: string; message?: string }> {
   const language = languageId(path);
   if (language === 'markdown') return { content: formatMarkdown(content) };
@@ -116,6 +116,7 @@ export async function formatDocumentContent(
     }
     return { content: applyTextEdits(content, edits) };
   }
+  if (options.trusted === false) return { content };
   const result = await invoke<FormatResult>('quality_format', { path, content });
   if (result.status === 'ok') return { content: result.content };
   if (!options.lsp) return { content, message: result.message };

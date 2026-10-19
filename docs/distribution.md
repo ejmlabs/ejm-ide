@@ -21,6 +21,10 @@ Before publishing desktop builds, resolve these source-level blockers:
 - `src-tauri/tauri.conf.json` targets `app` and `dmg`, and bundles native
   macOS ARM packages. Add tested resources, icons, and bundle targets for
   macOS Intel, Windows x64, and Linux x64.
+- Linux remains unsupported while its GTK stack requires glib 0.18.5 with
+  RUSTSEC-2024-0429. Upgrade the upstream stack compatibly and pass native
+  verification before advertising Linux support. See the
+  [dependency check](package-audit.md#public-readiness-dependency-check).
 - Cargo depends on sibling `ejm-harness` and `ejm-harness-auth` path crates. CI must
   check out the matching harness revision beside `ejm-ide`. The shared package
   owner must approve its release contract.

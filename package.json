@@ -2,7 +2,19 @@
   "name": "ejm-ide",
   "private": true,
   "version": "0.1.0",
+  "description": "A desktop coding IDE with Edi, built on the shared ejm-harness",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ejmlabs/ejm-ide.git"
+  },
+  "homepage": "https://ide.ejmlabs.com",
+  "bugs": {
+    "url": "https://github.com/ejmlabs/ejm-ide/issues"
+  },
+  "engines": {
+    "node": ">=24 <25"
+  },
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1 --port 1420 --strictPort",
@@ -71,7 +83,7 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "6.1.2",
-    "esbuild": "^0.27.3",
+    "esbuild": "^0.28.1",
     "pyright": "^1.1.408",
     "tailwindcss": "4.3.3",
     "typescript": "6.0.3",
@@ -79,5 +91,10 @@
     "vite": "8.3.4",
     "vitest": "^4.1.0",
     "vscode-languageserver-protocol": "3.18.4"
+  },
+  "overrides": {
+    "monaco-editor": {
+      "dompurify": "3.4.16"
+    }
   }
 }

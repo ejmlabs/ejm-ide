@@ -445,9 +445,13 @@ pub async fn language_open(
                 message: None,
             });
         };
-        let root = workspace.root_path()?;
+        let root = workspace.trusted_root_path()?;
         let sessions = languages.sessions.clone();
+        let workspace = workspace.inner().clone();
         tauri::async_runtime::spawn_blocking(move || {
+            if workspace.trusted_root_path()? != root {
+                return Err("The workspace changed before its language service started.".into());
+            }
             let session = match session(&sessions, &root, language, &app) {
                 Ok(session) => session,
                 Err(message) => {
@@ -515,7 +519,7 @@ pub async fn language_change(
     let Some(language) = language else {
         return Ok(());
     };
-    let root = workspace.root_path()?;
+    let root = workspace.trusted_root_path()?;
     let session = languages
         .sessions
         .lock()
@@ -560,7 +564,7 @@ pub fn language_save(
         let Some(language) = language else {
             return Ok(());
         };
-        let root = workspace.root_path()?;
+        let root = workspace.trusted_root_path()?;
         let session = languages
             .sessions
             .lock()
@@ -662,7 +666,7 @@ pub async fn language_request(
             "params": params,
             "requestId": request_id,
         }));
-        let root = workspace.root_path()?;
+        let root = workspace.trusted_root_path()?;
         let session = languages
             .sessions
             .lock()

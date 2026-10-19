@@ -1991,6 +1991,16 @@
   .reference-dialog {
     width: min(800px, 90vw);
   }
+  .trust-dialog {
+    width: min(460px, 90vw);
+  }
+  .trust-dialog .button:focus-visible {
+    outline-color: var(--ejm-ui-focus);
+    outline-offset: 2px;
+  }
+  .trust-dialog .button-primary:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--ejm-ui-primary) 95%, var(--ejm-ui-on-primary));
+  }
   .reference-snapshot {
     max-height: 56vh;
     margin: 0;

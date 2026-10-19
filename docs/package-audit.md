@@ -110,6 +110,32 @@ three low-severity entries listed above. This check does not establish that the
 whole dependency tree has no advisories. Current interaction verification belongs
 with [the editor organization follow-up](ux-review.md#editor-organization-follow-up).
 
+## Public-readiness dependency check
+
+The October 18, 2026 dependency check resolved the reported npm advisories:
+
+- Monaco remains at 0.57.0. A scoped override changes its DOMPurify dependency
+  from 3.4.15 to 3.4.16, fixing GHSA-6688-9rhm-gjv2 and GHSA-p98j-92pf-mc4p.
+- esbuild changes from 0.27.7 to 0.28.1, fixing GHSA-g7r4-m6w7-qqqr. Vite
+  8.3.4 already accepts this esbuild line. Its version stays unchanged.
+
+A complete `npm audit --package-lock-only` returned zero known npm
+vulnerabilities under Node.js 24.19.0. The lock retains matching esbuild
+platform packages. npm also recorded six dependencies already bundled in the
+unchanged Tailwind WASM package; no unrelated package version changed.
+
+The extension host calls esbuild's build API, not its development server.
+Moving between esbuild 0.x minor versions still needs the real extension
+template regression and frontend build at the next full gate. This lock-only
+check did not install packages or establish browser or packaged-app acceptance.
+
+The native Cargo lock still includes glib 0.18.5 through the Linux GTK stack,
+with unresolved advisory RUSTSEC-2024-0429. The supported target is macOS on
+Apple Silicon, whose resolved dependency tree does not include this crate.
+Linux remains unsupported. Its release gate requires a compatible Tauri/GTK
+upgrade to a fixed glib version and native verification. GTK 0.18 requires
+glib 0.18, so forcing a glib 0.20 override is not a compatible fix.
+
 ## Remaining candidates
 
 | Priority | Location | Action and condition |

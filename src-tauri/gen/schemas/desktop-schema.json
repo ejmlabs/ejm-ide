@@ -669,6 +669,30 @@
           "markdownDescription": "Enables the language_save command without any pre-configured scope."
         },
         {
+          "description": "Enables the provider_auth_cancel command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-provider-auth-cancel",
+          "markdownDescription": "Enables the provider_auth_cancel command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the provider_auth_logout command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-provider-auth-logout",
+          "markdownDescription": "Enables the provider_auth_logout command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the provider_auth_start command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-provider-auth-start",
+          "markdownDescription": "Enables the provider_auth_start command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the provider_auth_status command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-provider-auth-status",
+          "markdownDescription": "Enables the provider_auth_status command without any pre-configured scope."
+        },
+        {
           "description": "Enables the provider_list command without any pre-configured scope.",
           "type": "string",
           "const": "allow-provider-list",
@@ -757,6 +781,12 @@
           "type": "string",
           "const": "allow-workspace-search",
           "markdownDescription": "Enables the workspace_search command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the workspace_trust command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-workspace-trust",
+          "markdownDescription": "Enables the workspace_trust command without any pre-configured scope."
         },
         {
           "description": "Denies the agent_archive_chat command without any pre-configured scope.",
@@ -1077,6 +1107,30 @@
           "markdownDescription": "Denies the language_save command without any pre-configured scope."
         },
         {
+          "description": "Denies the provider_auth_cancel command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-provider-auth-cancel",
+          "markdownDescription": "Denies the provider_auth_cancel command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the provider_auth_logout command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-provider-auth-logout",
+          "markdownDescription": "Denies the provider_auth_logout command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the provider_auth_start command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-provider-auth-start",
+          "markdownDescription": "Denies the provider_auth_start command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the provider_auth_status command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-provider-auth-status",
+          "markdownDescription": "Denies the provider_auth_status command without any pre-configured scope."
+        },
+        {
           "description": "Denies the provider_list command without any pre-configured scope.",
           "type": "string",
           "const": "deny-provider-list",
@@ -1165,6 +1219,12 @@
           "type": "string",
           "const": "deny-workspace-search",
           "markdownDescription": "Denies the workspace_search command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the workspace_trust command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-workspace-trust",
+          "markdownDescription": "Denies the workspace_trust command without any pre-configured scope."
         },
         {
           "description": "Manage reviewed local ejm-ide extensions.",

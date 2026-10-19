@@ -7,6 +7,20 @@ vi.mock('./language-sync', () => ({ syncLanguageDocument: vi.fn(async () => {}) 
 import { applyTextEdits, formatDocumentContent, lintForSavedBuffers } from './save';
 
 describe('save formatting', () => {
+  it('leaves an untrusted source buffer unchanged without starting native tools or LSP', async () => {
+    invoke.mockClear();
+    const content = 'fn main(){}';
+    await expect(
+      formatDocumentContent('/project/main.rs', content, 1, {
+        lsp: true,
+        trusted: false,
+        tabSize: 4,
+        insertSpaces: true,
+      }),
+    ).resolves.toEqual({ content });
+    expect(invoke).not.toHaveBeenCalled();
+  });
+
   it('formats strict JSON without changing large integers or numeric spelling', async () => {
     const original = '{"id":9007199254740993,"amount":1.00,"label":"😀"}';
     const result = await formatDocumentContent('/package.json', original, 4, {

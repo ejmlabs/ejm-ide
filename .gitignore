@@ -8,3 +8,24 @@ website/dist/
 distribution/.wrangler/
 distribution/.types/
 target/
+
+# Local credentials and machine state
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.keystore
+id_rsa
+id_ed25519
+credentials.json
+credentials.*.json
+.aws/
+.azure/
+.gcloud/
+.codex/auth.json
+.claude/settings.local.json
+*.log

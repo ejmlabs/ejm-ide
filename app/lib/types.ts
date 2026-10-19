@@ -6,6 +6,7 @@ export interface Entry {
 export interface Workspace {
   root: string;
   name: string;
+  trusted: boolean;
   entries: Entry[];
   branch?: string | null;
 }
