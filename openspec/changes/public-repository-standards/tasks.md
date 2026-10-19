@@ -14,7 +14,7 @@
 - [x] 2.2 Apply available GitHub branch, approval, Actions, and dependency protections; verify API readback.
 - [x] 2.3 Refresh the normal product workflow callers to retained shared revision `965cd684713ae91a7804745eddd452cc392af11d`; verify pinned standards and templates, rejection of the shared-only missing-key caller, actionlint, strict OpenSpec, whitespace, and the unchanged harness pin without claiming product gates or live acceptance.
 - [x] 2.4 Adopt retained shared revision `c4f2873ef0eef5bc3c7d75cf71fa3489a911d134` in both normal callers and release standards-ref; export the exact old default caller revision and new revision as bounded static review context; separate only the seven preserved generated OpenSpec skill additions from this draft; verify canonical sources, safe committed modes, normal templates, community/version standards, shared-only missing-key rejection, actionlint, contributor links, strict OpenSpec, unchanged product sources and harness pin, whitespace, and the full PR diff bound. Record local preparation separately from blocked hosted acceptance; trigger no IDE readiness or recovery.
-- [ ] 2.5 Land [tooling PR #3](https://github.com/ejmlabs/ejm-ide/pull/3) after this product PR, with a refreshed base and fresh human decisions; verify that all seven project-local skill files retain their exact `0b221630db35100b6a0ced1f877b2617cfa9b880` bytes and modes. Use that PR to prove the installed harness pin `09b779ee0452dda07b7f52503be22e65fe238373` and shared caller `c4f2873ef0eef5bc3c7d75cf71fa3489a911d134`, including both complete actual Codex passes and every required gate. Preserve configuration and this change here; do not claim the project-local skills or new hosted checkout are verified before that draft passes and merges.
+- [ ] 2.5 Land [tooling PR #3](https://github.com/ejmlabs/ejm-ide/pull/3) after this product PR, with a refreshed base and fresh human decisions; verify that all seven project-local skill files retain their exact `0b221630db35100b6a0ced1f877b2617cfa9b880` bytes and modes. Repair the private brand-directory prerequisite in contributor guidance with committed design, site asset, license and notice references; keep brand refresh optional and assign active shared tokens, themes, primitives and site infrastructure to `ejm-ui` public exports. Verify local links, unchanged runtime/workflows/pins/configuration, strict OpenSpec, whitespace and the full diff bound. Use that PR to prove the installed harness pin `09b779ee0452dda07b7f52503be22e65fe238373` and shared caller `c4f2873ef0eef5bc3c7d75cf71fa3489a911d134`, including both complete actual Codex passes and every required gate. Preserve configuration and this change here; do not claim the project-local skills or new hosted checkout are verified before that draft passes and merges.
 - [x] 2.6 Refresh the proposed harness pin to reviewed protected main `09b779ee0452dda07b7f52503be22e65fe238373`; preserve historical `4a751c6a3f24d7d143140f79ff53517fb93e3531` evidence and document that this product PR still checks the trusted base's old pin. Verify actual resolved core/auth/exec production source and harness lock identity, exact one-line pin, pinned standards, strict OpenSpec, local docs links, whitespace, unchanged product sources and locks, and the assembled diff bound. Keep both drafts unadmitted; record no review or recovery decision and run no native/site suite, model call, or hosted job.
 - [x] 2.7 Repair the formatter failure from admitted run `39294657006` with the narrow Biome force-ignore rule for immutable `.github/review-context` exports; preserve every canonical byte and mode, reproduce the failure, then verify literal format/lint commands, exact source exports, pinned standards, contributor links, strict OpenSpec, unchanged runtime sources and locks, whitespace, and the assembled diff bound. Record local evidence and unrun gates. Require fresh human decisions for the new head; do not trigger CI, reuse old recovery authorization, or claim hosted acceptance.
 
@@ -29,6 +29,25 @@
 - Sync completed specs and archive after all tracked work and required verification succeed.
 
 ## Local verification evidence
+
+- Task 2.5 has a local provisional preview on proposed product head
+  `5c680dabc6aa0f387fed0a9839699449deb4d744`, without claiming actual-main
+  ancestry. Its first commit preserves all seven generated additions from
+  `703f4bce5b2f691cae7f9238d95c459eda1ad841` and original
+  `0b221630db35100b6a0ced1f877b2617cfa9b880`: 96,361 source bytes, exact
+  Git blobs and regular nonexecutable modes, with the same 99,291-byte text
+  diff and no conflicts. The separate guidance repair removes the private
+  brand-directory prerequisite, links committed design/site assets and notices,
+  leaves historical provenance intact, and names the current shared owners.
+  All 47 local Markdown link targets across the eight affected guidance and
+  planning files exist within this checkout. Strict OpenSpec and whitespace
+  checks pass. Runtime, site source/assets/build inputs, workflows, harness pin,
+  configuration, and the seven generated files remain unchanged by the repair.
+  No runtime/native/site suite, hosted job, model call, comment, remote ref,
+  setting, release, or publication ran. This preview must be replayed on the
+  actual product squash merge, reverified, and admitted under fresh human
+  decisions. Tasks 2.5 and 3.2 remain open; no new hosted checkout, two-pass AI
+  acceptance, shared-package migration, live site update, or merge is claimed.
 
 - Task 2.7 starts from `c3e17d59e47683286675ef631bf9069883d4066a`.
   Admitted run [39294657006](https://github.com/ejmlabs/ejm-ide/actions/runs/39294657006)

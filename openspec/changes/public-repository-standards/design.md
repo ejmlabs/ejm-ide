@@ -113,6 +113,33 @@ product PR diff passes the review bound; task 2.5 tracks the pending tooling
 installation. Neither local result admits this draft or establishes hosted
 acceptance.
 
+## Portable contributor brand guidance
+
+Task 2.5 also repairs the contributor instructions that require a private brand
+directory. The IDE owns its guidance, current site composition, and committed
+asset references. `ejm-ui` owns active shared tokens, generated themes, reusable
+visual primitives, and site infrastructure through public `@ejm/*` exports.
+Retained `design-kit/` files support brand assets and earlier source references;
+they are not a second authority for active shared UI. This documentation change
+does not add a dependency or claim that a shared-package migration is installed.
+
+Use `DESIGN.md`, the committed `website/index.html` and
+`website/public/design-kit/` files, local font licenses, and
+`website/public/notices.txt` for this source snapshot. Historical local paths in
+the asset provenance record describe earlier inputs; they are not contributor
+prerequisites. Keep an upstream brand-asset refresh an optional maintainer action
+through the existing script and a reviewed source supplied by `DESIGN_KIT`.
+Ordinary source and site work must not require a private marketing checkout.
+
+Keep the seven generated OpenSpec additions byte-for-byte unchanged. Align only
+the affected root, UI, theme, website, and shared-owner guidance. Check its local
+links, source and license paths, whitespace, strict OpenSpec validation, unchanged
+runtime, workflow, pins, configuration, and generated skills, and the full PR diff
+bound. Site source, assets, build inputs, appearance, downloads, and release
+availability do not change, so no live publication or new site acceptance is
+claimed. Keep task 2.5 and all hosted acceptance open until the refreshed PR runs
+both complete actual Codex passes, passes every required gate, and merges.
+
 ## Reviewed harness pin refresh
 
 For task 2.6, refresh the proposed `.github/harness-revision` to reviewed
