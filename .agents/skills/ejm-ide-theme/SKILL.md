@@ -6,16 +6,21 @@ description: Add or change colors, light and dark themes, the editor theme, or t
 # Light and dark themes
 
 The app has a System, Light, and Dark choice (Preferences, Appearance). Every
-surface must work in both themes. The palette comes from the ejmlabs design kit:
-Ink, Paper, Forest, Sage, and Mist.
+surface must work in both themes. Start with the committed tokens and theme
+adapters listed below.
 
 ## Authority
 
-The kit's `ui/theme.json` (`~/Desktop/ejmlabs/design-kit`) is the one source of
-color for ejmlabs apps. Read its `UI.md`. The kit has a rename table that maps
-this app's tokens to its `--ejm-ui-*` roles, and the "ejmlabs" session owns that
-migration. Before changing token values or moving the app onto the kit, tell that
-session. Do not edit generated kit files.
+`ejm-ui/packages/tokens` owns active shared tokens and generated themes through
+the `@ejm/tokens` public exports. Shared visual primitives belong to `@ejm/ui`.
+Read the owning package contract before a shared change, then adopt its public
+output in the IDE. Retained design-kit assets support brand material and older
+references; they do not define another active shared theme system.
+
+This readiness snapshot still has the local definitions and adapters below.
+They can be inspected in this checkout without a private brand directory. A
+shared-package migration needs its own reviewed change and compatibility checks;
+these instructions do not claim that migration is installed.
 
 ## What the app has today
 
@@ -32,8 +37,8 @@ session. Do not edit generated kit files.
 
 ## Rules
 
-1. No raw hex colors in CSS or TSX. Use a token. Add a token in `app/theme.css`
-   for both themes before using a new color.
+1. No raw hex colors in CSS or TSX. Reuse a token. Shared token additions belong
+   in `ejm-ui`; document any IDE-specific role in both themes before using it.
 2. Hover and selection tints use `rgb(var(--ov) / 0.04)` so they flip with the theme.
    Status tints use `rgb(var(--error-rgb) / 0.1)` and the like. Translucent neutrals use
    `color-mix(in srgb, var(--k5) 50%, transparent)`.

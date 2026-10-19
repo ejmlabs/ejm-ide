@@ -385,10 +385,22 @@ layout and agent behavior should compose those primitives. See
 
 ## Public download site
 
-The public site is "ide" by ejmlabs at `ide.ejmlabs.com`. It uses the ejmlabs
-design kit 1.0.0 at `/Users/everettmorgan/Desktop/ejmlabs/design-kit`, shared
-with cli.ejmlabs.com and harness.ejmlabs.com. The desktop workspace keeps the
-palette and density specified above.
+The public site is "ide" by ejmlabs at `ide.ejmlabs.com`. This readiness snapshot
+builds [website/index.html](website/index.html) with the committed
+[design-kit assets](website/public/design-kit/). Read the
+[site notices](website/public/notices.txt) and
+[font licenses](website/public/design-kit/fonts/). The normal build does not
+require a private brand directory. Historical local paths in
+[the asset manifest](.impeccable/download-site-assets.json) record earlier inputs.
+
+`ejm-ui` owns active shared tokens, generated themes, reusable visual primitives,
+and site infrastructure through public `@ejm/*` exports. Retained design-kit
+material supports brand assets and earlier references. It does not define a
+second active shared UI system. This guidance does not claim that a new
+shared-package migration is installed or published. See
+[the website skill](.agents/skills/ejm-ide-website/SKILL.md) for the optional
+maintainer asset refresh. The desktop workspace keeps its current committed
+palette and density while shared changes follow their owning public contracts.
 
 ### Color, type, and identity
 
@@ -397,9 +409,9 @@ Use Paper `#f6f5ef`, Ink `#202721`, Forest `#29443b`, Sage `#8a9a7b`, and Mist
 Forest, and Forest on Mist. Sage is artwork and decoration. Dark mode uses deep
 space `#02070d` with Paper text, as on ejmlabs.com.
 
-Self-host Latin WOFF2 subsets of the kit's Manrope (400 body, 600 headings) and
-IBM Plex Mono 500 (eyebrows, versions, statuses, short labels) with
-`font-display: swap`, and keep both OFL licenses beside them.
+Use the committed Manrope (400 body, 600 headings) and IBM Plex Mono 500
+(eyebrows, versions, statuses, short labels) font files with `font-display: swap`,
+and keep both OFL licenses beside them.
 
 Lead with the full ejmlabs logo and put the product name beside it in an
 outlined mono tag. Never retype the ejmlabs wordmark. Use the cropped Sage

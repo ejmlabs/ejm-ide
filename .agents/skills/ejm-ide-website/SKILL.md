@@ -11,11 +11,26 @@ with a small TypeScript module, built by Vite from `website/` into
 
 ## Ownership
 
-The ejmlabs design kit (`~/Desktop/ejmlabs/design-kit`) defines the page shell,
-sections, components, and rules in its `SITES.md`. The "ejmlabs" session owns the
-move of every product site onto the kit. Before restructuring the page or its
-styles, check what that session has changed in `website/`. Do not edit
-`website/public/design-kit/`; refresh it with `website/scripts/sync-design-kit.sh`.
+The IDE owns this site's content and composition. `ejm-ui` owns active shared
+tokens, generated themes, reusable visuals, and site infrastructure through
+public `@ejm/*` exports. Read [the shared-repository rules](../ejm-ide-shared-repos/SKILL.md)
+before a shared change. These instructions do not install or publish those
+packages.
+
+For this readiness snapshot, start with [DESIGN.md](../../../DESIGN.md),
+[website/index.html](../../../website/index.html), and the committed
+[design-kit assets](../../../website/public/design-kit/). Read
+[the site notices](../../../website/public/notices.txt) and keep both
+[font licenses](../../../website/public/design-kit/fonts/). These retained files
+support the asset snapshot and earlier references. Active shared UI changes
+belong in `ejm-ui`.
+
+The normal site build uses committed inputs. It needs no private brand checkout
+or asset refresh. `website/scripts/sync-design-kit.sh` is an optional maintainer
+refresh from a reviewed retained brand source. It replaces the committed copy;
+use `DESIGN_KIT` to name that source explicitly, review the resulting diff, and
+preserve its notices and provenance. Do not use this legacy refresh as a second
+source for active shared tokens or primitives.
 
 The sibling pages are cli.ejmlabs.com and harness.ejmlabs.com. Match their
 anatomy and tone: header with the logo and product tag, a hero with an eyebrow,
