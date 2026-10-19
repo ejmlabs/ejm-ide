@@ -71,7 +71,7 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "6.1.2",
-    "esbuild": "^0.27.3",
+    "esbuild": "^0.28.2",
     "pyright": "^1.1.408",
     "tailwindcss": "4.3.3",
     "typescript": "6.0.3",
