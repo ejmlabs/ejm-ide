@@ -9,12 +9,13 @@ kit="${DESIGN_KIT:-$(cd "$here/../../../ejmlabs/design-kit" && pwd)}"
 out="$repo/website/public/design-kit"
 rm -rf "$out"
 copy() { mkdir -p "$out/$(dirname "$1")"; cp "$kit/$1" "$out/$1"; }
-for file in tokens/brand.css components/brand-components.css web/site.css ui/theme.css web/theme.js web/motion.js web/analytics.js \
+for file in tokens/brand.css components/brand-components.css web/site.css ui/theme.css web/theme.js web/motion.js web/analytics.js web/demo.js ui/app.css \
   social/social-card.png fonts/Manrope-Variable.ttf fonts/Manrope-OFL.txt fonts/IBMPlexMono-Medium.ttf fonts/IBMPlexMono-OFL.txt; do
   copy "$file"
 done
 for file in "$kit"/favicon/*; do copy "favicon/$(basename "$file")"; done
-for css in tokens/brand.css components/brand-components.css web/site.css ui/theme.css; do
+for file in "$kit"/web/demos/*.json; do copy "web/demos/$(basename "$file")"; done
+for css in tokens/brand.css components/brand-components.css web/site.css ui/theme.css ui/app.css; do
   grep -ohE "url\(['\"]?\.\./[^'\")#]+" "$kit/$css" | sed -E "s/url\(['\"]?\.\.\///" || true
 done | sort -u | while read -r file; do [ -f "$kit/$file" ] && copy "$file"; done
 echo "Copied the design kit into $out"

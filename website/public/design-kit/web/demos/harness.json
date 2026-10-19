@@ -1,0 +1,55 @@
+{
+  "label": "ejm-harness demo",
+  "name": "ejm-harness",
+  "caption": "Add sessions, lower the limit, then press Crash worker to watch the journal recover them.",
+  "note": "Simulated demo. Nothing runs on your machine and nothing is sent anywhere. Counts, timings and event names are illustrative sample values.",
+  "seed": 7,
+  "tickMs": 250,
+  "defaults": {
+    "limit": 3,
+    "commands": 2,
+    "start": 4
+  },
+  "realDefaults": "ejm-harness defaults allow 8 model requests, 4 local jobs and 1 heavy job. The sliders here use sample values.",
+  "plan": [
+    {
+      "kind": "model",
+      "label": "model request",
+      "min": 6,
+      "max": 10
+    },
+    {
+      "kind": "command",
+      "label": "local command",
+      "min": 6,
+      "max": 10
+    },
+    {
+      "kind": "model",
+      "label": "model request",
+      "min": 4,
+      "max": 8
+    }
+  ],
+  "recoveryTicks": 4,
+  "langs": [
+    {
+      "id": "rust",
+      "label": "Rust",
+      "caption": "Open a session and run one turn. Shortened from the ejm-harness README.",
+      "code": "use std::sync::Arc;\nuse ejm_harness::{Harness, HarnessConfig, ReplayProvider, SessionOptions};\n\n#[tokio::main]\nasync fn main() -> anyhow::Result<()> {\n    let harness = Harness::new(\n        HarnessConfig::default(),\n        Arc::new(ReplayProvider::echo()),\n        vec![],\n    )?;\n    let session = harness.create_session(SessionOptions {\n        cwd: std::env::current_dir()?,\n        title: \"First agent\".into(),\n    }).await?;\n    let mut run = harness.start(&session.id, \"Hello\".into()).await?;\n    println!(\"{}\", run.wait().await?.text);\n    harness.shutdown().await?;\n    Ok(())\n}\n"
+    },
+    {
+      "id": "ts",
+      "label": "TypeScript",
+      "caption": "The TypeScript SDK shares one persistent worker across sessions. Shortened from its README.",
+      "code": "import { Harness } from \"ejm-harness\";\n\nconst harness = await Harness.create({ state_dir: \".ejm-harness\" });\ntry {\n    const session = await harness.createSession();\n    const run = await session.start(\"Hello\");\n    for await (const event of run) {\n        if (event.type === \"text_delta\") process.stdout.write(event.text);\n    }\n    console.log((await run.wait()).status);\n} finally {\n    await harness.close();\n}\n"
+    },
+    {
+      "id": "python",
+      "label": "Python",
+      "caption": "The Python SDK has sync and async APIs. Shortened from its README.",
+      "code": "from ejm_harness import Harness\n\nwith Harness(config={\"state_dir\": \".ejm-harness\"}) as harness:\n    session = harness.create_session(\".\")\n    run = session.start(\"Hello\")\n    for event in run:\n        if event[\"type\"] == \"text_delta\":\n            print(event[\"text\"], end=\"\", flush=True)\n    result = run.wait()\n"
+    }
+  ]
+}

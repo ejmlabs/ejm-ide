@@ -1,0 +1,31 @@
+{
+  "name": "harbor",
+  "note": "Sample project written for the demos. It is not a real repository.",
+  "files": [
+    {
+      "path": "README.md",
+      "lang": "md",
+      "text": "# harbor\n\nA small order library with a retry helper and a TypeScript config loader.\nThis is sample content written for the demo.\n\n## Layout\n\n- `src/lib.rs` exports the public API.\n- `src/main.rs` prints an order total.\n- `src/retry.rs` retries a call with exponential backoff.\n- `web/config.ts` reads the service config.\n\n## Test\n\nRun `cargo test`.\n"
+    },
+    {
+      "path": "src/lib.rs",
+      "lang": "rust",
+      "text": "//! harbor: order helpers.\n\npub mod retry;\n\n/// Total of an order in cents.\npub fn order_total(prices: &[u64], quantities: &[u32]) -> u64 {\n    prices\n        .iter()\n        .zip(quantities)\n        .map(|(price, qty)| price * u64::from(*qty))\n        .sum()\n}\n"
+    },
+    {
+      "path": "src/main.rs",
+      "lang": "rust",
+      "text": "use std::env;\n\nfn main() {\n    let args: Vec<String> = env::args().skip(1).collect();\n    let total = harbor::order_total(&[1200, 450], &[2, 1]);\n    println!(\"order total: {} cents\", total);\n    if args.iter().any(|a| a == \"--help\") {\n        println!(\"usage: harbor [--help]\");\n    }\n}\n"
+    },
+    {
+      "path": "src/retry.rs",
+      "lang": "rust",
+      "text": "use std::time::{Duration, Instant};\n\n/// Wait before the next attempt, doubling each time.\npub fn retry_backoff(attempt: u32) -> Duration {\n    Duration::from_millis(100 << attempt.min(6))\n}\n\n/// True while the retry window is still open.\npub fn window_open(started: Instant, budget: Duration) -> bool {\n    let now = Instant::now();\n    now.duration_since(started) < budget\n}\n\n#[cfg(test)]\nmod tests {\n    use super::*;\n\n    #[test]\n    fn window_is_open_at_start() {\n        let started = Instant::now();\n        assert!(window_open(started, Duration::from_millis(1)));\n    }\n}\n"
+    },
+    {
+      "path": "web/config.ts",
+      "lang": "ts",
+      "text": "export interface Config {\n  host: string;\n  port: number;\n}\n\n// Read the service config from the environment.\nexport function loadConfig(env: Record<string, string | undefined>): Config {\n  const host = env.HARBOR_HOST ?? \"127.0.0.1\";\n  const port = Number(env.HARBOR_PORT ?? \"8080\");\n  return { host, port };\n}\n"
+    }
+  ]
+}

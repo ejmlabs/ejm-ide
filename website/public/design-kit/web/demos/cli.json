@@ -1,0 +1,147 @@
+{
+  "project": "harbor.json",
+  "label": "ejm-cli demo",
+  "name": "ejm-cli",
+  "caption": "Press Enter to send, or pick a prompt. Turn on Grant write to let a blocked patch apply.",
+  "note": "Simulated demo. Nothing runs on your machine and nothing is sent anywhere. Replies are scripted, not model output.",
+  "app": {
+    "name": "ejm-cli",
+    "provider": "replay",
+    "cwd": "~/code/harbor",
+    "title": "New session",
+    "sessionId": "s_4f2a91"
+  },
+  "empty": {
+    "title": "What shall we build?",
+    "help": [
+      "Ask about this repository, investigate a bug, or describe a change.",
+      "Read tools are ready. Write and shell access require explicit flags.",
+      "Use /help for commands. Sessions are saved locally."
+    ]
+  },
+  "chips": [
+    { "id": "explain", "label": "Explain this repository", "prompt": "Explain this repository" },
+    { "id": "fix", "label": "Fix the flaky retry test", "prompt": "Fix the flaky retry test" },
+    { "id": "json", "label": "Add a --json flag", "prompt": "Add a --json flag" }
+  ],
+  "match": [
+    { "id": "fix", "words": ["flaky", "retry", "fix", "test", "clock"] },
+    { "id": "json", "words": ["json", "flag"] },
+    { "id": "explain", "words": ["explain", "repository", "repo", "readme", "overview", "what"] }
+  ],
+  "scenarios": {
+    "explain": {
+      "title": "Explain this repository",
+      "steps": [
+        { "say": "I will start with the README and the file list." },
+        { "tool": "read_file", "args": "README.md", "read": { "path": "README.md" } },
+        { "tool": "list_files", "args": ".", "list": true },
+        { "say": "# harbor\nA small order library. Three parts matter:\n- src/lib.rs exports order_total.\n- src/retry.rs holds the retry backoff and the retry window check.\n- web/config.ts reads the host and port from the environment.\nThe test in src/retry.rs reads the wall clock. Ask me to fix it if you like." }
+      ]
+    },
+    "fix": {
+      "title": "Fix the flaky retry test",
+      "steps": [
+        { "say": "I will read the retry module and find where it reads the clock." },
+        { "tool": "read_file", "args": "src/retry.rs", "read": { "path": "src/retry.rs", "to": 21 } },
+        { "tool": "search", "args": "Instant::now", "search": "Instant::now" },
+        {
+          "patch": {
+            "path": "src/retry.rs",
+            "edits": [
+              {
+                "find": "pub fn window_open(started: Instant, budget: Duration) -> bool {\n    let now = Instant::now();\n    now.duration_since(started) < budget\n}",
+                "replace": "pub fn window_open(started: Instant, now: Instant, budget: Duration) -> bool {\n    now.duration_since(started) < budget\n}"
+              },
+              {
+                "find": "        let started = Instant::now();\n        assert!(window_open(started, Duration::from_millis(1)));",
+                "replace": "        let started = Instant::now();\n        let now = started + Duration::from_millis(1);\n        assert!(window_open(started, now, Duration::from_millis(5)));"
+              }
+            ]
+          },
+          "intro": "window_open reads the wall clock, so a slow machine can pass the 1 ms budget before the assertion runs. I will pass the current time in, so the test controls it.",
+          "applied": "Done. window_open now takes the time as an argument, and the test passes a fixed time.",
+          "blocked": "I could not write the change. The diff above shows what I would apply."
+        }
+      ]
+    },
+    "json": {
+      "title": "Add a --json flag",
+      "steps": [
+        { "say": "I will read main.rs and see how arguments are handled." },
+        { "tool": "read_file", "args": "src/main.rs", "read": { "path": "src/main.rs" } },
+        { "tool": "search", "args": "println!", "search": "println!" },
+        {
+          "patch": {
+            "path": "src/main.rs",
+            "edits": [
+              {
+                "find": "    println!(\"order total: {} cents\", total);",
+                "replace": "    if args.iter().any(|a| a == \"--json\") {\n        println!(\"{{\\\"total_cents\\\": {total}}}\");\n    } else {\n        println!(\"order total: {} cents\", total);\n    }"
+              },
+              {
+                "find": "usage: harbor [--help]",
+                "replace": "usage: harbor [--help] [--json]"
+              }
+            ]
+          },
+          "intro": "main already collects the arguments, so the flag is a small branch around the print.",
+          "applied": "Done. harbor --json prints the total as a JSON object.",
+          "blocked": "I could not write the change. The diff above shows what I would apply."
+        }
+      ]
+    }
+  },
+  "afterGrant": {
+    "say": "Write access is on for this session. Applying the patch again."
+  },
+  "blockedNotice": "patch_file was blocked because write access is off. ejm-cli grants it at launch with --allow-write. Here, turn on Grant write to apply the patch.",
+  "fallback": "This demo only knows a few prompts; try one of the chips.",
+  "sessions": [
+    {
+      "id": "9f3e07b2",
+      "state": "idle",
+      "title": "Add pagination to the list API",
+      "transcript": [
+        { "kind": "you", "text": "Add pagination to the list API" },
+        { "kind": "assistant", "text": "Sample saved session. In the real app this is where your earlier conversation would load." }
+      ]
+    },
+    {
+      "id": "5c1d88e0",
+      "state": "interrupted",
+      "title": "Migrate config to TOML",
+      "transcript": [
+        { "kind": "you", "text": "Migrate config to TOML" },
+        { "kind": "assistant", "text": "Sample saved session. It was interrupted before the last tool call finished." }
+      ]
+    },
+    {
+      "id": "0b77a4c9",
+      "state": "idle",
+      "title": "Explain the build graph",
+      "transcript": [
+        { "kind": "you", "text": "Explain the build graph" },
+        { "kind": "assistant", "text": "Sample saved session with a short scripted reply." }
+      ]
+    }
+  ],
+  "help": {
+    "Conversation": [
+      ["Enter", "Send, or queue while a run is active"],
+      ["Alt+Enter", "Insert a newline (Ctrl+J also works)"],
+      ["Ctrl+C", "Stop an active run"],
+      ["Ctrl+S", "Choose a saved session"],
+      ["Up / Down", "Recall sent messages"],
+      ["PageUp/PageDown", "Scroll transcript; End follows output"],
+      ["Esc", "Close a panel"]
+    ],
+    "Commands": [
+      ["/new [title]", "Create a session in this workspace"],
+      ["/sessions", "Choose a saved session (Ctrl+S)"],
+      ["/stop", "Cancel the current run"],
+      ["/help", "Show this reference"]
+    ],
+    "footer": "Grants are fixed at launch. The demo covers only these keys and commands."
+  }
+}
