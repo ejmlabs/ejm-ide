@@ -38,16 +38,45 @@ updating a PR starts no checks or AI review. A human maintainer first posts
 recheck that admission. See [Contributing](../CONTRIBUTING.md) for approval,
 revocation, and retry rules.
 
+The default branch currently uses shared revision
+`af4ee77e9ee8da606c4ae3a0838bc3b46fd9d7f3`. Its earlier AI invocation
+failure remains unresolved there, and it has no explicit review completion
+guard. This change prepares revision
+`c4f2873ef0eef5bc3c7d75cf71fa3489a911d134`; the earlier local
+`965cd684713ae91a7804745eddd452cc392af11d` preparation is recorded in the
+[change tasks](../openspec/changes/public-repository-standards/tasks.md).
+The proposed revision requires boolean `complete: true` from each review pass.
+Missing, false, or nonboolean completion fails even with no findings. The
+[source manifest](../.github/review-context/manifest.json) identifies both exact
+workflow implementations supplied for static review. Those copies are review
+data and must never be executed or imported.
+
+A submitted caller does not replace the trusted workflow on the default
+branch. Local preparation proves neither hosted acceptance nor repair of that
+default caller. This preparation authorizes no IDE readiness decision or
+recovery exception. Live acceptance remains open in the change tasks.
+The initial combined draft exceeded the shared 1,000,000-byte review diff
+limit. Seven generated OpenSpec skill files were preserved unchanged in
+[tooling PR #3](https://github.com/ejmlabs/ejm-ide/pull/3). Configuration and
+this change's plans remain here. Merge this product PR first, then refresh the
+tooling draft's base and obtain new human decisions for its current head.
+Project-local skill installation remains pending until that tooling draft
+lands. Check the full assembled diff before admission; keep both exact review
+source sets and the shared limit intact.
+
 Trusted preparation reads `.github/harness-revision` from the base branch. It
 must contain a full commit SHA for a compatible `ejmlabs/ejm-harness` revision.
 Changing that pin in a PR does not change the harness used to check that PR.
-The workflow checks out the IDE at `ejm-ide` and the pinned harness at
-`ejm-harness` under the runner workspace. npm commands run from `ejm-ide`.
+The Quality job places the admitted IDE sources at `product` and the pinned
+harness at sibling `ejm-harness` under the runner workspace. npm commands run
+from `product`.
 
-If the harness is private, a fine-grained token with read-only Contents access
-may be stored as `EJM_HARNESS_TOKEN`. Only trusted preparation receives this
-token. Build jobs run the prepared source without that credential. Keep the
-harness pin current when updating the shared API or preparing a release.
+Hosted IDE CI stays blocked while the harness is private, under the owner's
+decision to wait for a public harness and provision no private cross-repository
+token. This preparation leaves `.github/harness-revision` at
+`4a751c6a3f24d7d143140f79ff53517fb93e3531` and changes no credentials or
+dependency access. After access is available, verify the pin and hosted
+pipeline separately before claiming native CI acceptance.
 
 ## Commands
 
