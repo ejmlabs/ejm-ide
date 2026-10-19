@@ -7,6 +7,7 @@ workspace trust, and use.
 | --- | --- |
 | [Development](development.md) | Checks, sibling harness checkout, and shared code changes |
 | [Architecture](../ARCHITECTURE.md) | Frontend, native host, and shared engine boundaries |
+| [Interface design](../DESIGN.md#interaction-principles) | Setup, editor groups, navigation, and inspectable agent work |
 | [Languages](languages.md) | Language tools, workspace trust, formatting, and limits |
 | [Indexing](indexing.md) | Saved source search, call evidence, and context |
 | [Agent tools](agent-tools.md) | Edi's file tools, review policy, and chat displays |

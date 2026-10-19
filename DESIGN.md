@@ -419,9 +419,11 @@ symbol as hero decoration and close with "Small experiments. Useful things."
 Render interface icons from the installed Lucide package at build time.
 
 The editor image shows the actual app. Record each shipped asset's source,
-transform, and SHA-256 in `.impeccable/download-site-assets.json`, and keep
-`.impeccable/download-site-brief.md` current. The ejmlabs marks are the
-owner's artwork; the IDE's MIT license does not grant rights to them.
+transform, and SHA-256 in
+[the asset manifest](.impeccable/download-site-assets.json). Keep this guide
+and [the website skill](.agents/skills/ejm-ide-website/SKILL.md) current when
+site requirements change. The ejmlabs marks are the owner's artwork; the IDE's
+MIT license does not grant rights to them.
 
 ### Page and interaction
 

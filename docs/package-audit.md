@@ -93,8 +93,9 @@ already present. No cmdk advisory appeared in the current npm audit.
 The npm audit reported three low-severity entries in the existing dependency
 set: DOMPurify, Monaco through DOMPurify, and esbuild. These were not changed in
 this UX pass. The main frontend chunk is now about 5.51 MB minified; the existing
-large-chunk warning remains. See [the UX review](ux-review.md) for the interface
-coverage and current frontend checks.
+large-chunk warning remains. Use [the interaction principles](../DESIGN.md#interaction-principles)
+for current UX guidance and [development checks](development.md) for verification
+commands.
 
 ## Editor tab and menu follow-up
 
@@ -107,8 +108,9 @@ The existing `react-resizable-panels` dependency still owns pane resizing.
 
 The install added only these two packages. npm audit still reported the same
 three low-severity entries listed above. This check does not establish that the
-whole dependency tree has no advisories. Current interaction verification belongs
-with [the editor organization follow-up](ux-review.md#editor-organization-follow-up).
+whole dependency tree has no advisories. See [editor groups and debug inspection](../DESIGN.md#editor-groups-and-debug-inspection)
+for current interaction rules and [development checks](development.md) for
+verification commands.
 
 ## Public-readiness dependency check
 
