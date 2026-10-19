@@ -17,6 +17,7 @@
 - [ ] 2.5 Land [tooling PR #3](https://github.com/ejmlabs/ejm-ide/pull/3) after this product PR, with a refreshed base and fresh human decisions; verify that all seven project-local skill files retain their exact `0b221630db35100b6a0ced1f877b2617cfa9b880` bytes and modes. Repair the private brand-directory prerequisite in contributor guidance with committed design, site asset, license and notice references; keep brand refresh optional and assign active shared tokens, themes, primitives and site infrastructure to `ejm-ui` public exports. Verify local links, unchanged runtime/workflows/pins/configuration, strict OpenSpec, whitespace and the full diff bound. Use that PR to prove the installed harness pin `09b779ee0452dda07b7f52503be22e65fe238373` and shared caller `c4f2873ef0eef5bc3c7d75cf71fa3489a911d134`, including both complete actual Codex passes and every required gate. Preserve configuration and this change here; do not claim the project-local skills or new hosted checkout are verified before that draft passes and merges.
 - [x] 2.6 Refresh the proposed harness pin to reviewed protected main `09b779ee0452dda07b7f52503be22e65fe238373`; preserve historical `4a751c6a3f24d7d143140f79ff53517fb93e3531` evidence and document that this product PR still checks the trusted base's old pin. Verify actual resolved core/auth/exec production source and harness lock identity, exact one-line pin, pinned standards, strict OpenSpec, local docs links, whitespace, unchanged product sources and locks, and the assembled diff bound. Keep both drafts unadmitted; record no review or recovery decision and run no native/site suite, model call, or hosted job.
 - [x] 2.7 Repair the formatter failure from admitted run `39294657006` with the narrow Biome force-ignore rule for immutable `.github/review-context` exports; preserve every canonical byte and mode, reproduce the failure, then verify literal format/lint commands, exact source exports, pinned standards, contributor links, strict OpenSpec, unchanged runtime sources and locks, whitespace, and the assembled diff bound. Record local evidence and unrun gates. Require fresh human decisions for the new head; do not trigger CI, reuse old recovery authorization, or claim hosted acceptance.
+- [x] 2.8 Adopt retained shared revision `6717b433c462e01abaed86e2118e4843827598cb` in both normal callers and release standards-ref for byte-preserving source release validation; replace the static review pair with exact installed `c4f2873ef0eef5bc3c7d75cf71fa3489a911d134` and proposed sources from the shared exporter. Update release-operation guidance and the unreleased changelog. Verify pinned standards, canonical bytes and modes, affected links, strict OpenSpec, whitespace, unchanged runtime/dependency/harness inputs, and the complete normal review bound. Keep existing product/host/secret contracts, require fresh human admission and normal hosted gates, and create no tag or release.
 
 ## 3. Verification
 
@@ -29,6 +30,30 @@
 - Sync completed specs and archive after all tracked work and required verification succeed.
 
 ## Local verification evidence
+
+- Task 2.8 starts from public main
+  `9527b878ed8b02f0b69cbadccd1b13d147d535d1`. Both normal callers and release
+  `standards-ref` match the exact `6717b433c462e01abaed86e2118e4843827598cb`
+  consumer generator. The shared exporter supplies installed `c4f2873...` and
+  proposed sources as 33 static files totaling 681,228 bytes. Canonical Git
+  bytes, blob/tree identities, hashes, sizes, and regular nonexecutable index
+  modes match. Both public `workflow-pins/FULL_SHA` references resolve to the
+  exact revisions. Pinned standards and version 0.1.0, all uniform community
+  templates, actionlint, affected Markdown links, strict OpenSpec, whitespace,
+  and the complete normal review bound pass locally.
+- The shared target retains IDE protected-base harness selection and its
+  macOS Quality commands. All other tracked blobs and modes, including all
+  93 website paths, runtime/dependency inputs, uniform community documents,
+  and harness pin `09b779ee0452dda07b7f52503be22e65fe238373`, remain unchanged.
+  No optional UI pin is introduced. Keep the unsupported Linux GLib advisory
+  and sibling-path Cargo Dependabot limit. This contributor/release guidance
+  change has no public site runtime or download availability effect; no live
+  documentation publication is claimed.
+- Native/frontend/site gates, installs, hosted CI, model calls, remote writes,
+  tags, releases, and deployment were not run for task 2.8. A fresh exact-head
+  human decision and all normal merge gates remain required. Shared release
+  evidence does not establish an IDE draft or installer. Tasks 2.5 and 3.2 stay
+  open for their own evidence reconciliation; no sync or archive runs here.
 
 - Task 2.5 has a local provisional preview on proposed product head
   `5c680dabc6aa0f387fed0a9839699449deb4d744`, without claiming actual-main
