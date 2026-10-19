@@ -28,7 +28,7 @@ jobs:
       - name: Check out ejm-harness
         uses: actions/checkout@v4
         with:
-          repository: ${{ vars.EJM_HARNESS_REPOSITORY || format('{0}/ejm-harness', github.repository_owner) }}
+          repository: ${{ vars.EJM_HARNESS_REPOSITORY || format('{0}/ejmlabs-harness', github.repository_owner) }}
           ref: ${{ vars.EJM_HARNESS_REF }}
           token: ${{ secrets.EJM_HARNESS_TOKEN || github.token }}
           path: ejm-harness
