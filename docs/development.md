@@ -73,10 +73,21 @@ from `product`.
 
 Hosted IDE CI stays blocked while the harness is private, under the owner's
 decision to wait for a public harness and provision no private cross-repository
-token. This preparation leaves `.github/harness-revision` at
-`4a751c6a3f24d7d143140f79ff53517fb93e3531` and changes no credentials or
-dependency access. After access is available, verify the pin and hosted
-pipeline separately before claiming native CI acceptance.
+token. The proposed `.github/harness-revision` now selects reviewed protected
+harness main `09b779ee0452dda07b7f52503be22e65fe238373`. Prepare the sibling
+checkout at that exact revision with Rust 1.99.1 or newer. Its resolved core,
+auth, and execution production sources and harness lock match the earlier
+verified dependency source. The pin refresh changes no IDE runtime source,
+dependency lock, credentials, or access.
+
+This product PR still tests trusted base pin
+`4a751c6a3f24d7d143140f79ff53517fb93e3531`; the submitted pin cannot change
+its own Quality checkout. After this PR lands, refresh [tooling PR #3](https://github.com/ejmlabs/ejm-ide/pull/3)
+onto that base and obtain fresh human decisions. That run must prove the
+installed new harness pin and shared caller `c4f2873ef0eef5bc3c7d75cf71fa3489a911d134`,
+with both complete actual Codex passes and every required gate. Preserve the
+historical old-pin evidence. Neither local preparation nor an old-pin Quality
+result establishes the new hosted checkout or authorizes a recovery exception.
 
 ## Commands
 

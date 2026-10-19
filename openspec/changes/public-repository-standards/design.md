@@ -24,7 +24,7 @@ At the start of this audit, the projects were private and main had no branch pro
 
 - Shared workflow changes affect several products. Immutable caller pins and reviewed update PRs bound rollout.
 - Human readiness costs a small metadata action and can delay outside contributions. The expensive checks remain unavailable until deliberate admission.
-- CLI and IDE consume pinned sibling harness revisions. The 2026-10-18 plan recorded the owner's decision to wait for a public harness and use no private cross-repository token. IDE hosted checks remain blocked under that policy. CLI's current dependency access belongs to its separate credential task. This refresh changes no consumer harness pin or credential and grants no dependency access. Later pin updates need review and hosted acceptance through the owning task.
+- CLI and IDE consume pinned sibling harness revisions. The 2026-10-18 plan recorded the owner's decision to wait for a public harness and use no private cross-repository token. IDE hosted checks remain blocked under that policy. CLI's current dependency access belongs to its separate task. Earlier workflow refreshes changed no consumer harness pin or credential and granted no dependency access. The reviewed IDE pin refresh below needs separate hosted acceptance and grants no access.
 - API review needs a scoped OPENAI_API_KEY and provider budget settings. Setup does not prove a successful paid review.
 - Local disk space is constrained. Coordinate Cargo checks, use focused existing caches, and report missing full platform evidence honestly.
 - Source and history scans reduce known risk; partial scan coverage and platform-specific tests remain explicit.
@@ -84,9 +84,11 @@ The default branch still uses the old caller. Updating a submitted caller does
 not replace the trusted base workflow used to check that PR. This preparation
 does not admit an IDE head or authorize a recovery exception. Hosted IDE CI
 remains blocked until the harness is public under the owner's no-token policy.
-Keep `.github/harness-revision` at
-`4a751c6a3f24d7d143140f79ff53517fb93e3531`; change no credentials or dependency
-access. Task 3.2 remains open for separate hosted acceptance.
+Task 2.4 kept `.github/harness-revision` at
+`4a751c6a3f24d7d143140f79ff53517fb93e3531` and changed no credentials or
+dependency access. Preserve that historical evidence. Task 3.2 remains open
+for separate hosted acceptance; the pin refresh below adds no admission or
+recovery decision.
 
 Check exact caller templates, community and version standards, source identity,
 safe file modes, actionlint, contributor links, strict OpenSpec validation, and
@@ -110,3 +112,37 @@ until its separate draft lands. Task 2.4 completes only after the assembled
 product PR diff passes the review bound; task 2.5 tracks the pending tooling
 installation. Neither local result admits this draft or establishes hosted
 acceptance.
+
+## Reviewed harness pin refresh
+
+For task 2.6, refresh the proposed `.github/harness-revision` to reviewed
+protected harness main `09b779ee0452dda07b7f52503be22e65fe238373`. The
+harness owns its public core, auth, and execution contracts; the IDE consumes
+them through sibling path crates. The IDE's resolved local dependency graph
+contains `ejm-harness`, `ejm-harness-auth`, and `ejm-harness-exec`, not the
+coding or package crates. Their production sources and the harness lock are
+identical between the old pin and the reviewed main tree. The workspace Rust
+floor rises to 1.99.1, which the recorded IDE gate already used. This aligns
+the proposed checkout with the reviewed public candidate; it is not a claimed
+runtime or performance fix. Do not adopt the separate host-auth feature.
+
+Preparation reads the harness pin from trusted base source. Until this product
+PR lands, its hosted Quality job still uses
+`4a751c6a3f24d7d143140f79ff53517fb93e3531`, even when the submitted file names
+the new pin. After landing, refresh tooling PR #3 onto that base and obtain
+fresh human decisions. That PR must prove the installed new harness pin and
+shared caller `c4f2873ef0eef5bc3c7d75cf71fa3489a911d134`, including both
+complete actual Codex passes and every required gate. A successful old-pin
+Quality run does not establish the new checkout. The old default AI caller
+still needs its own explicitly authorized recovery; task 2.6 grants none.
+
+Limit this preparation to the pin, contributor operating guidance, and this
+change's design/tasks. Preserve the historical pin and gate evidence, both
+canonical workflow source sets, and the seven-file tooling split. Check the
+resolved consumed source and lock identity, exact pin bytes, pinned repository
+standards, strict OpenSpec, local documentation links, whitespace, and the
+assembled diff bound. Product sources and locks stay unchanged, so their
+recorded tests remain source-covered. Run no native/site suite, model call,
+hosted job, credential change, release, or publication for this preparation.
+The public documentation impact is source setup and contributor CI guidance;
+no public site behavior or download availability changes.
