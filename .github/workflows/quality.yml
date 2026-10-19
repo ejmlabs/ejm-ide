@@ -30,6 +30,7 @@ jobs:
         with:
           repository: ${{ vars.EJM_HARNESS_REPOSITORY || format('{0}/ejm-harness', github.repository_owner) }}
           ref: ${{ vars.EJM_HARNESS_REF }}
+          token: ${{ secrets.EJM_HARNESS_TOKEN || github.token }}
           path: ejm-harness
       - uses: actions/setup-node@v4
         with:

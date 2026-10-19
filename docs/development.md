@@ -47,6 +47,9 @@ can select a different source or pin a revision:
 | `EJM_HARNESS_REF` | Optional branch, tag, or commit; unset uses the harness repository's default branch |
 
 The harness repository must be accessible to the workflow's checkout action.
+A private harness repository needs a repository secret named `EJM_HARNESS_TOKEN`,
+a fine-grained token with read-only Contents access to that repository. Without
+the secret, checkout uses the workflow token, which can read only this repository.
 Pin a compatible revision when releasing the IDE.
 
 ## Commands
