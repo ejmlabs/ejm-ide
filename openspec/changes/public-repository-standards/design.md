@@ -225,3 +225,42 @@ admission, all five statuses, native approval, and both complete actual medium
 Codex passes remain required before normal merge. This preparation creates no
 tag, release, package, deployment, or new hosted verification. Tasks 2.5 and 3.2
 stay open until their own evidence is reconciled.
+
+## Hosted evidence reconciliation and installed caller acceptance
+
+Tooling PR #3 landed after the product PR as
+`76879ea01dea506f72b143939915a9475a37e528`, with parent
+`9cf2a9026da4c7e5f3f22d11a136256c7a8906f6`. All seven generated additions
+retain the exact original `0b221630db35100b6a0ced1f877b2617cfa9b880`
+bytes and modes. Its portable contributor guidance changed no runtime, site,
+workflow, dependency, configuration, or pin. Run `39302791631` verified the
+installed public harness pin `09b779ee0452dda07b7f52503be22e65fe238373`
+and shared caller `c4f2873ef0eef5bc3c7d75cf71fa3489a911d134`, all five
+required statuses, native approval, and two complete actual `gpt-6.1-sol`
+medium passes. It merged without an exception. This closes task 2.5 and
+supersedes only its earlier pending status, preserving the preparation record.
+
+PR #8 passed the same installed caller in run `39344302241`, then merged
+normally as `392bfa2ae0edfd05e92e6926449a2cb964c78c08`. Its tree is
+`f76a71fe7781b79dbedfe4fe66740c049edb17c8`. This installed retained shared
+revision `6717b433c462e01abaed86e2118e4843827598cb`; its own run did not
+execute that proposed revision. Task 2.9 uses a fresh documentation-only PR
+from that exact protected merge to verify the installed caller after fresh
+human admission. Every normal gate and both complete actual medium reviews
+remain required. Keep that task pending until hosted evidence is verified.
+
+The IDE owns these contributor notes and consumes the shared workflow and
+public harness contracts without changing either. Runtime, dependencies,
+callers, canonical context, harness pin, community templates, and all website
+inputs remain exact. Check affected links, installed source identities, pinned
+standards, strict OpenSpec, whitespace, and normal review bounds. Reuse the
+recorded runtime checks; no new native or site suite is needed for this static
+guidance. The public site has no CI operations guide, and its content and
+download availability do not change. No live docs publication is claimed.
+
+Task 3.2 stays open. The owner left the genuine outside-account fork test open;
+no maintainer action substitutes for an account without organization or
+repository access. Preserve the accepted unsupported Linux GLib advisory and
+sibling-path Cargo Dependabot limit. Neither the fresh PR nor prior hosted
+checks authorize an IDE tag, source draft, signed installer, package, or site
+deployment. Do not sync or archive while tracked acceptance remains open.

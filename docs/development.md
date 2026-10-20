@@ -39,10 +39,9 @@ recheck that admission. See [Contributing](../CONTRIBUTING.md) for approval,
 revocation, and retry rules.
 
 Both normal callers and the release `standards-ref` use the same immutable
-shared revision. This update selects
-`6717b433c462e01abaed86e2118e4843827598cb`, replacing
-`c4f2873ef0eef5bc3c7d75cf71fa3489a911d134`. The release validator preserves
-committed license and document bytes, including their line endings. The
+shared revision, `6717b433c462e01abaed86e2118e4843827598cb`. The release
+validator preserves committed license and document bytes, including their line
+endings. The
 [source manifest](../.github/review-context/manifest.json) identifies both exact
 implementations for static review. These copies must never be executed or
 imported. Biome excludes `.github/review-context` to preserve canonical bytes;
@@ -70,13 +69,21 @@ the sibling harness path; review its immutable pin and compatible source
 separately. Keep the documented unsupported Linux GLib advisory and native
 platform limits in [the dependency audit](package-audit.md#public-readiness-dependency-check).
 
-The target shared revision keeps this IDE protected-base selection and the
+The installed shared revision keeps this IDE protected-base selection and the
 existing macOS Quality commands. It supports an optional public UI source pin,
 but this repository supplies none, so no UI checkout or installation is added.
-This metadata-only preparation changes no product, dependency, installer, or
-secret input. Earlier gate evidence stays in the
-[change tasks](../openspec/changes/public-repository-standards/tasks.md);
-no new native or site result is claimed here.
+
+[PR #3](https://github.com/ejmlabs/ejm-ide/pull/3) proved the installed harness
+pin and previous `c4f2873ef0eef5bc3c7d75cf71fa3489a911d134` caller in
+[run 39302791631](https://github.com/ejmlabs/ejm-ide/actions/runs/39302791631).
+[PR #8](https://github.com/ejmlabs/ejm-ide/pull/8) then passed under that caller
+in [run 39344302241](https://github.com/ejmlabs/ejm-ide/actions/runs/39344302241)
+and installed `6717b433…` on main. Both runs passed all five gates and two
+complete actual `gpt-6.1-sol` medium reviews without an exception. This
+docs-only follow-up must verify the installed `6717b433…` caller after fresh
+human admission. At preparation, that hosted result and the genuine
+outside-account fork test remain pending. See the
+[change tasks](../openspec/changes/public-repository-standards/tasks.md).
 
 ## Draft source releases
 
@@ -89,9 +96,10 @@ building from a source archive.
 
 An existing `vVERSION` tag or release blocks another request. Do not use a rerun
 or move a tag after a failure. Inspect the retained run, tag, draft, and assets
-before choosing the next version. Installing this workflow update creates no
-IDE tag or release. Native signing, platform checks, installer publication, and
-site deployment keep their separate gates in [distribution](distribution.md).
+before choosing the next version. Installing the workflow and testing its PR
+caller create no IDE tag or release. Native signing, platform checks, installer
+publication, and site deployment keep their separate gates in
+[distribution](distribution.md).
 
 ## Commands
 
