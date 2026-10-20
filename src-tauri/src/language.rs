@@ -12,8 +12,8 @@ use std::{
     path::{Path, PathBuf},
     process::Command,
     sync::{
-        Arc, Mutex,
-        atomic::{AtomicBool, Ordering},
+        Arc, Mutex, MutexGuard,
+        atomic::{AtomicBool, AtomicU64, Ordering},
     },
     thread,
     time::{Duration, Instant},
@@ -26,15 +26,17 @@ struct Session {
     hierarchy_items: Mutex<HierarchyItems>,
 }
 
-#[derive(Default)]
+#[derive(Clone, Default)]
 pub struct LanguageState {
     sessions: Arc<Mutex<HashMap<Language, Arc<Session>>>>,
+    generation: Arc<AtomicU64>,
     requests: Arc<Mutex<RequestCancellations>>,
 }
 
 impl LanguageState {
     pub fn clear(&self) {
         if let Ok(mut sessions) = self.sessions.lock() {
+            self.generation.fetch_add(1, Ordering::AcqRel);
             sessions.clear();
         }
         if let Ok(mut requests) = self.requests.lock() {
@@ -43,6 +45,20 @@ impl LanguageState {
             }
             requests.entries.clear();
         }
+    }
+
+    fn sessions_for_generation(
+        &self,
+        expected: u64,
+    ) -> Result<MutexGuard<'_, HashMap<Language, Arc<Session>>>, String> {
+        let sessions = self
+            .sessions
+            .lock()
+            .map_err(|_| "Language services are unavailable")?;
+        if self.generation.load(Ordering::Acquire) != expected {
+            return Err("The workspace changed before its language service started.".into());
+        }
+        Ok(sessions)
     }
 }
 
@@ -330,15 +346,14 @@ pub fn server_initialization_options(language: Language, resources: Option<&Path
 }
 
 fn session(
-    sessions: &Mutex<HashMap<Language, Arc<Session>>>,
+    languages: &LanguageState,
+    generation: u64,
     root: &Path,
     language: Language,
     app: &AppHandle,
 ) -> Result<Arc<Session>, String> {
     {
-        let mut sessions = sessions
-            .lock()
-            .map_err(|_| "Language services are unavailable")?;
+        let mut sessions = languages.sessions_for_generation(generation)?;
         sessions.retain(|_, session| session.root == root);
         if let Some(existing) = sessions.get(&language) {
             return Ok(existing.clone());
@@ -354,9 +369,7 @@ fn session(
         client: Mutex::new(client),
         hierarchy_items: Mutex::new(HierarchyItems::default()),
     });
-    let mut sessions = sessions
-        .lock()
-        .map_err(|_| "Language services are unavailable")?;
+    let mut sessions = languages.sessions_for_generation(generation)?;
     if let Some(existing) = sessions.get(&language)
         && existing.root == root
     {
@@ -436,6 +449,7 @@ pub async fn language_open(
     activity
         .record_request(&serde_json::json!({"path": path, "content": content, "version": version}));
     let result: Result<LanguageStatus, String> = async {
+        let generation = languages.generation.load(Ordering::Acquire);
         let (path, language) = checked_document(&workspace, &path, &content, version)?;
         let Some(language) = language else {
             return Ok(LanguageStatus {
@@ -446,13 +460,13 @@ pub async fn language_open(
             });
         };
         let root = workspace.trusted_root_path()?;
-        let sessions = languages.sessions.clone();
+        let languages = languages.inner().clone();
         let workspace = workspace.inner().clone();
         tauri::async_runtime::spawn_blocking(move || {
             if workspace.trusted_root_path()? != root {
                 return Err("The workspace changed before its language service started.".into());
             }
-            let session = match session(&sessions, &root, language, &app) {
+            let session = match session(&languages, generation, &root, language, &app) {
                 Ok(session) => session,
                 Err(message) => {
                     return Ok(LanguageStatus {
@@ -790,6 +804,29 @@ pub fn language_close(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn pending_language_start_cannot_publish_after_workspace_clear() {
+        let state = LanguageState::default();
+        let pending = state.clone();
+        let generation = state.generation.load(Ordering::Acquire);
+        let (started, starting) = std::sync::mpsc::sync_channel(0);
+        let (resume, resumed) = std::sync::mpsc::sync_channel(0);
+        let worker = thread::spawn(move || {
+            drop(pending.sessions_for_generation(generation).unwrap());
+            started.send(()).unwrap();
+            resumed.recv().unwrap();
+            pending.sessions_for_generation(generation).is_err()
+        });
+        starting.recv().unwrap();
+        // Opening another folder and returning to the same path are separate sessions.
+        state.clear();
+        state.clear();
+        resume.send(()).unwrap();
+        assert!(worker.join().unwrap());
+        let current = state.generation.load(Ordering::Acquire);
+        assert!(state.sessions_for_generation(current).is_ok());
+    }
 
     fn item(name: &str, uri: &str) -> Value {
         json!({

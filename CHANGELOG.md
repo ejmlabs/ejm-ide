@@ -4,6 +4,19 @@ Changes follow [Semantic Versioning](https://semver.org/). Each repository is ve
 
 ## [Unreleased]
 
+### Fixed
+
+- Reject language-server starts from an earlier workspace session, including
+  leaving and reopening the same folder. Pending initialization still runs
+  until it returns, then releases the rejected client.
+
+### Verification and limits
+
+- The focused generation-guard regression passed. Full clean-pin checks and
+  native folder-switch and child cleanup acceptance remain unrun. See the
+  [language guide](docs/languages.md#workspace-changes-during-server-startup).
+- No release, installer, or live website update is claimed.
+
 ## [0.1.0] - 2026-10-19
 
 Prepared development source for the first `0.1.0` release. These notes do not
