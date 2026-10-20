@@ -18,7 +18,7 @@ use std::{
         Arc, Mutex, OnceLock,
         atomic::{AtomicBool, AtomicU64, Ordering},
     },
-    time::Duration,
+    time::{Duration, SystemTime, UNIX_EPOCH},
 };
 use tauri::{AppHandle, Manager, State, WebviewWindow};
 use tokio::sync::Notify;
@@ -40,9 +40,13 @@ const INSTRUCTIONS: &str = "You are Edi, the coding companion in ejm-ide, a huma
     to inspect callers and callees. Index links are approximate; read current source \
     with workbench_read_file before editing it. To create or replace a file use \
     workbench_write_file with its exact current version from the read tool, or null \
-    for a new file. ejm-ide automatically reviews every proposed write and rejects \
-    stale versions or paths outside this workspace. A denial is a failed action; \
-    explain it and do not seek a bypass. There is no shell or external-action tool. \
+    for a new file. ejm-ide automatically reviews every proposed write. Sensitive paths, \
+    including build files, package manifests, tool config, CI files, editor config, and \
+    scripts, are applied only after the person confirms them in the IDE. Automatic review \
+    can deny a write, and its approval does not apply a sensitive path. Other writes are \
+    applied when automatic review approves them. ejm-ide rejects stale versions or paths \
+    outside this workspace. A denial or a missed confirmation is a failed action; explain \
+    it and do not seek a bypass. There is no shell or external-action tool. \
     Make only the requested changes and summarize the resulting diff. Use \
     workbench_show_ui for useful tables, charts, diagrams, and callouts. Use the \
     navigation and presentation tools to explain current code. Presentation tools \
@@ -761,9 +765,42 @@ fn review_context(conversation: &[Message]) -> Value {
     json!({"userRequests":user_requests,"recentAssistant":recent_assistant})
 }
 
+fn latest_assistant(conversation: &[Message]) -> Option<String> {
+    conversation.iter().rev().find_map(|message| {
+        if message.role == "assistant" && !message.content.trim().is_empty() {
+            let text = message.content.trim();
+            let end = text
+                .char_indices()
+                .nth(1000)
+                .map(|(index, _)| index)
+                .unwrap_or(text.len());
+            Some(text[..end].to_string())
+        } else {
+            None
+        }
+    })
+}
+
+fn main_window_focused(app: &AppHandle) -> bool {
+    app.get_webview_window("main")
+        .and_then(|window| window.is_focused().ok())
+        .unwrap_or(false)
+}
+
+fn show_expiry_notification(app: &AppHandle, body: &str) {
+    use tauri_plugin_notification::NotificationExt;
+    if let Err(error) = app.notification().builder().title("Edi").body(body).show() {
+        tracing::warn!(%error, "Could not show the write-confirmation notification");
+    }
+}
+
 #[allow(
     clippy::too_many_arguments,
     reason = "The review uses the current driver and adds its usage to the owning turn"
+)]
+#[allow(
+    clippy::too_many_lines,
+    reason = "Sensitive writes pause inside the existing review before any apply"
 )]
 async fn reviewed_write(
     host: &ToolHost,
@@ -775,6 +812,11 @@ async fn reviewed_write(
     turn: &mut StoredTurn,
     total: &mut Usage,
 ) -> Result<ToolResult, String> {
+    let raw_path = args
+        .get("path")
+        .and_then(Value::as_str)
+        .unwrap_or("")
+        .to_string();
     let edit = host.prepare_write(args)?;
     let review_id = uuid::Uuid::new_v4().to_string();
     let action = json!({"type":"fileChange","path":edit.path});
@@ -842,24 +884,122 @@ async fn reviewed_write(
             Err(error)
         }
     };
-    let (approved, reason) = match review {
-        Ok(review) => (review.approved, review.reason),
-        Err(error) => (false, error),
+    let (review_ok, approved, reason) = match review {
+        Ok(review) => (true, review.approved, review.reason),
+        Err(error) => (false, false, error),
     };
-    publish(
-        &host.app,
-        &profile.id,
-        &host.root.path,
-        &host.thread_id,
-        host.connection_id,
-        "item/autoApprovalReview/completed",
-        json!({"reviewId":review_id,"action":action,"review":{"status":if approved {"approved"} else {"denied"},"rationale":reason}}),
-    );
-    if !approved {
-        return Err(format!("Automatic review rejected this edit: {reason}"));
+    let classified = crate::agent_tools::classify_workspace_path(&host.root, &edit.path)?;
+    let gate = crate::agent_sensitive::review_gate(review_ok, approved, classified.sensitive);
+    let publish_completed = |status: &str, rationale: &str| {
+        publish(
+            &host.app,
+            &profile.id,
+            &host.root.path,
+            &host.thread_id,
+            host.connection_id,
+            "item/autoApprovalReview/completed",
+            json!({"reviewId":review_id,"action":action,"review":{"status":status,"rationale":rationale}}),
+        );
+    };
+    match gate {
+        crate::agent_sensitive::ReviewGate::Reject => {
+            let message = format!("Automatic review rejected this edit: {reason}");
+            publish_completed("denied", &reason);
+            Err(message)
+        }
+        crate::agent_sensitive::ReviewGate::Apply => {
+            publish_completed("approved", &reason);
+            host.check_current()?;
+            edit.apply(host)
+        }
+        crate::agent_sensitive::ReviewGate::Confirm => {
+            let state = host.app.state::<AgentToolState>();
+            let expires_at_ms = SystemTime::now()
+                .checked_add(crate::agent_sensitive::CONFIRMATION_TIMEOUT)
+                .and_then(|instant| instant.duration_since(UNIX_EPOCH).ok())
+                .map(|elapsed| u64::try_from(elapsed.as_millis()).unwrap_or(u64::MAX))
+                .unwrap_or(0);
+            let kind = if edit.expected_version.is_none() {
+                "add"
+            } else {
+                "update"
+            };
+            publish(
+                &host.app,
+                &profile.id,
+                &host.root.path,
+                &host.thread_id,
+                host.connection_id,
+                "item/autoApprovalReview/awaitingUser",
+                crate::agent_sensitive::awaiting_user_payload(
+                    &review_id,
+                    &classified,
+                    &raw_path,
+                    kind,
+                    &edit.before,
+                    &edit.after,
+                    &reason,
+                    latest_assistant(conversation).as_deref(),
+                    state.denied_earlier(&host.turn_id, &classified.normalized),
+                    expires_at_ms,
+                ),
+            );
+            let path = classified.normalized.clone();
+            let app = host.app.clone();
+            let decision = state
+                .await_confirmation(
+                    crate::agent_tools::ConfirmationRequest {
+                        review_id: review_id.clone(),
+                        provider_id: host.provider_id.clone(),
+                        connection_id: host.connection_id,
+                        timeout: crate::agent_sensitive::CONFIRMATION_TIMEOUT,
+                        warning_before: crate::agent_sensitive::CONFIRMATION_WARNING,
+                    },
+                    || host.check_current(),
+                    || {
+                        if let Some(body) = crate::agent_sensitive::expiry_notification(
+                            main_window_focused(&app),
+                            false,
+                            &path,
+                        ) {
+                            show_expiry_notification(&app, &body);
+                        }
+                    },
+                )
+                .await;
+            match decision {
+                Ok(crate::agent_sensitive::WriteChoice::Approve(note)) => match edit.apply(host) {
+                    Ok(mut result) => {
+                        publish_completed("approved", &reason);
+                        if let Some(note) = note
+                            && let Some(object) = result.value.as_object_mut()
+                        {
+                            object.insert("note".into(), json!(note));
+                        }
+                        Ok(result)
+                    }
+                    Err(error) => {
+                        publish_completed("stale", &error);
+                        Err(error)
+                    }
+                },
+                Ok(crate::agent_sensitive::WriteChoice::Deny(note)) => {
+                    state.remember_denial(&host.turn_id, &classified.normalized);
+                    let message = crate::agent_sensitive::denial_message(note.as_deref());
+                    publish_completed("denied", &message);
+                    Err(message)
+                }
+                Err(crate::agent_sensitive::ConfirmationStop::Timeout) => {
+                    publish_completed("timedOut", crate::agent_sensitive::TIMED_OUT);
+                    Err(crate::agent_sensitive::TIMED_OUT.into())
+                }
+                Err(crate::agent_sensitive::ConfirmationStop::Withdrawn(message)) => {
+                    publish_completed("cancelled", &message);
+                    Err(message)
+                }
+            }
+        }
     }
-    host.check_current()?;
-    edit.apply(host)
 }
 
 #[tauri::command]
@@ -904,6 +1044,35 @@ pub(crate) async fn agent_ide_ack(
     state
         .acknowledge(&app, &provider_id, request_id, &status, message.as_deref())
         .await
+}
+
+#[tauri::command]
+#[allow(
+    clippy::too_many_arguments,
+    reason = "Tauri exposes one write decision and injects host state"
+)]
+pub(crate) fn agent_write_decision(
+    state: State<'_, AgentToolState>,
+    window: WebviewWindow,
+    auth: String,
+    host: State<'_, crate::HostAccessState>,
+    provider_id: String,
+    review_id: String,
+    decision: String,
+    note: Option<String>,
+    connection_id: u64,
+) -> Result<(), String> {
+    host.check(&window, &auth)?;
+    if connection_id == 0
+        || !review_id
+            .chars()
+            .all(|character| character.is_ascii_graphic())
+        || review_id.len() > 128
+    {
+        return Err("This proposal was already decided.".into());
+    }
+    let choice = crate::agent_sensitive::parse_write_choice(&decision, note)?;
+    state.submit_confirmation(&provider_id, connection_id, &review_id, choice)
 }
 
 #[tauri::command]
@@ -1266,6 +1435,18 @@ mod tests {
             "Rename the requested method"
         );
         assert_eq!(context["recentAssistant"].as_array().unwrap().len(), 6);
+    }
+
+    #[test]
+    fn instructions_require_a_person_for_sensitive_writes() {
+        assert!(INSTRUCTIONS.contains("automatically reviews every proposed write"));
+        assert!(INSTRUCTIONS.contains("only after the person confirms"));
+        assert!(INSTRUCTIONS.contains("does not apply a sensitive path"));
+        assert!(INSTRUCTIONS.contains("Other writes are applied when automatic review approves"));
+        let host = crate::HostAccessState("token".into());
+        assert!(host.check_label("main", "token").is_ok());
+        assert!(host.check_label("main", "other").is_err());
+        assert!(host.check_label("panel", "token").is_err());
     }
 
     #[test]

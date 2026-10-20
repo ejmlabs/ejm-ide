@@ -21,11 +21,39 @@ use tauri_plugin_dialog::DialogExt;
 const FILE_LIMIT: u64 = 2 * 1024 * 1024;
 const TREE_LIMIT: usize = 10_000;
 
+/// Publish a directory entry durably. cap-std opens Linux directories with
+/// `O_PATH`, and `fsync` on that descriptor returns `EBADF`, so reopen the
+/// directory when the capability descriptor cannot be synced.
+fn sync_directory(parent: &Dir, path: &Path) -> Result<(), String> {
+    let synced = parent
+        .try_clone()
+        .map_err(|error| error.to_string())?
+        .into_std_file()
+        .sync_all();
+    match synced {
+        Ok(()) => Ok(()),
+        Err(error) if error.raw_os_error() == Some(libc::EBADF) => std::fs::File::open(path)
+            .and_then(|file| file.sync_all())
+            .map_err(|error| format!("Cannot sync file directory: {error}")),
+        Err(error) => Err(format!("Cannot sync file directory: {error}")),
+    }
+}
+
 #[derive(Clone)]
 pub(crate) struct WorkspaceRoot {
     pub(crate) path: PathBuf,
     pub(crate) directory: Arc<Dir>,
     trusted: bool,
+}
+
+impl WorkspaceRoot {
+    #[allow(
+        dead_code,
+        reason = "Tests assert that workspace trust does not change the write gate"
+    )]
+    pub(crate) fn is_trusted(&self) -> bool {
+        self.trusted
+    }
 }
 
 #[derive(Clone, Default)]
@@ -423,12 +451,7 @@ impl WorkspaceRoot {
                         format!("Cannot create file: {error}")
                     }
                 })?;
-            parent
-                .try_clone()
-                .map_err(|error| error.to_string())?
-                .into_std_file()
-                .sync_all()
-                .map_err(|error| format!("Cannot sync file directory: {error}"))?;
+            sync_directory(&parent, &self.path.join(parent_path))?;
             Ok(())
         })();
         let _ = parent.remove_file(&temporary);
@@ -498,12 +521,7 @@ impl WorkspaceRoot {
             parent
                 .rename(&temporary, &parent, name)
                 .map_err(|error| format!("Cannot replace file: {error}"))?;
-            parent
-                .try_clone()
-                .map_err(|error| error.to_string())?
-                .into_std_file()
-                .sync_all()
-                .map_err(|error| format!("Cannot sync file directory: {error}"))?;
+            sync_directory(&parent, &self.path.join(parent_path))?;
             Ok(())
         })();
         if result.is_err() {

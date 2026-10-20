@@ -52,6 +52,12 @@ import {
 } from '@/lib/providers';
 import { finishToolActivity, toolActivity } from '@/lib/tool-calls';
 import type { AgentEvent, ContextReference, SourceRange } from '@/lib/types';
+import {
+  approvalActivity,
+  approvalStatusFromReview,
+  parseWriteApproval,
+  type WriteApproval,
+} from '@/lib/write-approval';
 import { ToolCall } from './AgentPresentation';
 import { ChatBlocks } from './ChatBlocks';
 import { ChatHistory } from './ChatHistory';
@@ -61,6 +67,7 @@ import { ModelPicker } from './ModelPicker';
 import { ProviderSettings } from './ProviderSettings';
 import { Button } from './ui/button';
 import { Tooltip } from './ui/tooltip';
+import { WriteApprovalCard } from './WriteApprovalCard';
 
 export interface ChatDisplay extends ChatPresentation {
   revision: string;
@@ -104,6 +111,8 @@ interface Props {
   onDropReference: (reference: ContextReference) => void;
   onTurnComplete: () => void;
   onBusy: (busy: boolean) => void;
+  onApprovalPending: (pending: boolean) => void;
+  onOpenProposal: (approval: WriteApproval) => void;
   externalPrompt: { text: string; key: number } | null;
 }
 
@@ -302,6 +311,8 @@ export function ChatPane(props: Props) {
   const [usage, setUsage] = useState<ChatTokenUsage | null>(null);
   const [atBottom, setAtBottom] = useState(true);
   const [activity, setActivity] = useState('');
+  const [approval, setApproval] = useState<WriteApproval | null>(null);
+  const [approvalNow, setApprovalNow] = useState(() => Date.now());
   const [error, setError] = useState('');
   const [dragOver, setDragOver] = useState(false);
   const [activeChat, setActiveChat] = useState<ChatThread | null>(null);
@@ -339,6 +350,14 @@ export function ChatPane(props: Props) {
   const promptRef = useRef(prompt);
   const pendingTitle = useRef('');
   promptRef.current = prompt;
+  useEffect(() => {
+    propsRef.current.onApprovalPending(approval?.status === 'pending');
+  }, [approval?.status]);
+  useEffect(() => {
+    if (approval?.status !== 'pending') return;
+    const timer = window.setInterval(() => setApprovalNow(Date.now()), 15_000);
+    return () => window.clearInterval(timer);
+  }, [approval?.status]);
   const setRunning = useCallback((value: boolean) => {
     busyRef.current = value;
     setBusy(value);
@@ -580,6 +599,29 @@ export function ChatPane(props: Props) {
         if (snapshot) setUsage(snapshot);
         return;
       }
+      if (event.method === 'item/autoApprovalReview/awaitingUser') {
+        const next = parseWriteApproval(p);
+        if (next) {
+          setApproval({ ...next, connectionId: event.connection });
+          setApprovalNow(Date.now());
+          setActivity(approvalActivity(true) || 'Waiting for your approval');
+        }
+        return;
+      }
+      if (event.method === 'item/autoApprovalReview/completed') {
+        const status = approvalStatusFromReview(p.review?.status);
+        setApproval((current) =>
+          current && current.reviewId === p.reviewId
+            ? {
+                ...current,
+                status: status || 'error',
+                detail: p.review?.rationale || current.detail,
+              }
+            : current,
+        );
+        if (busyRef.current) setActivity('Working');
+        return;
+      }
       const tool = toolActivity(event.method, p);
       if (tool) {
         setMessages((old) => upsertChatTool(old, tool));
@@ -619,6 +661,11 @@ export function ChatPane(props: Props) {
         setRunning(true);
         setActivity('Thinking');
       } else if (event.method === 'turn/completed') {
+        setApproval((current) =>
+          current?.status === 'pending'
+            ? { ...current, status: 'cancelled', detail: 'The response ended.' }
+            : current,
+        );
         setMessages((old) =>
           old.map((item) =>
             item.tool
@@ -734,8 +781,8 @@ export function ChatPane(props: Props) {
       textarea.current?.focus();
     }
   }, [props.externalPrompt]);
-  async function send() {
-    if (!prompt.trim() || busyRef.current || changingChatRef.current) return;
+  async function sendText(text: string, references: ContextReference[]) {
+    if (!text.trim() || busyRef.current || changingChatRef.current) return;
     if (!connected || !authenticated) {
       await connect();
       return;
@@ -744,8 +791,6 @@ export function ChatPane(props: Props) {
       setError('Open a saved chat or reconnect Edi before sending.');
       return;
     }
-    const text = prompt.trim(),
-      references = [...props.references];
     references.forEach((ref) => {
       allReferences.current.set(ref.id, ref);
     });
@@ -809,6 +854,41 @@ export function ChatPane(props: Props) {
       setRunning(false);
       setActivity('');
       setPrompt(text);
+    }
+  }
+  function send() {
+    void sendText(prompt.trim(), [...props.references]);
+  }
+  async function retryApproval(text: string) {
+    if (busyRef.current) {
+      try {
+        await invokeAgent(providerId, 'agent_cancel');
+      } catch {
+        // The turn may already have finished.
+      }
+      for (let attempt = 0; attempt < 20 && busyRef.current; attempt += 1) {
+        await new Promise((resolve) => window.setTimeout(resolve, 50));
+      }
+    }
+    if (busyRef.current) {
+      setError('Stop the response, then ask Edi to try the change again.');
+      return;
+    }
+    await sendText(text, []);
+  }
+  async function decideApproval(decision: 'approve' | 'deny', note: string) {
+    if (!approval) return;
+    try {
+      await invokeAgent(providerId, 'agent_write_decision', {
+        reviewId: approval.reviewId,
+        decision,
+        note: note.trim() || null,
+        connectionId: approval.connectionId,
+      });
+    } catch (error) {
+      setApproval((current) =>
+        current ? { ...current, status: 'error', detail: String(error) } : current,
+      );
     }
   }
   async function cancel() {
@@ -1224,10 +1304,19 @@ export function ChatPane(props: Props) {
               </article>
             ),
           )}
-          {busy && (
-            <div className="chat-activity">
+          {approval && (
+            <WriteApprovalCard
+              approval={approval}
+              now={approvalNow}
+              onDecide={(decision, note) => void decideApproval(decision, note)}
+              onRetry={(text) => void retryApproval(text)}
+              onOpenDiff={props.onOpenProposal}
+            />
+          )}
+          {(busy || approval?.status === 'pending') && (
+            <div className="chat-activity" role="status" aria-live="polite">
               <LoaderCircle size={13} className="spin" />
-              {activity || 'Working'}
+              {approvalActivity(approval?.status === 'pending') || activity || 'Working'}
               <span className="activity-dots" />
             </div>
           )}

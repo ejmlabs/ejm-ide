@@ -25,7 +25,10 @@ and [docs/harness.md](../../../docs/harness.md) first.
 ## Product rules
 
 - Auto-review is the only review policy. Every proposed file write is reviewed
-  automatically. Do not add Ask or Edit modes, or a policy picker.
+  automatically. A sensitive path is applied only after the person confirms it.
+  Reviewer approval does not apply a sensitive path, and a reviewer denial is
+  final. Other writes stay on automatic review. Do not add Ask or Edit modes,
+  a policy picker, or a way to skip the sensitive-path confirmation.
 - There is no shell or external-action tool. Do not add one without a design
   change the user approves.
 - Tool names start with `workbench_` and stay stable across renames. Tools use

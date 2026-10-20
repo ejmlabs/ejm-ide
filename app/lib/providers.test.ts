@@ -82,6 +82,7 @@ describe('provider routing', () => {
     'agent_complete',
     'agent_complete_cancel',
     'agent_ide_ack',
+    'agent_write_decision',
   ])('still requires a provider for %s', async (command) => {
     await expect(invokeAgent('', command)).rejects.toThrow('Set up a model provider');
     expect(backend.invoke).not.toHaveBeenCalled();

@@ -4,7 +4,17 @@ import type { GitDiffRequest } from './git';
 export type EditorTab =
   | { id: string; kind: 'file'; path: string; title: string }
   | { id: string; kind: 'markdown-preview'; path: string; title: string }
-  | { id: string; kind: 'diff'; request: GitDiffRequest; title: string };
+  | { id: string; kind: 'diff'; request: GitDiffRequest; title: string }
+  | {
+      id: string;
+      kind: 'proposal-diff';
+      title: string;
+      path: string;
+      before: string;
+      after: string;
+      reviewId: string;
+      connectionId?: number;
+    };
 export interface EditorGroup {
   kind: 'group';
   id: string;
@@ -200,7 +210,7 @@ export function splitEditorGroup(
   return { ...layout, root, activeGroup: newGroupId };
 }
 export function editorTabPath(tab: EditorTab | undefined): string | undefined {
-  return tab && tab.kind !== 'diff' ? tab.path : undefined;
+  return tab && (tab.kind === 'file' || tab.kind === 'markdown-preview') ? tab.path : undefined;
 }
 export function editorDocumentPaths(layout: EditorLayout): Set<string> {
   return new Set(
@@ -275,7 +285,9 @@ export function replaceEditorFile(
     tabs: Object.fromEntries(
       Object.entries(layout.tabs).map(([id, tab]) => [
         id,
-        tab.kind !== 'diff' && tab.path === oldPath ? { ...tab, path, title } : tab,
+        (tab.kind === 'file' || tab.kind === 'markdown-preview') && tab.path === oldPath
+          ? { ...tab, path, title }
+          : tab,
       ]),
     ),
   };
@@ -288,6 +300,27 @@ export function diffEditorTab(
   title: string,
 ): Extract<EditorTab, { kind: 'diff' }> {
   return { id: `diff:${JSON.stringify(request)}`, kind: 'diff', request, title };
+}
+export function proposalDiffTab(proposal: {
+  reviewId: string;
+  path: string;
+  before: string;
+  after: string;
+  connectionId?: number;
+}): Extract<EditorTab, { kind: 'proposal-diff' }> {
+  return {
+    id: `proposal:${proposal.reviewId}`,
+    kind: 'proposal-diff',
+    title: proposal.path,
+    path: proposal.path,
+    before: proposal.before,
+    after: proposal.after,
+    reviewId: proposal.reviewId,
+    connectionId: proposal.connectionId,
+  };
+}
+export function isGitDiffTab(tab: EditorTab): boolean {
+  return tab.kind === 'diff';
 }
 export function isUntitled(path: string): boolean {
   return path.startsWith('untitled:');
