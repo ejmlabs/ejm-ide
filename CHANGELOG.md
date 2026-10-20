@@ -20,7 +20,8 @@ Follow [Releases](RELEASING.md) before creating or publishing artifacts.
 - Provider authentication commands with matching native declarations and host
   permissions, while sandboxed panels remain unable to invoke them.
 - Uniform repository guidance, explicit human admission, protected merge gates,
-  two complete Codex reviews, and independent SemVer source-draft preparation.
+  two complete automated review steps, and independent SemVer source-draft
+  preparation.
 
 ### Fixed
 
@@ -34,8 +35,8 @@ Follow [Releases](RELEASING.md) before creating or publishing artifacts.
 ### Verification and limits
 
 - [PR #9](https://github.com/ejmlabs/ejm-ide/pull/9) verified the installed shared
-  caller, macOS Quality, all five merge gates and two complete Codex Sol 6.1
-  medium reviews. It used the separately pinned harness revision
+  caller, macOS Quality, all five merge gates and two complete automated review
+  steps at medium effort. It used the separately pinned harness revision
   `09b779ee0452dda07b7f52503be22e65fe238373`; fetch that checkout beside the IDE
   when building the source archives.
 - The current target is macOS on Apple Silicon. Native installer, signing and

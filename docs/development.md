@@ -49,7 +49,8 @@ check their Git identities, hashes, modes, and total size separately.
 
 Each AI pass must return boolean `complete: true`. Missing, false, or nonboolean
 completion fails even with no findings. Human readiness, maintainer approval,
-both complete medium Codex passes, and every required check remain required.
+both complete automated review steps at medium effort, and every required
+check remain required.
 A submitted caller does not replace the trusted workflow used to check its own
 PR. A caller update therefore needs fresh admission and normal hosted checks
 before merge; local standards checks do not establish hosted acceptance.
@@ -79,7 +80,7 @@ pin and previous `c4f2873ef0eef5bc3c7d75cf71fa3489a911d134` caller in
 [PR #8](https://github.com/ejmlabs/ejm-ide/pull/8) then passed under that caller
 in [run 39344302241](https://github.com/ejmlabs/ejm-ide/actions/runs/39344302241)
 and installed `6717b433…` on main. Both runs passed all five gates and two
-complete actual `gpt-6.1-sol` medium reviews without an exception. The
+complete actual automated review steps at medium effort without an exception. The
 installed `6717b433…` caller then passed
 [PR #9](https://github.com/ejmlabs/ejm-ide/pull/9) in
 [run 39347126851](https://github.com/ejmlabs/ejm-ide/actions/runs/39347126851),
