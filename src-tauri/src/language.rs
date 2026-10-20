@@ -345,12 +345,13 @@ pub fn server_initialization_options(language: Language, resources: Option<&Path
     })
 }
 
-fn session(
+fn session_with_start(
     languages: &LanguageState,
     generation: u64,
     root: &Path,
     language: Language,
-    app: &AppHandle,
+    start: impl FnOnce() -> Result<LspClient, String>,
+    on_created: impl FnOnce(&Arc<Session>),
 ) -> Result<Arc<Session>, String> {
     {
         let mut sessions = languages.sessions_for_generation(generation)?;
@@ -359,11 +360,7 @@ fn session(
             return Ok(existing.clone());
         }
     }
-    let resources = app.path().resource_dir().ok();
-    let command = server_command(language, resources.as_deref())?;
-    let options = server_initialization_options(language, resources.as_deref());
-    let client = LspClient::start_with_options(root, language, command, options)
-        .map_err(|error| error.to_string())?;
+    let client = start()?;
     let created = Arc::new(Session {
         root: root.to_path_buf(),
         client: Mutex::new(client),
@@ -377,35 +374,60 @@ fn session(
     }
     sessions.insert(language, created.clone());
     drop(sessions);
-    let weak = Arc::downgrade(&created);
-    let app = app.clone();
-    thread::spawn(move || {
-        while let Some(session) = weak.upgrade() {
-            let Ok(client) = session.client.lock() else {
-                break;
-            };
-            let mut stopped = false;
-            for _ in 0..100 {
-                match client.try_recv() {
-                    Ok(Some(LspEvent::Notification { method, params })) => app.state::<NativeEvents>().publish("language:event", json!({ "language": key(language), "root": session.root, "method": method, "params": params })),
-                    Ok(Some(LspEvent::Error { id: None, message })) => {
-                        app.state::<NativeEvents>().publish("language:event", json!({ "language": key(language), "root": session.root, "method": "workbench/status", "params": { "status": "error", "message": message } }));
-                        stopped = true; break;
-                    }
-                    Ok(Some(_)) => {},
-                    Ok(None) => break,
-                    Err(_) => { stopped = true; break; }
-                }
-            }
-            drop(client);
-            drop(session);
-            if stopped {
-                break;
-            }
-            thread::sleep(Duration::from_millis(30));
-        }
-    });
+    on_created(&created);
     Ok(created)
+}
+
+fn session(
+    languages: &LanguageState,
+    generation: u64,
+    root: &Path,
+    language: Language,
+    app: &AppHandle,
+) -> Result<Arc<Session>, String> {
+    session_with_start(
+        languages,
+        generation,
+        root,
+        language,
+        || {
+            let resources = app.path().resource_dir().ok();
+            let command = server_command(language, resources.as_deref())?;
+            let options = server_initialization_options(language, resources.as_deref());
+            LspClient::start_with_options(root, language, command, options)
+                .map_err(|error| error.to_string())
+        },
+        |created| {
+            let weak = Arc::downgrade(created);
+            let app = app.clone();
+            thread::spawn(move || {
+                while let Some(session) = weak.upgrade() {
+                    let Ok(client) = session.client.lock() else {
+                        break;
+                    };
+                    let mut stopped = false;
+                    for _ in 0..100 {
+                        match client.try_recv() {
+                            Ok(Some(LspEvent::Notification { method, params })) => app.state::<NativeEvents>().publish("language:event", json!({ "language": key(language), "root": session.root, "method": method, "params": params })),
+                            Ok(Some(LspEvent::Error { id: None, message })) => {
+                                app.state::<NativeEvents>().publish("language:event", json!({ "language": key(language), "root": session.root, "method": "workbench/status", "params": { "status": "error", "message": message } }));
+                                stopped = true; break;
+                            }
+                            Ok(Some(_)) => {},
+                            Ok(None) => break,
+                            Err(_) => { stopped = true; break; }
+                        }
+                    }
+                    drop(client);
+                    drop(session);
+                    if stopped {
+                        break;
+                    }
+                    thread::sleep(Duration::from_millis(30));
+                }
+            });
+        },
+    )
 }
 
 fn checked_document(
@@ -805,25 +827,78 @@ pub fn language_close(
 mod tests {
     use super::*;
 
-    #[test]
-    fn pending_language_start_cannot_publish_after_workspace_clear() {
+    #[tokio::test]
+    async fn pending_language_start_cannot_publish_after_workspace_clear() {
+        use tokio::{
+            io::{AsyncReadExt, AsyncWriteExt},
+            net::TcpListener,
+            time::timeout,
+        };
+
+        let deadline = Duration::from_secs(10);
+        let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let address = listener.local_addr().unwrap();
+        let root = tempfile::tempdir().unwrap();
+        let path = root.path().to_path_buf();
         let state = LanguageState::default();
         let pending = state.clone();
         let generation = state.generation.load(Ordering::Acquire);
-        let (started, starting) = std::sync::mpsc::sync_channel(0);
-        let (resume, resumed) = std::sync::mpsc::sync_channel(0);
-        let worker = thread::spawn(move || {
-            drop(pending.sessions_for_generation(generation).unwrap());
-            started.send(()).unwrap();
-            resumed.recv().unwrap();
-            pending.sessions_for_generation(generation).is_err()
+        let initialized = Arc::new(AtomicBool::new(false));
+        let started = initialized.clone();
+        let mut command = Command::new(node_path().unwrap());
+        command
+            .arg(
+                Path::new(env!("CARGO_MANIFEST_DIR"))
+                    .join("tests/fixtures/initializing-language-server.cjs"),
+            )
+            .arg(address.port().to_string());
+        let worker = tokio::task::spawn_blocking(move || {
+            session_with_start(
+                &pending,
+                generation,
+                &path,
+                Language::TypeScript,
+                || {
+                    let client = LspClient::start_with_options(
+                        &path,
+                        Language::TypeScript,
+                        command,
+                        json!({}),
+                    )
+                    .map_err(|error| error.to_string())?;
+                    started.store(true, Ordering::Release);
+                    Ok(client)
+                },
+                |_| panic!("An invalidated client must not start an event pump"),
+            )
+            .map(|_| ())
         });
-        starting.recv().unwrap();
+        let (mut control, _) = timeout(deadline, listener.accept()).await.unwrap().unwrap();
+        assert_eq!(
+            timeout(deadline, control.read_u8()).await.unwrap().unwrap(),
+            1
+        );
         // Opening another folder and returning to the same path are separate sessions.
         state.clear();
         state.clear();
-        resume.send(()).unwrap();
-        assert!(worker.join().unwrap());
+        timeout(deadline, control.write_all(&[1]))
+            .await
+            .unwrap()
+            .unwrap();
+        let result = timeout(deadline, worker).await.unwrap().unwrap();
+        assert!(initialized.load(Ordering::Acquire));
+        assert!(result.is_err());
+        assert!(state.sessions.lock().unwrap().is_empty());
+        // The fixture keeps this socket open after shutdown and exit. Only the
+        // production client's child cleanup closes it before the parent does.
+        let mut byte = [0];
+        assert_eq!(
+            timeout(deadline, control.read(&mut byte))
+                .await
+                .unwrap()
+                .unwrap(),
+            0
+        );
         let current = state.generation.load(Ordering::Acquire);
         assert!(state.sessions_for_generation(current).is_ok());
     }

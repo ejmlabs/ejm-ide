@@ -41,15 +41,28 @@ not distinguish two open sessions for the same folder.
    shared counter allocation per state and two checked map acquisitions per
    startup. Do not infer app memory, process cleanup, or latency from scratch
    test measurements.
-5. Add one deterministic test that pauses a pending generation check, clears the
-   workspace twice, resumes it, and confirms rejection plus access by the current
-   generation. Synchronous channels avoid timing sleeps. Record the executed
-   production-fragment regression separately from full native checks.
+5. Extract only the existing cache, startup, and publication body into a private
+   helper shared by `session` and its native regression. A `FnOnce` starts the
+   client; a second `FnOnce` starts the existing event pump only after successful
+   publication. Cached, losing, and rejected clients do not invoke that callback.
+   The closures add no allocation or public interface and preserve production
+   command, initialization, locking, and cleanup behavior.
+6. Replace the guard-only regression with a real `LspClient` test. A small Node
+   fixture uses the installed public `vscode-languageserver-protocol/node`
+   transport and holds initialization at a loopback barrier. Clear twice while
+   startup is paused, release it, and confirm successful initialization followed
+   by rejection from the production publication path and an empty session map.
+   The child keeps its control socket open after shutdown and exit; observing EOF
+   after the worker returns checks production `LspClient::drop` cleanup. Tokio
+   provides bounded accept and IO; parent socket closure exits the fixture on
+   failure. Use no sleeps, custom LSP framing, dependency, or unsafe process probe.
+   GUI folder picking remains a separate acceptance check.
 
 ## Risks / Trade-offs
 
 - Initialization still runs to completion. The guard releases a rejected client
-  when startup returns; native child-process acceptance remains a separate check.
+  when startup returns. The fixture checks that native path, while GUI folder
+  switching remains unverified until a separate acceptance check runs.
 - A request during a workspace switch can be rejected. Reopen a file after
   trusting the current workspace to request its language service again.
 - Primary draft checks used active sibling source. Preserve their exact scope

@@ -12,7 +12,9 @@ leaving a folder and reopening it while that start is pending.
   requested startup.
 - Advance that generation when workspace language services are cleared. Reject
   older starts and release their owned clients through normal cleanup.
-- Add one deterministic regression for a start paused across workspace clears.
+- Exercise the production cache, start, and publication path with a real native
+  client paused during initialization across workspace clears. Confirm rejected
+  child cleanup with the existing public LSP transport package.
 - Update the canonical language guide and changelog with the lifecycle and
   verification limits.
 
@@ -44,3 +46,5 @@ budget is one shared generation value per language state, two generation
 checks per startup, and no added worker, timer, or package. No speed improvement
 is claimed. Focused checks supplement, but do not replace, clean-pin native and
 full repository gates. Keep the change open until those required gates pass.
+The test uses bounded loopback barriers and the existing Node transport package;
+it does not establish GUI folder-picker acceptance.

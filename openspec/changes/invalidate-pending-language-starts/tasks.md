@@ -3,15 +3,16 @@
 ## 1. Workspace language lifecycle
 
 - [x] 1.1 Add shared generation checks to language-session lookup and publication, and verify source ordering against the reviewed language-only patch.
-- [x] 1.2 Add the deterministic pending-start regression and confirm its production state code and test match the already executed scratch regression; record the guard-only limit.
+- [x] 1.2 Replace the guard-only regression with a real native client regression through a private production cache/start/publication helper; preserve the production event pump and record the older scratch evidence separately.
 - [x] 1.3 Update `docs/languages.md` and the unreleased changelog, and review the public site's language overview for affected claims at this source pin.
-- [x] 1.4 Record the exact scratch regression and primary draft native-check evidence in `verification.md`, including the scope of each result and the clean-pin gates still unrun.
+- [x] 1.4 Record historical scratch and primary draft evidence separately from exact-pin native checks, the final candidate regression and full gates in `verification.md`; retain raw logs, source and patch hashes, and remaining GUI limits.
 
 ## 2. Integration checks
 
 - [x] 2.1 After the shared measurement window ends, pass focused `rustfmt --edition 2024 --check`, `git diff --check`, and strict OpenSpec validation for this change.
-- [ ] 2.2 With the immutable harness pin, pass clean-pin `cargo check --tests --locked` and `npm run verify`; retain native test, Clippy, and build output for review.
-- [ ] 2.3 Confirm native language-server behavior while switching folders and reopening the same folder during startup, including release of the rejected child client.
+- [x] 2.2 With the immutable harness pin, pass clean-pin `cargo check --tests --locked` and `npm run verify`; retain native test, Clippy, and build output for review.
+- [x] 2.3 Exercise the production native publication error path across two workspace clears with a real initializing LSP client, bounded loopback barriers, and child-owned socket EOF after rejection. Confirm successful initialization, an empty session map, and normal child cleanup.
+- [ ] 2.4 Confirm the native app's folder-picker behavior while switching away and reopening the same folder during startup. The controlled native fixture does not establish this GUI acceptance check.
 
 ## Workflow follow-up
 

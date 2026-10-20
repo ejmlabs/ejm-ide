@@ -25,10 +25,12 @@ releases the earlier client; this guard does not interrupt startup immediately.
 If a file reports that the workspace changed before its language service
 started, trust the current workspace and reopen the file to request its server.
 
-This is unreleased source behavior. The generation guard passed a deterministic
-regression without running a language server. Native folder-switch and child
-cleanup acceptance remain unverified, as do the full clean-pin checks. These
-source changes do not establish a published website or installer update.
+This is unreleased source behavior. A native regression passed with a real LSP
+client paused during initialization, two workspace clears, rejection through
+the production publication path, and cleanup of the rejected child. Native
+checks and the full repository checks passed against the exact harness pin.
+The app's folder picker and manual folder-switch behavior remain unverified.
+These checks do not establish a published website or installer update.
 
 ## Languages and tools
 

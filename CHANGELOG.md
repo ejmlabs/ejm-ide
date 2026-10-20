@@ -12,8 +12,9 @@ Changes follow [Semantic Versioning](https://semver.org/). Each repository is ve
 
 ### Verification and limits
 
-- The focused generation-guard regression passed. Full clean-pin checks and
-  native folder-switch and child cleanup acceptance remain unrun. See the
+- The native pending-start and child-cleanup regression, exact-pin native checks,
+  and full repository checks passed. Manual app folder-switch acceptance remains
+  unrun. See the
   [language guide](docs/languages.md#workspace-changes-during-server-startup).
 - No release, installer, or live website update is claimed.
 
