@@ -17,33 +17,35 @@ The relevant code today:
 - `quality_format` never runs Cargo or RuboCop. rust-analyzer is started with `checkOnSave: false`, so it does not schedule a second Cargo check. A trusted Rust server can still expand proc macros on its own schedule.
 - Preferences live in `EditorPreferences` and `localStorage` keys such as `workbench.lintOnSave`. Nothing in the workspace can change them. The product rule in `.agents/skills/ejm-ide-agent/SKILL.md` says automatic review is the only review policy and forbids an approval-policy picker.
 
-The Product Manager will choose, with Everett, between two policies. This design specifies the shared mechanism first, then each policy. It does not implement either.
+The specs in this change are Option A. Option B stays a follow-up that would replace only the non-sensitive requirement. This design implements the specs.
 
 ## Goals / Non-Goals
 
 **Goals:**
 
-- No agent write to an execution-relevant path reaches disk without an explicit human decision on that proposal.
-- A project-executing lint (`cargo clippy`, RuboCop) does not start while such a decision is pending, or while a protected path on disk lacks a recorded approval for its current agent-written version.
-- The person sees the diff and chooses Approve or Reject. Approve is a deliberate control, not the action Enter would hit.
-- The running turn waits inside the current tool call and then continues with an honest tool result.
-- One implementation of the wait, the command, the card, and the lint gate can serve either policy.
+- No agent write to a sensitive path reaches disk until the person confirms that exact write in the IDE. AI reviewer approval is not enough.
+- The confirmation shows the workspace-relative path and the full proposed change.
+- Denial, a bounded timeout, cancellation, a workspace switch, or a changed on-disk version writes nothing, and the agent hears a failed action.
+- Non-sensitive writes keep today's AI review, version check, confinement, and cancellation behavior.
+- The same wait and command can later cover more paths if the non-sensitive requirement is revised.
 
 **Non-Goals:**
 
-- An "always allow" or per-path memory. One approval must not cover a later edit.
-- Ask/Edit modes, a second agent, or a shell tool.
-- Editing ejm-harness. The wait stays inside the IDE tool adapter.
+- An "always allow" or per-path memory. One confirmation covers one write.
+- Ask/Edit modes, a second agent, a shell tool, or a rename, move, or delete tool. The classifier still defines how those mutations would be gated.
+- Editing ejm-harness, provider code, Git, or quality-tool code.
+- Suspending auto-lint, or sandboxing Clippy, language servers, or other quality tools. The proposal leaves that as a follow-up.
 - Git hooks (finding L3), the CSP, or dependency advisories.
-- Stopping a Rust language server that is already running. `checkOnSave` stays off. Proc-macro expansion by that server is a residual, narrowed by not writing protected sources until approval.
+- Stopping a running Rust language server. `checkOnSave` stays off.
 - A multi-file approval stack. The engine does not present one.
-- Persisting a pending proposal across quit or crash. The file stays unchanged.
+- Persisting a pending confirmation across quit or crash. The file stays unchanged.
+- Option B. It is described below so a later change can see the fit, and it is not part of these tasks.
 
 ## Decisions
 
-These decisions are the shared machinery. Option A and Option B only change when a card is required and what the reviewer model is allowed to decide.
+These decisions implement Option A. The wait itself does not depend on which paths are sensitive.
 
-1. **Wait inside `reviewed_write`, on the tool call the harness is already awaiting.** The harness executes the calls from one response in order and will not start the next until this one returns. `reviewed_write` is already async. The human wait uses a oneshot, the same shape as `ToolHost::present`, and does not use the 30 second presentation timeout. The turn's existing 20 minute deadline still applies. If it fires, or the person stops the turn, or the workspace changes, the wait ends, nothing is written, and the tool result says the proposal was cancelled.
+1. **Wait inside `reviewed_write`, on the tool call the harness is already awaiting.** The harness executes the calls from one response in order and will not start the next until this one returns. `reviewed_write` is already async. The human wait uses a oneshot, the same shape as `ToolHost::present`, and does not use the 30 second presentation timeout. The confirmation itself times out after 120 seconds, the bound already labeled `approvalTimeoutMs` in the Debug pane. That result is a timeout denial, which is not the cancellation message. If the person stops the turn, the workspace changes, or the 20 minute turn deadline fires first, the confirmation is withdrawn and nothing is written.
 
    Alternative considered: a new harness "pending tool result" state that suspends the run deadline. That can wait longer than 20 minutes, and it could hold every call in the response before the first one runs. It is a shared-engine change, and this fix does not need it. A proposal that outlives the open turn can be re-requested.
 
@@ -51,153 +53,111 @@ These decisions are the shared machinery. Option A and Option B only change when
 
 2. **One pending proposal at a time.** Because calls are sequential and only one turn can bind, a second card cannot be pending in the same session. Calls later in the same response stay inside the harness until this call returns. They are not a queue the UI can approve together.
 
-   Consequence for mixed responses under Option A: a normal write earlier in the same response is already on disk before the protected card appears. A normal write later in the response waits until this decision returns, then follows Option A's rule for that path. The design does not buffer the whole response. See Option A for why that leftover window is acceptable once protected paths cannot land early.
+   Consequence for mixed responses: a normal write earlier in the same response is already on disk before the sensitive card appears. A normal write later in the response waits until this decision returns, then follows the non-sensitive rule. The design does not buffer the whole response. A sensitive path still cannot land before its own confirmation.
 
-3. **A new command, `agent_write_decision`, is the only way to approve.** It takes the per-launch host token and the main-window check that every other command uses. The body is a single-use request id, `approve` or `reject`, and an optional note (at most 1000 characters, no NUL). The id is a UUID created for that proposal and stored next to the oneshot in `AgentToolState`. The command checks that the id is still the active proposal for the current workspace and turn. The first decision wins. A repeat gets "This proposal was already decided." `agent_ide_ack` must not resolve it. A presentation ack means the view updated, and reusing it would let a rendered card count as approval.
+3. **A new command, `agent_write_decision`, is the only way to approve.** It takes the per-launch host token and the main-window check that every other command uses. The body is a single-use request id, `approve` or `deny`, and an optional note (at most 1000 characters, no NUL). The id is a UUID created for that proposal and stored next to the oneshot in `AgentToolState`. The command checks that the id is still the active proposal for the current workspace and turn. The first decision wins. A repeat gets "This proposal was already decided." `agent_ide_ack` must not resolve it. A presentation ack means the view updated, and reusing it would let a rendered card count as approval.
 
    The command is added to the `COMMANDS` list in `src-tauri/build.rs`, the invoke handler, and the generated ACL. The existing parity test in `src-tauri/src/lib.rs` (`every_registered_command_has_a_generated_declaration_and_main_capability`) is the regression.
 
-4. **Re-check the snapshot at decision time, then call the existing apply path.** Approve does not write the bytes the webview echoes back. The host still holds the `PreparedWrite` (path, before, after, expected version, turn owner). `apply_checked` already refuses a stale version, a symlink, or a turn that has moved on. If the file changed, the card stays up with Approve disabled and the tool result tells Edi to read the file again. Reject writes nothing and returns a tool error that includes the note when there is one. Either result is the normal tool message, so the loop resumes on its own.
+4. **Re-check the snapshot at decision time, then call the existing apply path.** Approve does not write the bytes the webview echoes back. The host still holds the `PreparedWrite` (path, before, after, expected version, turn owner). `apply_checked` already refuses a stale version, a symlink, or a turn that has moved on. If the person confirms and the file changed, nothing is written and the tool result tells Edi to read the file again. That result is returned immediately. Deny writes nothing and returns a tool error that includes the note when there is one. Either result is the normal tool message, so the loop resumes on its own.
 
-5. **The policy decision is a pure function over the normalized path.** `confirmation_required(path, policy) -> bool`. Option A passes the protected-path predicate. Option B passes always-true. The wait, the command, the card, and the lint gate call this function. They do not each grow a second copy of the rule.
+5. **Sensitivity is a pure function over the normalized path.** Create and replace pass the target. A future rename or move passes the source and the destination, and is sensitive if either path is. A future delete passes the target. `workbench_write_file` is the only mutation registered today, and both its create and replace paths call this function. No new tool is added. Text in the file, in tool output, or in the model reply cannot satisfy the function or skip the wait.
 
-6. **Project-executing lint consults the same host state.** Before `quality_lint` spawns Cargo or RuboCop, it refuses while a confirmation is pending, and it refuses when a protected path's on-disk version was written by Edi without a recorded approval for that version. The result uses a distinct status, `deferred`, and a short message naming the file. The save itself still succeeds. Biome, Ruff, and gofmt keep running: they are installed tools and do not execute project code. `quality_format` is unchanged. Agent apply does not call `quality_lint`. Trust stays an independent gate: an untrusted workspace still does not spawn these tools, and it still requires approval when the policy says so.
+6. **Quality-tool code stays as it is.** `quality_lint` and `quality_format` are not modified. A sensitive write cannot affect a later Clippy run until the person has confirmed it, because it is not on disk before then. Suspending lint for other agent edits is the follow-up named in the proposal.
 
-7. **No remembered allow, and no workspace-writable policy.** The protected list and the chosen policy live in the host binary. A read-only explanation may live in Preferences (`localStorage` is acceptable for an opt-in that Option B adds). A file in the repo must not be able to shrink the list. There is no "allow for this run" control. The Designer recommended against it, and a remembered allow on `build.rs` or `.github/**` would reopen M1.
+7. **No remembered allow, and no workspace-writable list.** The sensitive set lives in the host binary. A read-only explanation may live in Preferences. A file in the repo must not be able to shrink the list. There is no "allow for this run" control.
 
 8. **Keep the write-tool schema.** `workbench_write_file` stays `path`, `content`, and `expectedVersion`. A model-supplied "reason" field would be untrusted copy and would break current prompts if it were required. The card's reason line uses the latest non-empty assistant text in the turn, truncated, and is omitted when that text is empty. The label says it is Edi's wording and can be influenced by repository content.
 
-## Protected-path policy
+## Sensitive-path policy
 
-The predicate runs on the path `file_path` / `agent_file_root` have already accepted: absolute, inside the workspace, no `..`, no `.git` component, parent directories opened with symlinks not followed. Match each component case-insensitively. macOS can treat `Build.rs` and `build.rs` as the same file; a case-sensitive check would miss that. On Linux the same rule may ask about a name Cargo would not execute. That extra prompt is the safe direction.
+The predicate classifies the same normalized workspace-relative path the host will write. `file_path` already drops `.` segments and redundant separators, and it accepts an absolute path inside the workspace as that relative path. Compare each segment after Unicode NFKC and ASCII case-folding, so `BUILD.RS`, `cargo.toml`, `.GitHub`, and a fullwidth spelling of `scripts` match. NFKC is what makes a compatibility spelling of an ASCII name the same name. NFC alone does not.
 
-`.git` stays a hard error. Confirmation cannot open it.
+`.git`, in any case and any normalization, is rejected before this predicate. The UI does not offer a confirmation for it.
 
-The raw string from the model is not the match string. `src/../build.rs` never becomes `build.rs` here; it is rejected as traversal before review. When the raw string differs from the normalized relative path (`./build.rs`, or an absolute path), the card shows the normalized path and the raw string under it.
+`..` is rejected as traversal and is not rewritten into a sensitive path. A symbolic link in the target or in a parent is rejected, including when the link would land on a sensitive file. Both of those stay hard errors with no card.
 
-| Category | Match | What the card says |
-| --- | --- | --- |
-| Build and package manifests | File name `build.rs`, `Cargo.toml`, `rust-toolchain`, `rust-toolchain.toml`, `package.json`, `pyproject.toml`, `setup.py`, `setup.cfg`, `Makefile`, `makefile`, `GNUmakefile`, `Rakefile`, `Gemfile`, `Guardfile`, `Brewfile`. Any path under a `.cargo` directory. | Runs or changes what runs when the project builds or installs. |
-| Tool configs | File name matching `*.config.js`, `*.config.ts`, `*.config.mjs`, `*.config.cjs`, `*.config.mts`, `*.config.cts`. File name `.rubocop.yml`. | Tool config files are code and run when those tools start. |
-| CI | Any path under a `.github` directory. | Changes what runs in CI, which may have access to repository secrets. |
-| Editor and workspace | Any path under `.vscode` or `.workbench`. | Changes tasks and settings this editor may run automatically. |
-| Scripts | Any path under a `scripts` directory. | Scripts in this folder are likely to be run by you or your tools. |
-| Proc-macro sources | A `.rs` file whose nearest `Cargo.toml`, walking toward the workspace root, has `[lib] proc-macro = true`. | This package's Rust code runs during compilation, including automatic lint. |
+When the model's string differs from the normalized relative path (`./crates/./a/Cargo.toml`, or an absolute path), the card shows the normalized path and the raw string under it.
 
-Proc-macro detection reads the manifest with the `toml` crate. It does not run `cargo metadata` or any other Cargo command. Those commands execute build scripts, which is the outcome this change is preventing. If a `Cargo.toml` is present but cannot be parsed, `.rs` files under that package are treated as protected. A missing manifest does not protect ordinary `.rs` files. `build.rs` is protected by name even when the manifest parse fails.
+A path is sensitive when, at any depth:
 
-ejm-ide itself does not run npm scripts, Make, or GitHub workflows. Those entries stay on the list because they are the files a later tool or CI job executes, and they are the files named in M1. The files this app actually executes on save are covered by `build.rs`, `Cargo.toml`, `.cargo/**`, `rust-toolchain*`, proc-macro sources, and the RuboCop names above. `quality.rs` maps `.rs` to Clippy and `Rakefile` / `Gemfile` / `Guardfile` / `Brewfile` / Ruby sources to RuboCop.
+- the final segment is `build.rs`, `Cargo.toml`, `package.json`, `pyproject.toml`, `setup.py`, `Makefile`, or matches `*.config.*` (`vite.config.ts`, `eslint.config.mjs`)
+- or any directory segment is `.cargo`, `.github`, `.workbench`, `.vscode`, or `scripts`
 
-`Cargo.lock` is not on the list. It does not select code to run.
+`src/lib.rs`, `README.md`, and `Cargo.lock` are not sensitive. The card's one-line explanation follows the directory or file category: build and package manifests, tool config, CI, editor and workspace config, or scripts.
+
+Proposal open question 3 names more files (`rust-toolchain`, `rust-toolchain.toml`, `Gemfile`, `*.gemspec`, `.rubocop.yml`, and lower-priority `.envrc`, `go.mod`, `biome.json(c)`). They are not in the spec, and the ordinary-source scenario says `src/lib.rs` is not sensitive, including in a proc-macro package. This change does not add them. See "Left unresolved" below.
 
 ## Confirmation flow
 
 1. The model calls `workbench_write_file`. The harness awaits `EditorTool::execute`, which calls `reviewed_write`.
 2. `prepare_write` does today's checks. A bad path, a stale version, or a binary body returns a tool error. No card.
-3. The host evaluates `confirmation_required`. Under Option A the reviewer model runs first for every path. A protected path continues to step 4 only after a valid `approved: true`. Any other review result returns a tool error and skips the card. An ordinary path applies on that approval and does not reach step 4. Under Option B the reviewer model runs only when its preference is on, and it never skips step 4.
-4. The host publishes an `agent:event` on the existing channel (`workbench/writeApproval`). The payload carries the request id, thread, turn, connection, normalized path, raw path when it differs, category, change kind (`new` or `modified`), line counts, before, after, the advisory reviewer fields when a review ran, and whether this turn already rejected that path. The webview renders the card. The host waits on the oneshot.
-5. The person uses the card or the full-diff tab. Both call `agent_write_decision`. The host checks the token, window, id, and turn.
-6. Approve re-checks the workspace and version, records the approval for that path and version, then `apply_checked`. The tool result is the usual `{ path, version, created }`. Reject, cancel, timeout, or a workspace change records nothing and returns an error string the model can read. A disk error uses the same error path; the card shows "Couldn't apply change to {path}: {message}".
-7. The harness records the tool output and continues the turn. The next call in the response then starts, or the model takes another step.
+3. The reviewer model runs first for every write. A sensitive path continues to step 4 only after a valid `approved: true`. A denial or invalid review returns a tool error and does not ask the person. A non-sensitive path applies on a valid approval and does not reach step 4. Claims inside the file, tool output, or the review reason do not count as the person's confirmation.
+4. The host publishes `item/autoApprovalReview/awaitingUser` on the same review id the AI phase already uses. Today's `started` and `completed` payloads have no diff, and `completed` with `approved` means the write may be applied, so a sensitive approval must not use that status yet. The new payload carries the review id, the normalized path, the raw path when it differs, the change kind, and the full before and after. The webview renders it with the existing `.approval-request` rules. Nothing in `app/` listens for `item/autoApprovalReview/*` today, so this change adds that listener. The host then waits on the oneshot for at most 120 seconds.
+5. Approve and Deny on the card, and the same buttons on the full-diff tab, call `agent_write_decision`. The host checks the token, window, id, and turn. The webview sends the decision only, not the file bytes.
+6. Approve re-checks the workspace and version, then `apply_checked`. The tool result is the usual success value, and `item/autoApprovalReview/completed` reports `approved`. If the on-disk version changed, nothing is written and the tool error tells Edi to read the file again. Deny writes nothing and returns a denial. Timeout returns a timeout denial and does not use the cancellation wording. Cancellation and a workspace switch withdraw the card and write nothing. A disk error is reported on the card and to Edi.
+7. The harness records that tool output and continues the turn. The next call then starts. A later sensitive write needs its own confirmation. The first confirmation does not apply to it.
 
-The webview must not send the file bytes back. It sends the decision only. The before/after in the event are a display copy of what the host already stored.
+Stopping the response uses today's `agent_cancel` path. The wait observes the same cancel flag as `check_current`. Quit and crash drop the in-memory oneshot. The file was never written.
 
-Stopping the response uses today's `agent_cancel` path. The wait observes the same cancel flag as `check_current`. The card switches to "Cancelled · {path} · not applied". Quit and crash drop the in-memory oneshot; the file was never written.
+## Auto-lint
 
-## Auto-lint interaction
-
-`quality_lint` is the M1 trigger. Clippy's scope is the Cargo package, not the saved file: saving `src/main.rs` compiles that package and runs its `build.rs` and proc macros. RuboCop loads project config from the workspace.
-
-Shared rule, both options:
-
-- While a `workbench/writeApproval` proposal is unresolved, Clippy and RuboCop return `deferred` and do not spawn. Biome, Ruff, and gofmt still run.
-- `QualityState` (or the agent tool state it can read under the lint lock) records protected versions applied by Edi and the approval id that covered them. Clippy and RuboCop also return `deferred` if they would operate on a package or workspace that contains a protected agent-written version with no matching approval. Under both options the approval is recorded before `apply_checked`, so this second check is the invariant, not a second prompt.
-- The deferred message names the file and says lint is waiting until that change is decided. The editor save does not roll back.
-- Nothing in the agent apply path calls `lintSavedDocument`. If a later change reloads an open model from an agent write, that reload must not lint until the version is approved.
-
-Option A does not defer Clippy for an ordinary source edit that the reviewer model applied. Those files are outside the protected predicate, including the proc-macro rule, so compiling them runs the build scripts and macros already on disk, which a person approved or wrote. The chat still shows that edit through the existing `ChatEdits` row.
-
-Option B never applies any write before approval, so the pending-proposal check is the whole lint interaction. After the last decision, a later user save lints as usual.
-
-Untrusted workspaces never reach the spawn. The deferred status does not replace the trust check.
+Auto-lint is unchanged. The proposal puts suspending it out of scope and says this change does not modify quality-tool code. The M1 step this change closes is the unconfirmed write: `build.rs` and the other sensitive files are not on disk for the next trusted save to compile until the person confirms them. Ordinary agent edits, and the files in open question 3, can still be on disk when that save runs Clippy or RuboCop. That residual is the follow-up, not a lint gate in this change.
 
 ## Option A
 
-**Human confirmation for protected paths only. Recommended.**
+This is the behavior the specs require.
 
-- `confirmation_required` is the protected-path predicate.
-- The reviewer model still runs for every write, protected or not. A missing, invalid, or `approved: false` review leaves the file unchanged and does not show a card. The person cannot override a reviewer rejection. A rejection is untrusted too, but the failure direction is "do not write".
-- A valid `approved: true` on a protected path does not write. It opens the card. The reviewer's `reason` is advisory text on the card, never a checkmark and never a sufficient condition.
-- A valid `approved: true` on any other path applies immediately, as today.
-- The prompt keeps automatic review, and gains one sentence: a protected path is applied only after the person approves, and a rejection is final for that proposal.
+- The sensitive-path predicate above is the only extra gate.
+- The reviewer model still runs for every write. A missing, invalid, or `approved: false` review leaves the file unchanged and does not show a card. The person cannot override that denial.
+- A valid `approved: true` on a sensitive path does not write. It opens the card. The reviewer's `reason` is text on the card, never a checkmark and never a sufficient condition.
+- A valid `approved: true` on any other path applies immediately, as today. A denial of `README.md` still returns the reviewer's reason and writes nothing.
+- The prompt keeps automatic review, and gains one sentence: a sensitive path is applied only after the person confirms it in the IDE.
+- Trusted and untrusted workspaces use the same confirmation. Trust still decides whether quality tools and language servers may run.
 
-Why this is the default:
+Tradeoff: a response that writes `src/lib.rs` and then `build.rs` still lands `src/lib.rs` before the card, because the harness finishes each call in order. `build.rs` still cannot land early. A response that writes `build.rs` first shows the card before any later call in that response runs.
 
-- M1's concrete step is an edit to a file the next Cargo or RuboCop run will execute. Those paths are the ones a person must see.
-- Ordinary edits stay on the current automatic review path, so a normal coding turn does not stop on every file.
-- The proc-macro rule is what keeps "only the sensitive list" from missing Rust's other execution path. A `src/lib.rs` in a normal package is not executed by Clippy. The same file name in a proc-macro package is.
+Tradeoff: the reviewer model still sees untrusted repo text, and it can still approve a normal file. That is the current control, kept for paths the spec leaves on the automatic path.
 
-Tradeoff: a response that writes `src/lib.rs` and then `build.rs` still lands `src/lib.rs` before the card. That file is not execution-relevant under this predicate. The `build.rs` write still cannot land early. A response that writes `build.rs` first shows the card before any later write in that response runs.
-
-Tradeoff: the reviewer model still sees untrusted repo text, and it can still approve a normal file that should have been rejected. That is the current control, kept for files that do not execute during lint. It is no longer the control for protected paths.
-
-Alternative considered: show the card even when the reviewer rejects, so a person can override. That makes a single Approve click able to accept an edit the review layer called suspicious. The card would train the same habitual click M1 is about. Fail closed instead.
+Alternative considered: show the card even when the reviewer rejects, so a person can override. The spec allows the reviewer to deny before the person is asked, and an override would let one click accept an edit that layer called suspicious. Fail closed instead.
 
 ## Option B
 
-**A person reviews every agent write. The reviewer model is an opt-in note.**
+Not this change. The proposal keeps every requirement and replaces only "Non-sensitive writes keep the current review flow" with: agent writes require human confirmation by default, and the AI reviewer may approve non-sensitive writes only when the person has opted in.
 
-- `confirmation_required` is always true, including ordinary source.
-- The reviewer model does not run unless the person turns it on. The preference is `workbench.agentLlmReview` in `localStorage`, default off, edited from Preferences next to the other AI controls. It is not read from the workspace.
-- When the opt-in is on, the model still returns `approved` and `reason`, and the card shows that text as advisory. `approved: false` does not skip the card and does not block Approve. The person is the only apply gate. When the opt-in is off, the card omits the reviewer line and the host makes no reviewer model call.
-- The prompt drops "automatically reviews every proposed write" and says every write waits for the person.
-- The product sentence in `.agents/skills/ejm-ide-agent/SKILL.md` that forbids any confirmation beyond automatic review has to change with this option. Option A changes it only for protected paths.
+Under that wording, sensitive writes still need a person, and the reviewer may still deny before the prompt. Non-sensitive writes would also wait, unless the opt-in is on, in which case today's AI approval can apply them. The opt-in would not let the reviewer apply a sensitive path, and it would not turn a reviewer denial into advice the person can click past.
 
-Why someone would pick this:
+The wait, the command, the card, and the classifier are the pieces that follow-up would reuse. It would widen the predicate, add a preference outside the workspace, and change the tests that expect `src/main.rs` to apply with no prompt. It needs a spec edit first. This change does not add the preference or the Designer's A/B radio.
 
-- Path lists miss a file we have not thought of. A new tool config or a script outside `scripts/` would still wait.
-- The reviewer model never gates a write, so a prompt-injected approval cannot apply bytes.
+## Left unresolved
 
-Tradeoff: every `workbench_write_file` stops the turn until the person answers, including a one-line edit to a source file they asked for. The 20 minute deadline still cancels an abandoned card. This is the cost the Designer was avoiding by prompting only for protected paths.
+These are the proposal's open questions that this design does not close by editing the spec.
 
-Tradeoff: with the opt-in on, a reviewer rejection is only a warning, and Approve still writes. That matches "the person is the policy". It is a weaker automatic backstop than Option A.
-
-## Switching from A to B later
-
-The wait, the oneshot, `agent_write_decision`, the card, the diff tab, the lint deferral, and the approval ledger are the same code. They should be written once, against `confirmation_required`.
-
-The switch is then:
-
-- Change the predicate from the protected-path function to always true.
-- Stop treating reviewer `approved: false` as a hard failure, and skip the model call unless `workbench.agentLlmReview` is set.
-- Use the generic card title "Approve change to a file" when the path has no category. Protected paths keep their category title and the one-line explanation.
-- Update `INSTRUCTIONS`, `docs/agent-tools.md`, `docs/harness.md`, and the agent skill.
-- Invert the tests that expect an ordinary file to apply without a card.
-
-No chat migration and no on-disk flag. Pending proposals are in memory only.
-
-That is a small follow-up on top of the shared work, not a second design. The expensive pieces are the pause, the command ACL, the card, and the lint gate. They do not get rewritten to move from A to B.
-
-Shipping both as a user preference is a separate product choice. The Designer spec includes "Ask before agent changes: Build and config files / Every file". The current product rule forbids a policy picker, and a control that can move the security boundary is easy to flip without noticing. This change should implement the policy Everett picks, and expose the list as read-only help. The picker is specified below so it is ready if he wants both, and it is not part of the recommended implementation.
+- **Extra files (question 3).** `rust-toolchain`, `rust-toolchain.toml`, `Gemfile`, `*.gemspec`, `.rubocop.yml`, `.envrc`, `go.mod`, and `biome.json(c)` can still be written after AI review only. So can `src/lib.rs` in a proc-macro package. The spec's list and the ordinary-source scenario do not cover them. An earlier draft of this design added several of those paths. That contradicted the spec, so they are not in the predicate.
+- **Timeout length (question 5).** The spec requires a bounded timeout and a timeout denial. It does not fix the number. This design uses 120 seconds because the proposal suggests that value and the Debug pane already shows it as `approvalTimeoutMs`. A longer bound would still meet the spec. Everett can change the number without a new requirement.
+- **Any-depth directories (question 4).** The spec requires any depth, including `src/scripts/` and `tools/.cargo/`. The design follows that. The extra prompts are accepted.
+- **Reviewer before the prompt (question 6).** The spec says the reviewer may deny before the person is asked. The design keeps that pre-filter. Skipping it would be a spec change.
+- **Option A or B (question 1).** The specs are A. B is the follow-up above.
 
 ## Confirmation UI
 
 Folded from the Designer spec (uploads/require-human-approval-for-agent-writes-ui.md) and checked against `App.tsx`, `ChatPane.tsx`, `ChatEdits.tsx`, `GitDiffPane.tsx`, and `EditorPreferences.tsx`. User-visible copy says Edi where the spec said "Agent".
 
-### Answers to the spec's open questions
+### Answers to the Designer spec's open questions
 
-1. **The loop can pause on a tool call today.** `execute_response_tools` awaits each call. Awaiting a oneshot inside `reviewed_write` pauses the turn at that call and resumes when the tool result is recorded. No new harness state is required. A batch of pending cards does not form: the next call has not started, and a second session cannot bind. The wait is not unbounded. The harness deadline is 20 minutes, and the card has no timer of its own. Hitting the deadline cancels the proposal and writes nothing.
+1. **The loop can pause on a tool call today.** `execute_response_tools` awaits each call. Awaiting a oneshot inside `reviewed_write` pauses the turn at that call and resumes when the tool result is recorded. No new harness state is required. A batch of pending cards does not form: the next call has not started, and a second session cannot bind. The confirmation has its own 120 second timeout, and the tool result is a timeout denial. The 20 minute turn deadline can still withdraw the card sooner if the whole turn ends.
 
 2. **Reuse two existing diff views, not `GitDiffPane` as a whole.** The inline preview should use `fileDiffPreview` and the hunk table in `ChatEdits` (sign column, line numbers, sr-only "lines added" / "lines removed"). The full view should use the same Monaco `DiffEditor` options as `GitDiffPane` (`readOnly`, `originalEditable: false`, side by side, `releaseDiffModelsAfterDispose`). `GitDiffPane` itself cannot show the proposal: it fetches `git_diff` for a `GitDiffRequest`, and the proposal is not a Git diff yet. Add an editor-tab kind that holds the before/after strings already on the event. `EditorTab` today is only `file`, `markdown-preview`, and git `diff`.
 
-3. **Show the protected-path list, read-only.** Put it in Preferences, in the AI assistance section, as a disclosure under a `settings-note`: "Edi asks before changing build and config files." Listing the categories and the examples from the table. Do not make the list editable, and do not store overrides in the project. People should be able to see why a card appeared. An editable list would let a shorter list reopen M1.
+3. **Show the sensitive-path list, read-only.** Put it in Preferences, in the AI assistance section, as a disclosure under a `settings-note`: "Edi asks before changing build and config files." List the spec's file names and directory names. Do not make the list editable, and do not store overrides in the project. People should be able to see why a card appeared. An editable list would let a shorter list reopen M1.
 
 ### When the card appears
 
-- Option A: the normalized path is protected, and the reviewer model returned a valid approval. The verdict on the card is advisory. The write is still not applied.
-- Option B: every write that passes `prepare_write`. The reviewer line appears only when the opt-in model call ran.
+- The normalized path is sensitive, and the reviewer model returned a valid approval. The reviewer's reason is text on the card. The write is not applied yet.
+- A reviewer denial does not show the card.
 - An untrusted workspace uses the same card. Trust gates process launch, not this decision.
 - The card is inline in the chat thread, on the tool row for that call. It is not a modal. `ChatPane` already keeps the thread visible while the rest of the window stays usable.
+- The card uses the existing `.approval-request` rules in `app/styles.css`. Those rules are unused today.
 
 ### While it is pending
 
@@ -217,115 +177,116 @@ Folded from the Designer spec (uploads/require-human-approval-for-agent-writes-u
 │ Edi's reason: "Add a cfg flag for the new feature gate."   │
 │ Reviewer note: Requested build change.                     │
 │                                                             │
-│ ┌ diff preview (first 20 changed lines) ─────────────────┐ │
+│ ┌ full diff (scrolls; nothing omitted) ──────────────────┐ │
 │ │  fn main() {                                           │ │
 │ │ + println!("cargo:rustc-cfg=feature_x");               │ │
 │ └─────────────────────────────────────────────────────────┘ │
-│ Open full diff                                              │
+│ Open side-by-side diff                                      │
 │                                                             │
-│ [ Reject ]  [ Approve ]           Add a note for Edi       │
+│ [ Deny ]  [ Approve ]             Add a note for Edi       │
 └─────────────────────────────────────────────────────────────┘
 ```
 
-- **Title.** "Approve change to a build file", "…to a CI file", "…to an editor config file", "…to a script", "…to a tool config file", or "…to a file" when there is no category (Option B only). The region is labelled "Approval needed: build.rs".
-- **Path line.** Workspace-relative normalized path, `new file` or `modified`, and the `+` / `−` counts from `fileDiffPreview`. If the model string differed, a second line shows it.
-- **Why.** The one line from the category table. Omit it only for the generic Option B title.
+- **Title.** "Approve change to a build file", "…to a CI file", "…to an editor config file", "…to a script", or "…to a tool config file". The region is labelled "Approval needed: build.rs".
+- **Path line.** Workspace-relative normalized path, `new file` or `modified`, and the `+` / `−` counts. If the model string differed, a second line shows it.
+- **Why.** The one line for that category.
 - **Edi's reason.** The latest assistant text, as decided above. Omit the row when it is empty.
-- **Reviewer note.** The model's `reason` string, as text. A rejection is not shown on the card under Option A, because that proposal never reaches the card. Under Option B, a reviewer `approved: false` uses the warning tone already used for callouts and names the reason. No green check in either option.
-- **Earlier rejection.** When the turn already rejected this normalized path, add "You rejected a change to this file earlier in this run."
-- **Diff preview.** The `ChatEdits` hunk table, limited to about 20 changed lines, with `+` / `−` in the sign column as well as color. Added and removed text keep the existing chat-edit colors; contrast has to meet 3:1 for the line backgrounds and 4.5:1 for the text in both themes. The screen reader text already says "lines added" and "lines removed" on the counts. Each changed row should expose "added" or "removed" as well, which the current sign span marks `aria-hidden`.
-- **Open full diff.** Opens a read-only editor tab in the active group through `openEditorTab`, titled with the file name. The header reuses the `tool-subheader` layout from `GitDiffPane`: title, then Reject and Approve. The editor is Monaco `DiffEditor` with the proposal's before and after strings. A new file compares against an empty original. Decisions in the tab call the same command as the card. Closing the tab does not decide.
-- **Buttons.** `Button` from `app/components/ui/button.tsx`, both `type="button"`, both `variant="secondary"` so neither is the primary button. Reject is first in the tab order. Do not wrap them in a `<form>`. Do not autofocus Approve. This change adds no keyboard shortcut for Approve. Enter in the editor or the note field must not approve.
-- **Note.** "Add a note for Edi" is a disclosure. The textarea is empty until opened, kept if the decision fails, and sent with Approve or Reject. Most useful on Reject. Cap the field at 1000 characters.
+- **Reviewer note.** The model's `reason` string, as text. A reviewer denial never reaches this card. No green check.
+- **Earlier denial.** When this turn already denied this normalized path, add "You denied a change to this file earlier in this run."
+- **Diff.** The confirmation shows the full proposed change. Reuse the `ChatEdits` hunk rows, including the `+` / `−` sign column, and do not apply `fileDiffPreview`'s 600-line cap or a 20-line card cap. The existing `.approval-request pre` rule scrolls (`max-height: 200px`); every line stays in the region. Added and removed text keep the chat-edit colors. Contrast has to meet 3:1 for the line backgrounds and 4.5:1 for the text in both themes. The screen reader text already says "lines added" and "lines removed" on the counts. Each changed row should expose "added" or "removed" as well, which the current sign span marks `aria-hidden`. The Designer's 20-line preview is not used, because the spec says the confirmation shows the full change.
+- **Open side-by-side diff.** Optional extra view, not a substitute for the full diff on the card. It opens a read-only editor tab through `openEditorTab`. The header reuses the `tool-subheader` layout from `GitDiffPane`, with Deny and Approve. The editor is Monaco `DiffEditor` with the proposal's before and after strings. `GitDiffPane` itself stays a Git view, because it loads `git_diff`. A new file compares against an empty original. Decisions in the tab call the same command as the card. Closing the tab does not decide.
+- **Buttons.** The labels are Approve and Deny, matching the spec. `Button` from `app/components/ui/button.tsx`, both `type="button"`, both `variant="secondary"` so neither is the primary button. Deny is first in the tab order. Do not wrap them in a `<form>`. Do not autofocus Approve. This change adds no keyboard shortcut for Approve. Enter in the editor or the note field must not approve. The Designer label was Reject. The spec's verb is deny, so the button says Deny.
+- **Note.** "Add a note for Edi" is a disclosure. The textarea is empty until opened, kept if the decision fails, and sent with Approve or Deny. Most useful on Deny. Cap the field at 1000 characters. The spec does not require the note. It does not change the decision.
 
 ### What each decision does in the thread
 
-- **Approve.** The host writes. The card collapses to "Approved · build.rs · +12 −3 · View diff". View diff opens the same read-only tab against the applied snapshot. The activity line leaves "Waiting for your approval".
-- **Reject.** Nothing is written. The card collapses to "Rejected · build.rs · View proposed diff". The tool error includes the note when present. Edi can propose a different edit.
-- **Ask Edi to redo.** Shown only when the host reports the version changed. Approve is disabled. The button sends Reject with a fixed note that the file changed and Edi should read it again.
+- **Approve.** If the on-disk version still matches, the host writes. The card collapses to "Approved · build.rs · +12 −3 · View diff". If the version changed, nothing is written, the card says the file changed, and Edi is told to read it again. That result is immediate. It does not wait for a second click.
+- **Deny.** Nothing is written. The card collapses to "Denied · build.rs · View proposed diff". The tool error includes the note when present.
+- **Timed out.** Nothing is written. The card says "Timed out · build.rs · not applied". The tool error is a timeout denial, not a cancellation.
 - **Apply error.** The card shows "Couldn't apply change to build.rs: {message}" and the tool result is that error.
-- **Cancelled.** Stop, disconnect, workspace change, or the 20 minute deadline. "Cancelled · build.rs · not applied".
-- Status text is in the collapsed row, not only an icon, and the live region announces it.
+- **Withdrawn.** Stop, disconnect, workspace change, or the turn deadline. "Cancelled · build.rs · not applied".
+- Status text is in the collapsed row, not only an icon, and the live region announces it. Timed out and Cancelled use different sentences.
 
 ### Several writes
 
-The spec's stack ("3 changes waiting"), Review all, Reject all, and a multi-file diff with "1 of 3 reviewed" do not match the engine. One tool call is in `execute`. The next call is not running, so the UI cannot list it as a pending file, and Approve all would have nothing honest to apply.
+The Designer's stack ("3 changes waiting"), Review all, Deny all, and a multi-file diff do not match the engine. One tool call is in `execute`. The next call is not running, so the UI cannot list it as a pending file.
 
 Closest behavior, and the one to build:
 
 - One card for the call that is waiting.
-- After that decision, if the next call also needs confirmation, a new card appears and the activity line waits again.
-- Non-protected calls earlier in the same response are not held. Under Option A they may already be on disk. The lint gate still refuses Clippy and RuboCop until the pending protected decision finishes, so a save during the wait does not execute the package mid-decision.
-- Do not add Approve all. Do not add Reject all. There is no batch to apply together.
+- After that decision, if the next call is also sensitive, a new card appears. The first confirmation does not cover it.
+- A non-sensitive call earlier in the same response can already be on disk. This change does not hold it, and it does not change lint. A sensitive call still cannot land early.
+- Do not add Approve all or Deny all.
 
-The spec asked to confirm tool-result order. Results are recorded in call order, each when that call finishes. The model does not see a later result first. It can see an earlier normal write's success before it sees the protected decision. That is the sequential engine, and Option A accepts it.
+Tool results are recorded in call order, each when that call finishes. Edi can see an earlier ordinary write succeed before the sensitive decision. That matches the sequential engine and the spec's non-sensitive rule.
 
 ### Edge cases the app can support
 
-- **New file.** `expectedVersion` is null and `before` is empty. The card says "new file". The preview is the new content, truncated to the line cap. The full diff's original is empty.
-- **Large diff.** Above about 500 changed lines, or a single line too long for the chat table, the card says "Diff too large to preview here" and keeps Open full diff. Approve stays available. `fileDiffPreview` already truncates at 600 lines; the card's cap is tighter.
-- **Binary.** Not a card state. `prepare_write` rejects NUL and non-UTF-8 before review. Do not build the binary preview unless a later tool can propose those bytes.
-- **Same path rejected earlier in the turn.** Covered above. The set is in memory on the turn and cleared when the turn ends.
+- **New file.** `expectedVersion` is null and `before` is empty. The card says "new file". The diff compares against an empty original and includes the whole new file. Creating `scripts/postinstall.sh` is sensitive because of the `scripts` segment.
+- **Large diff.** The card still contains every line, inside the scrollable region. It does not replace the body with "Diff too large". The side-by-side tab shows the same bytes. Agent writes are already limited to 128 KiB.
+- **Binary.** Not a card state. `prepare_write` rejects NUL and non-UTF-8 before review. Do not build a binary preview unless a later tool can propose those bytes.
+- **Same path denied earlier in the turn.** Covered above. The set is in memory on the turn and cleared when the turn ends.
 
 ### Accessibility
 
 - Labelled region, polite announcement, focus left where it was.
-- Tab order inside the card: preview (the existing hunk table is already a tab stop), Open full diff, Reject, Approve, note disclosure, note field when open.
+- Tab order inside the card: diff (the hunk table is already a tab stop), Open side-by-side diff, Deny, Approve, note disclosure, note field when open.
 - No single-key approve and no bare Enter approve.
 - Diff meaning uses the sign glyph and the accessible name, not color alone.
 - Collapsed states are text and are announced.
 
 ### Preference copy
 
-Read-only disclosure, both policies: "Edi asks before changing build and config files." followed by the category names and a few examples (`build.rs`, `Cargo.toml`, `.cargo`, `package.json`, `.github`, `scripts`). Option B's implementation replaces the first sentence with "Edi asks before every file change." and keeps the examples as the files that would also explain themselves on the card.
-
-The Designer's two-value control, "Ask before agent changes: Build and config files (recommended) / Every file", is the right copy if Everett exposes both policies. It belongs in the AI assistance section beside Tab completion, as a radio pair, not a mode switch in the chat header. Default is Build and config files. Changing it does not approve a pending card. This control is specified and not recommended for the first implementation. See "Switching from A to B later".
+Read-only disclosure: "Edi asks before changing build and config files." followed by the spec's file names and directory names. No radio for Option B. That control would implement a policy this spec does not allow.
 
 ## Risks / Trade-offs
 
-- A 20 minute ceiling cancels an ignored card. The file stays unchanged. Raising `run_timeout_ms` for every turn would let an ordinary run sit for hours. Leave the deadline, and cancel cleanly.
-- Option A's path list can miss a future executor. The proc-macro and `rust-toolchain` entries are there because Cargo runs them and the audit list did not name them. A file outside the table still depends on the reviewer model until someone extends the predicate. Option B is the alternative when that residual is unacceptable.
-- Option A still applies an earlier ordinary write in the same response before the person sees the protected card. The lint lock covers the wait. It does not roll back the ordinary write.
-- rust-analyzer may expand proc macros from files already on disk. This change does not stop that server. It does stop new protected bytes from landing first.
+- 120 seconds may be short for a large diff. The file stays unchanged, and Edi receives a timeout denial. The number can move without a spec change. The 20 minute turn deadline stays the outer bound and uses the cancellation wording, not the timeout wording.
+- The sensitive list can miss a file that Cargo or RuboCop will execute. Open question 3 names the known ones. They stay on AI review until the spec grows. Option B is the follow-up when that residual is unacceptable.
+- An earlier ordinary write in the same response can be on disk before the person sees the sensitive card. This change does not roll it back and does not block lint.
+- rust-analyzer may expand proc macros from files already on disk. This change does not stop that server. A new `build.rs` is not among those files until the person confirms it. A new proc-macro `src/lib.rs` can be, because the spec does not call that path sensitive.
 - The OS notification needs a new plugin and a capability entry. The in-app badge does not. Ship the badge either way.
-- Holding before/after in the event shows the person the bytes they are approving. Those strings are already in the tool call. Do not also write them to a new log.
+- Holding before/after in the event shows the person the bytes they are confirming. Those strings are already in the tool call. Do not also write them to a new log.
 - A habitual Approve click remains possible. Equal-weight buttons, no default focus, no always-allow, and a one-line explanation are the mitigations in this change. They do not make a careless click impossible.
-- The reviewer model, when it runs, still reads untrusted file text. Option A does not let that reading apply a protected path. Option B does not let it apply any path.
+- The reviewer model still reads untrusted file text. That reading cannot apply a sensitive path. It can still apply an ordinary path.
 
 ## Migration Plan
 
 - No stored chat migration. Old turns have no pending proposal. A restart drops an in-memory wait and leaves the file as it was.
 - The tool schema does not change, so current model prompts keep calling `workbench_write_file` the same way.
 - Update `INSTRUCTIONS`, the tool description string, `docs/agent-tools.md`, and `docs/harness.md` in the same implementation so they stop saying every valid reviewer approval is applied.
-- Update the agent skill's "automatic review is the only policy" line to match the chosen option, so a later edit does not delete the human check.
+- Update the agent skill's "automatic review is the only policy" line so a later edit does not delete the human check for sensitive paths. Non-sensitive writes stay on automatic review.
+- Do not change `quality.rs` or the lint-on-save path in `App.tsx`.
 - The new command ships in the ACL with the binary. Old webviews are not a supported client of a new host.
 - Rollback is reverting the change. There is no policy file to migrate.
 
 ## Test strategy
 
-Use fixture reviews and local decision injection. Do not call a paid model. `parse_review` already covers malformed reviewer JSON; extend it only if the advisory payload changes.
+Use fixture reviews and local decision injection. Do not call a paid model. `parse_review` already covers malformed reviewer JSON.
 
-Host tests, in `agent_tools` and `agent`:
+Host tests map to the spec scenarios:
 
-- The predicate accepts the table above and rejects `src/lib.rs` in a normal package, `Cargo.lock`, and a name that only looks protected as a substring (`not-build.rs`).
-- `Build.RS`, `SRC/../build.rs` (rejected as traversal), and a `.git` path (still a hard error) behave as specified. A symlink parent still fails before the predicate.
-- A package whose `Cargo.toml` says `proc-macro = true` protects its `.rs` files. An unreadable manifest protects them. A normal manifest does not. The test must not spawn Cargo.
-- Option A: reviewer `approved: true` on `build.rs` does not call `apply` until `agent_write_decision` approves. Reject, a second decision, a stale version, cancel, and a workspace change leave the file absent or unchanged.
-- Option A: reviewer `approved: false` or invalid JSON on a protected path does not open a proposal and does not write.
-- Option A: an ordinary file still applies on a valid approval with no decision command.
-- Option B tests replace that last case: an ordinary file does not apply without `agent_write_decision`, and a reviewer rejection still waits for the person when the opt-in is on.
-- The decision command fails the host-token and window checks the other agent commands fail, and `agent_ide_ack` does not resolve a proposal.
-- `quality_lint` returns `deferred` and does not build a Cargo or RuboCop command while a proposal is pending, and when a protected version lacks an approval record. A Biome path still resolves its tool. An untrusted root still fails before that check.
+- Nested `crates/inner/build.rs`, both `.cargo/config.toml` and `tools/.cargo/config.toml`, `vite.config.ts`, and `packages/web/eslint.config.mjs` require confirmation. `src/lib.rs` does not.
+- `BUILD.RS`, `cargo.toml`, and `.GitHub/workflows/x.yml` require confirmation. `./crates/./a/Cargo.toml` and the absolute path of `Cargo.toml` classify the same as the relative path. A fullwidth or other NFKC spelling of `scripts` requires confirmation.
+- `src/../build.rs` and any `..` path are rejected with no card and no write. A symlink target or symlink parent is rejected the same way, including when it would resolve to a sensitive file.
+- Creating `scripts/postinstall.sh` requires confirmation. A classifier call for a rename of `notes.txt` to `build.rs`, and for a delete of `Cargo.toml`, requires confirmation. The tool registry still has no rename or delete tool.
+- `.git/hooks/pre-commit` and `.GIT/config` are rejected with no card and no write.
+- Reviewer `approved: true` on `build.rs` does not write, and the host emits `awaitingUser` with the path and the full before/after. Content or review text that claims the person already approved does not skip that wait.
+- Confirming `Cargo.toml` while the version still matches applies that content and reports success. A second sensitive write after that confirmation waits again.
+- Reviewer rejection of `.github/workflows/ci.yml` writes nothing and does not ask. Invalid review JSON does the same.
+- Deny writes nothing and returns a denial. Silence for 120 seconds writes nothing and returns a timeout denial, distinct from the cancellation string. Cancel and a workspace switch withdraw the card and write nothing. Confirming after the on-disk version changed writes nothing and tells Edi to re-read.
+- Reviewer approval of `src/main.rs` applies with no prompt, including when the workspace is untrusted. The same untrusted workspace still asks for `build.rs`. Reviewer denial of `README.md` writes nothing and returns the reason.
+- `agent_ide_ack` does not resolve a confirmation. A bad host token or window fails. A second decision fails.
+- No test starts Cargo or changes `quality_lint`.
 
-Web tests, in the chat and preferences suites:
+Web tests:
 
-- The card renders the category line, the truncated hunks, and the raw path when it differs.
-- Reject is before Approve in the tab order. Neither button is `type="submit"`. Approve is not autofocused. A note is included on reject.
-- Stale state disables Approve and the redo action sends the fixed reason.
-- Collapsed Approved, Rejected, and Cancelled rows include the text, not only an icon.
-- The chat toggle badge appears when the panel is hidden and a proposal is pending, and the activity string is the waiting copy.
-- The full-diff tab is a proposal tab fed with before/after, not a `git_diff` request.
-- The Preferences disclosure lists the categories and does not render an editable path list.
-- Both themes: the added and removed line colors come from tokens already used by chat edits. Check the approval card in light and dark in the browser preview, including keyboard travel from the preview to Reject and Approve.
+- The card shows the workspace-relative path and every line of the proposed diff, including a change longer than 20 lines. A differing raw path is shown as well.
+- Deny is before Approve. Neither button is `type="submit"`. Approve is not autofocused. A note is included on deny.
+- Approved, Denied, Timed out, and Cancelled rows include those words. Timed out and Cancelled are different strings.
+- The side-by-side tab is fed with before/after, not a `git_diff` request, and its buttons call the same decision.
+- The chat activity line says the turn is waiting, and the chat toggle badge appears when the panel is hidden.
+- The Preferences disclosure lists the spec's names and has no path editor.
+- Browser preview checks the card in light and dark, including keyboard travel from the diff to Deny and Approve, and Enter does not approve.
 
-Run the focused `npm test` files and `npm run test:rust` for the touched crates, then `npm run verify` before calling the implementation done. Browser preview covers the card, the diff tab, the badge, and Preferences. Native process execution of Clippy is not required; the deferred tests assert the command is not started.
+Run the focused `npm test` files and `npm run test:rust`, then `npm run verify`, before calling the implementation done.
