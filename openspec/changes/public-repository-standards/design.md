@@ -189,3 +189,39 @@ Changing the head requires fresh human decisions and a new exact-head recovery
 decision if needed. Do not reuse the old admission, run CI, or claim hosted
 acceptance from local checks. This contributor-tooling repair changes no runtime
 contract, public site content, or download availability.
+
+## Byte-preserving release validation
+
+The IDE owns its workflow callers and contributor guidance. Shared repository
+`ejmlabs/.github` owns the reusable governance and draft-release workflows and
+their embedded validators. Consume that public contract at retained reviewed
+revision `6717b433c462e01abaed86e2118e4843827598cb`, replacing installed
+revision `c4f2873ef0eef5bc3c7d75cf71fa3489a911d134` in both callers and
+the release `standards-ref`. The new release validator preserves original
+license and document line endings when comparing committed source with archive
+entries. Do not edit the uniform community templates.
+
+Generate a replacement old/new static source pair with the shared exporter.
+The old revision must match installed main and the new revision must match all
+three proposed pins. Verify the complete fixed scope, canonical Git bytes,
+tree/blob identities, original modes, manifest hashes, and nonexecutable
+committed copies. Keep the pair below 750,000 bytes and the whole proposed
+diff below the normal review bounds.
+
+The target also adds shared UI and harness preparation support. The IDE keeps
+its existing protected-base harness selection and exact harness pin. No
+`.github/ui-source.json` is introduced, so the optional UI checkout and install
+are absent. IDE Quality still runs `npm ci --ignore-scripts`, `npm run verify`,
+`npm run site:check`, and `npm run site:build` on macOS. No product, dependency,
+secret, provider, or installer contract changes. Shared policy has no new
+dependency on the IDE.
+
+Update the development and distribution guides and unreleased changelog.
+The current website has no release-operation guide, so its runtime, assets,
+build inputs, and output are outside this metadata-only change. Check affected
+Markdown links and preserve every runtime and dependency blob. The existing
+native/platform checks are not repeated locally. Fresh exact-head human
+admission, all five statuses, native approval, and both complete actual medium
+Codex passes remain required before normal merge. This preparation creates no
+tag, release, package, deployment, or new hosted verification. Tasks 2.5 and 3.2
+stay open until their own evidence is reconciled.
