@@ -18,7 +18,7 @@
 - [x] 2.6 Refresh the proposed harness pin to reviewed protected main `09b779ee0452dda07b7f52503be22e65fe238373`; preserve historical `4a751c6a3f24d7d143140f79ff53517fb93e3531` evidence and document that this product PR still checks the trusted base's old pin. Verify actual resolved core/auth/exec production source and harness lock identity, exact one-line pin, pinned standards, strict OpenSpec, local docs links, whitespace, unchanged product sources and locks, and the assembled diff bound. Keep both drafts unadmitted; record no review or recovery decision and run no native/site suite, model call, or hosted job.
 - [x] 2.7 Repair the formatter failure from admitted run `39294657006` with the narrow Biome force-ignore rule for immutable `.github/review-context` exports; preserve every canonical byte and mode, reproduce the failure, then verify literal format/lint commands, exact source exports, pinned standards, contributor links, strict OpenSpec, unchanged runtime sources and locks, whitespace, and the assembled diff bound. Record local evidence and unrun gates. Require fresh human decisions for the new head; do not trigger CI, reuse old recovery authorization, or claim hosted acceptance.
 - [x] 2.8 Adopt retained shared revision `6717b433c462e01abaed86e2118e4843827598cb` in both normal callers and release standards-ref for byte-preserving source release validation; replace the static review pair with exact installed `c4f2873ef0eef5bc3c7d75cf71fa3489a911d134` and proposed sources from the shared exporter. Update release-operation guidance and the unreleased changelog. Verify pinned standards, canonical bytes and modes, affected links, strict OpenSpec, whitespace, unchanged runtime/dependency/harness inputs, and the complete normal review bound. Keep existing product/host/secret contracts, require fresh human admission and normal hosted gates, and create no tag or release.
-- [ ] 2.9 Verify installed shared caller `6717b433c462e01abaed86e2118e4843827598cb` on a fresh docs-only PR from protected merge `392bfa2ae0edfd05e92e6926449a2cb964c78c08`. Require fresh exact-head human readiness and approval, all five statuses, native approval, and two complete actual `gpt-6.1-sol` medium passes; verify exact product and protected-base harness sources and unchanged protections. Keep runtime, dependencies, workflow callers, static source context, harness pin, templates, and website inputs unchanged. Record preparation separately from hosted acceptance and leave the genuine outside-account fork test open.
+- [x] 2.9 Verify installed shared caller `6717b433c462e01abaed86e2118e4843827598cb` on a fresh docs-only PR from protected merge `392bfa2ae0edfd05e92e6926449a2cb964c78c08`. Require fresh exact-head human readiness and approval, all five statuses, native approval, and two complete actual `gpt-6.1-sol` medium passes; verify exact product and protected-base harness sources and unchanged protections. Keep runtime, dependencies, workflow callers, static source context, harness pin, templates, and website inputs unchanged. Record preparation separately from hosted acceptance and leave the genuine outside-account fork test open.
 
 ## 3. Verification
 
@@ -29,6 +29,12 @@
 ## Workflow follow-up
 
 - Sync completed specs and archive after all tracked work and required verification succeed.
+
+## 4. Prepare the first source release
+
+- [x] 4.1 Consolidate current changes into dated 0.1.0 source notes and reconcile installed-caller evidence from PR #9. Preserve the exact harness pin, unsupported Linux and native distribution limits, product/dependency/workflow/version blobs and original license bytes. Verify pinned standards, affected links, strict OpenSpec, whitespace and normal review bounds; repeat no native/runtime suites for these docs alone.
+- [ ] 4.2 Adopt the notes through normal exact-head human readiness and approval, all five checks, native approval and two complete actual Codex Sol 6.1 medium passes. Freeze the resulting protected main before selecting release sources.
+- [ ] 4.3 After separate exact version/source approval, verify the first source-only draft's protected tag, original source and notice bytes, both archives, checksums and provenance. Draft publication, signed installers, registry packages and deployment require their own approval and evidence.
 
 ## Reconciled hosted evidence
 
@@ -64,14 +70,17 @@
   `392bfa2ae0edfd05e92e6926449a2cb964c78c08`, tree
   `f76a71fe7781b79dbedfe4fe66740c049edb17c8`. That run executed installed
   `c4f2873…`; it installed `6717b433…` for subsequent admitted PRs.
-- Task 2.9 is prepared from that exact protected merge. Its documentation-only
-  candidate records these completed results and leaves installed `6717b433…`
-  hosted acceptance pending. Local preparation must verify affected links,
-  exact installed pins and canonical context, pinned standards, strict OpenSpec,
-  whitespace, and the full diff bound. No runtime, native, site, or dependency
-  suite is repeated for unchanged inputs. Human decisions, hosted jobs, and
-  model calls have not run for this candidate. It creates no tag, draft release,
-  installer, package, or deployment, and claims no live documentation update.
+- Task 2.9 is complete. [PR #9](https://github.com/ejmlabs/ejm-ide/pull/9),
+  head `7dbe9c8c21394bed428f513b0f56c7e4bbb9b740`, passed the installed
+  `6717b433…` caller in original
+  [run 39347126851](https://github.com/ejmlabs/ejm-ide/actions/runs/39347126851),
+  attempt 1. All five statuses, macOS Quality, native approval and both complete
+  actual `gpt-6.1-sol` medium reports passed with no findings. Exact IDE and
+  protected-base harness archives and full retained reports were verified.
+  It merged normally as `1c92944ee6c5c463472a730890d15eff7bdd3940`, tree
+  `0a6f46a340b48e84f4036f685a28af266a07aa03`, with unchanged protections.
+  This supersedes only earlier pending installed-caller observations. The
+  outside-account test and release/native distribution gates remain open.
 - Task 3.2 remains open. The owner chose to leave the genuine outside-account
   fork test open. No outside account without organization or repository access
   has completed that test. The unsupported Linux GLib advisory

@@ -79,10 +79,15 @@ pin and previous `c4f2873ef0eef5bc3c7d75cf71fa3489a911d134` caller in
 [PR #8](https://github.com/ejmlabs/ejm-ide/pull/8) then passed under that caller
 in [run 39344302241](https://github.com/ejmlabs/ejm-ide/actions/runs/39344302241)
 and installed `6717b433…` on main. Both runs passed all five gates and two
-complete actual `gpt-6.1-sol` medium reviews without an exception. This
-docs-only follow-up must verify the installed `6717b433…` caller after fresh
-human admission. At preparation, that hosted result and the genuine
-outside-account fork test remain pending. See the
+complete actual `gpt-6.1-sol` medium reviews without an exception. The
+installed `6717b433…` caller then passed
+[PR #9](https://github.com/ejmlabs/ejm-ide/pull/9) in
+[run 39347126851](https://github.com/ejmlabs/ejm-ide/actions/runs/39347126851),
+attempt 1, with macOS Quality, all five statuses, native approval and two
+complete actual medium reviews with no findings. Its exact reviewed tree
+merged normally as `1c92944ee6c5c463472a730890d15eff7bdd3940`, with
+protections unchanged. The genuine outside-account fork test remains open
+by owner choice. See the
 [change tasks](../openspec/changes/public-repository-standards/tasks.md).
 
 ## Draft source releases
@@ -93,6 +98,11 @@ review. The manual workflow creates source archives, `SHA256SUMS`, and
 `provenance.json`; it does not build or sign an installer. Committed notices
 retain their original bytes. Fetch the exact harness pin separately when
 building from a source archive.
+
+The dated `0.1.0` [source notes](../CHANGELOG.md) are prepared for review.
+No IDE draft is announced. After their normal protected merge, freeze the
+resulting main commit before requesting a source-only draft. Check both source
+archives, original notice bytes, checksums and provenance before publication.
 
 An existing `vVERSION` tag or release blocks another request. Do not use a rerun
 or move a tag after a failure. Inspect the retained run, tag, draft, and assets

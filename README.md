@@ -32,11 +32,12 @@ The native app depends on `../../ejm-harness/crates/ejm-harness` from
 
 ## Quick start
 
-Clone both repositories into the same parent folder. Private repositories
-require GitHub access until they become public.
+Clone both public repositories into the same parent folder and use the
+reviewed harness revision expected by this IDE source.
 
 ```sh
 git clone https://github.com/ejmlabs/ejm-harness.git
+git -C ejm-harness checkout 09b779ee0452dda07b7f52503be22e65fe238373
 git clone https://github.com/ejmlabs/ejm-ide.git
 cd ejm-ide
 npm ci

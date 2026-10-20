@@ -244,10 +244,14 @@ PR #8 passed the same installed caller in run `39344302241`, then merged
 normally as `392bfa2ae0edfd05e92e6926449a2cb964c78c08`. Its tree is
 `f76a71fe7781b79dbedfe4fe66740c049edb17c8`. This installed retained shared
 revision `6717b433c462e01abaed86e2118e4843827598cb`; its own run did not
-execute that proposed revision. Task 2.9 uses a fresh documentation-only PR
-from that exact protected merge to verify the installed caller after fresh
-human admission. Every normal gate and both complete actual medium reviews
-remain required. Keep that task pending until hosted evidence is verified.
+execute that proposed revision. PR #9 then verified the installed revision in
+original run `39347126851`, attempt 1, after fresh exact-head readiness and
+approval. All five statuses, macOS Quality, native approval and two complete
+actual medium reviews passed with no findings. The source archives matched
+the admitted IDE head and protected-base harness pin. It merged normally as
+`1c92944ee6c5c463472a730890d15eff7bdd3940`, preserving reviewed tree
+`0a6f46a340b48e84f4036f685a28af266a07aa03` and unchanged protections.
+This completes task 2.9; it creates no release or native distribution evidence.
 
 The IDE owns these contributor notes and consumes the shared workflow and
 public harness contracts without changing either. Runtime, dependencies,
@@ -264,3 +268,26 @@ repository access. Preserve the accepted unsupported Linux GLib advisory and
 sibling-path Cargo Dependabot limit. Neither the fresh PR nor prior hosted
 checks authorize an IDE tag, source draft, signed installer, package, or site
 deployment. Do not sync or archive while tracked acceptance remains open.
+
+## Prepare source version 0.1.0 notes
+
+Consolidate the current `Unreleased` changes into dated `0.1.0` source notes.
+Keep source availability distinct from a GitHub draft or signed installer.
+The IDE owns its notes and host adapters; the separately pinned harness owns
+runtime and auth contracts, and shared `.github` owns reusable release
+validation. The dependency direction and public interfaces do not change.
+
+Reconcile task 2.9 with the retained PR #9 run and normal merge. Keep the
+outside-account test, unsupported Linux advisory, sibling-path Dependabot
+limit, and native distribution gates explicit. Preserve product sources,
+dependencies, workflows, pins, version metadata and original license bytes.
+Verify pinned standards, affected links, strict OpenSpec, whitespace and
+normal review bounds without repeating native/runtime suites for docs alone.
+The public site has no source-release operations page; its build inputs and
+download availability stay unchanged, and no live docs publication is claimed.
+
+The release-note PR still needs fresh normal human admission, two complete
+reviews and every protected merge gate. Only after merge can a source-draft
+plan select the exact frozen main. This preparation creates no tag, draft,
+installer, registry package, R2 manifest update or deployment. Do not sync or
+archive incomplete work.
