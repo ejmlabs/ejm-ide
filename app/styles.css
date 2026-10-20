@@ -377,6 +377,9 @@
   .rail-spacer {
     flex: 1;
   }
+  .chat-toggle {
+    position: relative;
+  }
   .rail-badge {
     position: absolute;
     right: 1px;
@@ -1857,6 +1860,10 @@
     display: flex;
     justify-content: flex-end;
     gap: 7px;
+  }
+  .approval-request .approval-diff {
+    height: 220px;
+    margin: 8px 0;
   }
   .drop-hint {
     pointer-events: none;

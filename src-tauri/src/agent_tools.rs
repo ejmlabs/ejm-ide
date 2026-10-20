@@ -9,7 +9,7 @@ use serde::Deserialize;
 use serde_json::{Value, json};
 use sha2::{Digest, Sha256};
 use std::{
-    collections::HashMap,
+    collections::{HashMap, HashSet, VecDeque},
     io::Read,
     path::{Component, Path, PathBuf},
     sync::{
@@ -74,7 +74,7 @@ fn registry() -> &'static [RegisteredTool] {
             ),
             (
                 "workbench_write_file",
-                "Propose creating or replacing a UTF-8 source file inside the selected workspace, up to 128 KiB. Automatic review must approve the exact change before it is applied. Supply expectedVersion from workbench_read_file for updates, or null to create a file only if it does not exist. Parent directories must exist. Git metadata, symbolic links, special files, deletion, and paths outside the workspace are unavailable. Never retry a rejected or stale write without reading the current source.",
+                "Propose creating or replacing a UTF-8 source file inside the selected workspace, up to 128 KiB. Automatic review must approve the exact change. Sensitive paths are applied only after the person confirms them in the IDE. Reviewer approval does not apply a sensitive path, and a reviewer denial is final. Supply expectedVersion from workbench_read_file for updates, or null to create a file only if it does not exist. Parent directories must exist. Git metadata, symbolic links, special files, deletion, and paths outside the workspace are unavailable. Never retry a rejected or stale write without reading the current source.",
                 json!({"path":{"type":"string","minLength":1,"maxLength":4096},"content":{"type":"string","maxLength":FILE_BYTES},"expectedVersion":{"type":["string","null"],"maxLength":64}}),
                 vec!["path", "content", "expectedVersion"],
             ),
@@ -341,6 +341,46 @@ fn check_current(
 pub(crate) struct AgentToolState {
     pending: Arc<Mutex<HashMap<String, PendingIdeRequest>>>,
     active: Arc<AtomicUsize>,
+    write_confirmation: Arc<Mutex<Option<PendingWriteConfirmation>>>,
+    denied_writes: Arc<Mutex<DeniedWrites>>,
+}
+
+#[derive(Default)]
+struct DeniedWrites {
+    order: VecDeque<String>,
+    paths: HashMap<String, HashSet<String>>,
+}
+
+pub(crate) struct ConfirmationRequest {
+    pub(crate) review_id: String,
+    pub(crate) provider_id: String,
+    pub(crate) connection_id: u64,
+    pub(crate) timeout: Duration,
+    pub(crate) warning_before: Duration,
+}
+
+struct PendingWriteConfirmation {
+    review_id: String,
+    provider_id: String,
+    connection_id: u64,
+    sender: oneshot::Sender<crate::agent_sensitive::WriteChoice>,
+}
+
+struct WriteConfirmationGuard {
+    state: AgentToolState,
+    review_id: String,
+}
+
+impl Drop for WriteConfirmationGuard {
+    fn drop(&mut self) {
+        if let Ok(mut slot) = self.state.write_confirmation.lock()
+            && slot
+                .as_ref()
+                .is_some_and(|pending| pending.review_id == self.review_id)
+        {
+            slot.take();
+        }
+    }
 }
 
 struct ToolGuard(Arc<AtomicUsize>);
@@ -422,6 +462,155 @@ impl AgentToolState {
         }
         Ok(())
     }
+
+    pub(crate) fn denied_earlier(&self, turn_id: &str, path: &str) -> bool {
+        self.denied_writes
+            .lock()
+            .ok()
+            .and_then(|denied| denied.paths.get(turn_id).map(|paths| paths.contains(path)))
+            .unwrap_or(false)
+    }
+
+    pub(crate) fn remember_denial(&self, turn_id: &str, path: &str) {
+        let Ok(mut denied) = self.denied_writes.lock() else {
+            return;
+        };
+        if !denied.paths.contains_key(turn_id) {
+            denied.order.push_back(turn_id.to_string());
+            if denied.order.len() > 32
+                && let Some(old) = denied.order.pop_front()
+            {
+                denied.paths.remove(&old);
+            }
+        }
+        denied
+            .paths
+            .entry(turn_id.to_string())
+            .or_default()
+            .insert(path.to_string());
+    }
+
+    pub(crate) fn submit_confirmation(
+        &self,
+        provider_id: &str,
+        connection_id: u64,
+        review_id: &str,
+        choice: crate::agent_sensitive::WriteChoice,
+    ) -> Result<(), String> {
+        let mut slot = self
+            .write_confirmation
+            .lock()
+            .map_err(|_| "Write confirmation is unavailable.".to_string())?;
+        let pending = slot.as_ref().ok_or("This proposal was already decided.")?;
+        if pending.review_id != review_id {
+            return Err("This proposal was already decided.".into());
+        }
+        if pending.provider_id != provider_id || pending.connection_id != connection_id {
+            return Err("This proposal belongs to another agent connection.".into());
+        }
+        let pending = slot.take().ok_or("This proposal was already decided.")?;
+        pending
+            .sender
+            .send(choice)
+            .map_err(|_| "This proposal was already decided.".to_string())
+    }
+
+    pub(crate) async fn await_confirmation(
+        &self,
+        request: ConfirmationRequest,
+        mut still_current: impl FnMut() -> Result<(), String>,
+        on_warning: impl FnOnce(),
+    ) -> Result<crate::agent_sensitive::WriteChoice, crate::agent_sensitive::ConfirmationStop> {
+        use crate::agent_sensitive::ConfirmationStop;
+        let (sender, mut receiver) = oneshot::channel();
+        {
+            let mut slot = self.write_confirmation.lock().map_err(|_| {
+                ConfirmationStop::Withdrawn("Write confirmation is unavailable.".into())
+            })?;
+            if slot.is_some() {
+                return Err(ConfirmationStop::Withdrawn(
+                    "Another confirmation is already pending.".into(),
+                ));
+            }
+            *slot = Some(PendingWriteConfirmation {
+                review_id: request.review_id.clone(),
+                provider_id: request.provider_id,
+                connection_id: request.connection_id,
+                sender,
+            });
+        }
+        let _guard = WriteConfirmationGuard {
+            state: self.clone(),
+            review_id: request.review_id,
+        };
+        let started = tokio::time::Instant::now();
+        let deadline = started + request.timeout;
+        let mut on_warning = Some(on_warning);
+        let warning_at = request
+            .timeout
+            .checked_sub(request.warning_before)
+            .filter(|offset| !offset.is_zero())
+            .map(|offset| started + offset);
+        let mut warned = false;
+        loop {
+            if let Err(reason) = still_current() {
+                return Err(ConfirmationStop::Withdrawn(reason));
+            }
+            let now = tokio::time::Instant::now();
+            if now >= deadline {
+                return Err(ConfirmationStop::Timeout);
+            }
+            let mut wake = deadline;
+            if !warned
+                && let Some(warning_at) = warning_at
+                && warning_at < deadline
+                && now < warning_at
+            {
+                wake = warning_at;
+            }
+            let poll = now + Duration::from_millis(20);
+            if poll < wake {
+                wake = poll;
+            }
+            tokio::select! {
+                biased;
+                choice = &mut receiver => {
+                    return choice.map_err(|_| {
+                        ConfirmationStop::Withdrawn("The confirmation was withdrawn.".into())
+                    });
+                }
+                () = tokio::time::sleep_until(wake) => {
+                    if !warned
+                        && let Some(warning_at) = warning_at
+                        && tokio::time::Instant::now() >= warning_at
+                        && warning_at < deadline
+                    {
+                        warned = true;
+                        if let Some(on_warning) = on_warning.take() {
+                            on_warning();
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    #[cfg(test)]
+    fn confirmation_pending(&self, review_id: &str) -> bool {
+        self.write_confirmation
+            .lock()
+            .ok()
+            .and_then(|slot| slot.as_ref().map(|pending| pending.review_id == review_id))
+            .unwrap_or(false)
+    }
+
+    #[cfg(test)]
+    fn presentation_pending(&self, id: &str) -> bool {
+        self.pending
+            .lock()
+            .ok()
+            .is_some_and(|pending| pending.contains_key(id))
+    }
 }
 
 #[derive(Deserialize)]
@@ -493,7 +682,9 @@ fn file_path(root: &WorkspaceRoot, value: &str) -> Result<PathBuf, String> {
     let mut normalized = PathBuf::new();
     for component in relative.components() {
         match component {
-            Component::Normal(part) if !part.to_string_lossy().eq_ignore_ascii_case(".git") => {
+            Component::Normal(part)
+                if crate::agent_sensitive::fold_segment(&part.to_string_lossy()) != ".git" =>
+            {
                 normalized.push(part)
             }
             Component::CurDir => {}
@@ -509,6 +700,70 @@ fn file_path(root: &WorkspaceRoot, value: &str) -> Result<PathBuf, String> {
         return Err("Choose a workspace file.".into());
     }
     Ok(root.path.join(normalized))
+}
+
+#[allow(
+    dead_code,
+    reason = "Rename and delete tools are not registered; tests keep the future gate"
+)]
+pub(crate) enum AgentMutation<'a> {
+    Write(&'a str),
+    Rename { from: &'a str, to: &'a str },
+    Delete(&'a str),
+}
+
+#[allow(
+    dead_code,
+    reason = "Rename and delete tools are not registered; tests keep the future gate"
+)]
+pub(crate) enum MutationPlan {
+    Ordinary(crate::agent_sensitive::ClassifiedPath),
+    Sensitive(crate::agent_sensitive::ClassifiedPath),
+    Rejected(String),
+}
+
+pub(crate) fn classify_workspace_path(
+    root: &WorkspaceRoot,
+    raw: &str,
+) -> Result<crate::agent_sensitive::ClassifiedPath, String> {
+    let absolute = file_path(root, raw)?;
+    let relative = absolute
+        .strip_prefix(&root.path)
+        .map_err(|_| "The file is outside the selected workspace.")?;
+    Ok(crate::agent_sensitive::classify_relative(
+        &root.path, relative,
+    ))
+}
+
+#[allow(
+    dead_code,
+    reason = "Rename and delete tools are not registered; tests keep the future gate"
+)]
+pub(crate) fn classify_mutation(root: &WorkspaceRoot, mutation: AgentMutation<'_>) -> MutationPlan {
+    let one = |raw: &str| match classify_workspace_path(root, raw) {
+        Ok(path) if path.sensitive => MutationPlan::Sensitive(path),
+        Ok(path) => MutationPlan::Ordinary(path),
+        Err(error) => MutationPlan::Rejected(error),
+    };
+    match mutation {
+        AgentMutation::Write(path) | AgentMutation::Delete(path) => one(path),
+        AgentMutation::Rename { from, to } => {
+            match (
+                classify_workspace_path(root, from),
+                classify_workspace_path(root, to),
+            ) {
+                (Err(error), _) | (_, Err(error)) => MutationPlan::Rejected(error),
+                (Ok(source), Ok(destination)) if source.sensitive || destination.sensitive => {
+                    MutationPlan::Sensitive(if destination.sensitive {
+                        destination
+                    } else {
+                        source
+                    })
+                }
+                (Ok(source), Ok(_)) => MutationPlan::Ordinary(source),
+            }
+        }
+    }
 }
 
 fn read_document(root: &WorkspaceRoot, path: &str) -> Result<Document, String> {
@@ -944,6 +1199,406 @@ mod tests {
                 None
             )
             .is_err()
+        );
+    }
+
+    #[test]
+    fn normalized_paths_match_at_any_depth_and_reject_traversal_git_and_links() {
+        let workspace = TestWorkspace::new();
+        let root = workspace.root();
+        for path in [
+            "crates/inner/build.rs",
+            "sub/crate/build.rs",
+            ".cargo/config.toml",
+            "tools/.cargo/config.toml",
+            "nested/.github/workflows/ci.yml",
+            "BUILD.RS",
+            "cargo.toml",
+            ".GitHub/workflows/x.yml",
+            "./crates/./a/Cargo.toml",
+        ] {
+            match classify_workspace_path(&root, path) {
+                Ok(classified) => assert!(classified.sensitive, "{path}"),
+                Err(error) => panic!("{path}: {error}"),
+            }
+        }
+        let absolute = root.path.join("Cargo.toml");
+        assert!(
+            classify_workspace_path(&root, absolute.to_str().unwrap())
+                .unwrap()
+                .sensitive
+        );
+        assert_eq!(
+            classify_workspace_path(&root, "./crates/./a/Cargo.toml")
+                .unwrap()
+                .normalized,
+            "crates/a/Cargo.toml"
+        );
+        for path in [
+            "src/../build.rs",
+            "../build.rs",
+            ".git/hooks/pre-commit",
+            ".GIT/config",
+        ] {
+            assert!(
+                matches!(
+                    classify_mutation(&root, AgentMutation::Write(path)),
+                    MutationPlan::Rejected(reason) if !reason.is_empty()
+                ),
+                "{path}"
+            );
+        }
+        let fullwidth_git = "\u{FF0E}\u{FF47}\u{FF49}\u{FF54}/config";
+        assert!(matches!(
+            classify_mutation(&root, AgentMutation::Write(fullwidth_git)),
+            MutationPlan::Rejected(reason) if !reason.is_empty()
+        ));
+        assert!(matches!(
+            classify_mutation(
+                &root,
+                AgentMutation::Rename {
+                    from: "notes.txt",
+                    to: "build.rs",
+                }
+            ),
+            MutationPlan::Sensitive(path) if path.normalized == "build.rs" && path.sensitive
+        ));
+        assert!(matches!(
+            classify_mutation(&root, AgentMutation::Delete("Cargo.toml")),
+            MutationPlan::Sensitive(path) if path.sensitive
+        ));
+        assert!(matches!(
+            classify_mutation(&root, AgentMutation::Write("README.md")),
+            MutationPlan::Ordinary(path) if !path.sensitive && path.normalized == "README.md"
+        ));
+        assert!(registered_tool_name("workbench_delete_file").is_none());
+        assert!(registered_tool_name("workbench_rename_file").is_none());
+        let write = specs()
+            .into_iter()
+            .find(|spec| spec["name"] == "workbench_write_file")
+            .unwrap();
+        let description = write["description"].as_str().unwrap();
+        assert!(description.contains("person confirms"));
+        assert!(description.contains("does not apply a sensitive path"));
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn symbolic_links_to_sensitive_files_are_rejected_without_a_write() {
+        use std::os::unix::fs::symlink;
+        let workspace = TestWorkspace::new();
+        let build = workspace.directory.path().join("build.rs");
+        std::fs::write(&build, "fn main() {}\n").unwrap();
+        symlink("build.rs", workspace.directory.path().join("link-build.rs")).unwrap();
+        std::fs::create_dir(workspace.directory.path().join("nested")).unwrap();
+        symlink("nested", workspace.directory.path().join("alias-parent")).unwrap();
+        for path in ["link-build.rs", "alias-parent/build.rs"] {
+            assert!(
+                PreparedWrite::prepare(
+                    &workspace.root(),
+                    json!({"path": path, "content": "fn main() { println!(\"no\"); }\n", "expectedVersion": null})
+                )
+                .is_err(),
+                "{path}"
+            );
+        }
+        assert_eq!(std::fs::read_to_string(build).unwrap(), "fn main() {}\n");
+    }
+
+    #[tokio::test]
+    async fn deadline_cancels_without_writing_and_warns_once() {
+        let workspace = TestWorkspace::new();
+        let build = workspace.directory.path().join("build.rs");
+        std::fs::write(&build, "fn main() {}\n").unwrap();
+        let state = AgentToolState::default();
+        let warnings = Arc::new(AtomicUsize::new(0));
+        let counted = warnings.clone();
+        let result = state
+            .await_confirmation(
+                ConfirmationRequest {
+                    review_id: "review-timeout".into(),
+                    provider_id: "provider".into(),
+                    connection_id: 1,
+                    timeout: Duration::from_millis(90),
+                    warning_before: Duration::from_millis(50),
+                },
+                || Ok(()),
+                || {
+                    counted.fetch_add(1, Ordering::SeqCst);
+                },
+            )
+            .await;
+        assert!(matches!(
+            result,
+            Err(crate::agent_sensitive::ConfirmationStop::Timeout)
+        ));
+        assert_eq!(warnings.load(Ordering::SeqCst), 1);
+        assert_eq!(std::fs::read_to_string(build).unwrap(), "fn main() {}\n");
+        assert!(
+            state
+                .submit_confirmation(
+                    "provider",
+                    1,
+                    "review-timeout",
+                    crate::agent_sensitive::WriteChoice::Approve(None),
+                )
+                .is_err()
+        );
+    }
+
+    #[tokio::test]
+    async fn confirmation_applies_only_after_approval_and_not_from_an_ack() {
+        let workspace = TestWorkspace::new();
+        std::fs::write(workspace.directory.path().join("Cargo.toml"), "[package]\n").unwrap();
+        let source = read_document(&workspace.root(), "Cargo.toml").unwrap();
+        let prepared = PreparedWrite::prepare(
+            &workspace.root(),
+            json!({"path":"Cargo.toml","content":"[package]\nname=\"demo\"\n","expectedVersion":source.version}),
+        )
+        .unwrap();
+        assert!(
+            crate::agent_sensitive::review_gate(true, true, true)
+                == crate::agent_sensitive::ReviewGate::Confirm
+        );
+        let state = AgentToolState::default();
+        let deciding = state.clone();
+        let waiting = tokio::spawn(async move {
+            deciding
+                .await_confirmation(
+                    ConfirmationRequest {
+                        review_id: "review-cargo".into(),
+                        provider_id: "provider".into(),
+                        connection_id: 4,
+                        timeout: Duration::from_secs(2),
+                        warning_before: Duration::from_secs(5 * 60),
+                    },
+                    || Ok(()),
+                    || {},
+                )
+                .await
+        });
+        tokio::time::sleep(Duration::from_millis(30)).await;
+        assert!(state.confirmation_pending("review-cargo"));
+        assert!(!state.presentation_pending("review-cargo"));
+        assert_eq!(
+            std::fs::read_to_string(workspace.directory.path().join("Cargo.toml")).unwrap(),
+            "[package]\n"
+        );
+        state
+            .submit_confirmation(
+                "provider",
+                4,
+                "review-cargo",
+                crate::agent_sensitive::WriteChoice::Approve(Some("ship it".into())),
+            )
+            .unwrap();
+        assert!(
+            state
+                .submit_confirmation(
+                    "provider",
+                    4,
+                    "review-cargo",
+                    crate::agent_sensitive::WriteChoice::Deny(None),
+                )
+                .is_err()
+        );
+        assert!(matches!(
+            waiting.await.unwrap(),
+            Ok(crate::agent_sensitive::WriteChoice::Approve(Some(note))) if note == "ship it"
+        ));
+        let applied = prepared
+            .apply_checked(&workspace.state, &AtomicBool::new(false))
+            .unwrap();
+        assert_eq!(applied.value["created"], false);
+        assert!(
+            std::fs::read_to_string(workspace.directory.path().join("Cargo.toml"))
+                .unwrap()
+                .contains("demo")
+        );
+        assert_eq!(
+            crate::agent_sensitive::review_gate(true, true, true),
+            crate::agent_sensitive::ReviewGate::Confirm
+        );
+    }
+
+    #[tokio::test]
+    async fn deny_cancel_switch_and_stale_version_write_nothing() {
+        let workspace = TestWorkspace::new();
+        let build = workspace.directory.path().join("build.rs");
+        std::fs::write(&build, "fn main() {}\n").unwrap();
+        let source = read_document(&workspace.root(), "build.rs").unwrap();
+        let prepared = PreparedWrite::prepare(
+            &workspace.root(),
+            json!({"path":"build.rs","content":"fn main() { println!(\"no\"); }\n","expectedVersion":source.version}),
+        )
+        .unwrap();
+        let state = AgentToolState::default();
+        let deciding = state.clone();
+        let waiting = tokio::spawn(async move {
+            deciding
+                .await_confirmation(
+                    ConfirmationRequest {
+                        review_id: "review-deny".into(),
+                        provider_id: "provider".into(),
+                        connection_id: 2,
+                        timeout: Duration::from_secs(2),
+                        warning_before: Duration::from_secs(5 * 60),
+                    },
+                    || Ok(()),
+                    || {},
+                )
+                .await
+        });
+        tokio::time::sleep(Duration::from_millis(20)).await;
+        state
+            .submit_confirmation(
+                "provider",
+                2,
+                "review-deny",
+                crate::agent_sensitive::WriteChoice::Deny(Some("not this".into())),
+            )
+            .unwrap();
+        assert!(matches!(
+            waiting.await.unwrap(),
+            Ok(crate::agent_sensitive::WriteChoice::Deny(_))
+        ));
+        assert_eq!(std::fs::read_to_string(&build).unwrap(), "fn main() {}\n");
+
+        let flag = Arc::new(AtomicBool::new(false));
+        let watch = flag.clone();
+        let state = AgentToolState::default();
+        let result = state.await_confirmation(
+            ConfirmationRequest {
+                review_id: "review-cancel".into(),
+                provider_id: "provider".into(),
+                connection_id: 2,
+                timeout: Duration::from_secs(2),
+                warning_before: Duration::from_secs(5 * 60),
+            },
+            || {
+                if watch.load(Ordering::Acquire) {
+                    Err(
+                        "The agent turn or selected workspace changed. Discard this tool result."
+                            .into(),
+                    )
+                } else {
+                    Ok(())
+                }
+            },
+            || {},
+        );
+        flag.store(true, Ordering::Release);
+        let result = result.await;
+        assert!(matches!(
+            result,
+            Err(crate::agent_sensitive::ConfirmationStop::Withdrawn(message))
+                if message.contains("workspace")
+        ));
+
+        let root = workspace.root();
+        let state = AgentToolState::default();
+        let switched = workspace.state.clone();
+        let directory = workspace.directory.path().to_path_buf();
+        let waiting = tokio::spawn(async move {
+            tokio::time::sleep(Duration::from_millis(30)).await;
+            switched.open_folder(&directory).unwrap();
+        });
+        let result = state
+            .await_confirmation(
+                ConfirmationRequest {
+                    review_id: "review-switch".into(),
+                    provider_id: "provider".into(),
+                    connection_id: 2,
+                    timeout: Duration::from_secs(2),
+                    warning_before: Duration::from_secs(5 * 60),
+                },
+                || check_current(&workspace.state, &root, &AtomicBool::new(false)),
+                || {},
+            )
+            .await;
+        waiting.await.unwrap();
+        assert!(matches!(
+            result,
+            Err(crate::agent_sensitive::ConfirmationStop::Withdrawn(_))
+        ));
+        std::fs::write(&build, "external edit\n").unwrap();
+        assert!(
+            prepared
+                .apply_checked(&workspace.state, &AtomicBool::new(false))
+                .is_err()
+        );
+        assert_eq!(std::fs::read_to_string(&build).unwrap(), "external edit\n");
+    }
+
+    #[test]
+    fn ordinary_files_stay_on_automatic_review_in_trusted_and_untrusted_workspaces() {
+        let workspace = TestWorkspace::new();
+        std::fs::create_dir_all(workspace.directory.path().join("src")).unwrap();
+        std::fs::write(
+            workspace.directory.path().join("src/main.rs"),
+            "fn main() {}\n",
+        )
+        .unwrap();
+        std::fs::write(workspace.directory.path().join("README.md"), "readme\n").unwrap();
+        std::fs::write(
+            workspace.directory.path().join("build.rs"),
+            "fn main() {}\n",
+        )
+        .unwrap();
+        assert!(!workspace.root().is_trusted());
+        assert!(
+            !classify_workspace_path(&workspace.root(), "src/main.rs")
+                .unwrap()
+                .sensitive
+        );
+        assert_eq!(
+            crate::agent_sensitive::review_gate(true, true, false),
+            crate::agent_sensitive::ReviewGate::Apply
+        );
+        assert_eq!(
+            crate::agent_sensitive::review_gate(true, false, false),
+            crate::agent_sensitive::ReviewGate::Reject
+        );
+        workspace.state.trust(&workspace.root().path).unwrap();
+        assert!(workspace.root().is_trusted());
+        assert!(
+            !classify_workspace_path(&workspace.root(), "src/main.rs")
+                .unwrap()
+                .sensitive
+        );
+        assert!(
+            classify_workspace_path(&workspace.root(), "build.rs")
+                .unwrap()
+                .sensitive
+        );
+        let readme = read_document(&workspace.root(), "README.md").unwrap();
+        let proposal = PreparedWrite::prepare(
+            &workspace.root(),
+            json!({"path":"README.md","content":"changed\n","expectedVersion":readme.version}),
+        )
+        .unwrap();
+        assert!(
+            crate::agent_sensitive::review_gate(true, false, false)
+                == crate::agent_sensitive::ReviewGate::Reject
+        );
+        assert_eq!(
+            std::fs::read_to_string(workspace.directory.path().join("README.md")).unwrap(),
+            "readme\n"
+        );
+        let _ = proposal;
+        let main = read_document(&workspace.root(), "src/main.rs").unwrap();
+        let update = PreparedWrite::prepare(
+            &workspace.root(),
+            json!({"path":"src/main.rs","content":"fn main() { let _ = 1; }\n","expectedVersion":main.version}),
+        )
+        .unwrap();
+        update
+            .apply_checked(&workspace.state, &AtomicBool::new(false))
+            .unwrap();
+        assert!(
+            std::fs::read_to_string(workspace.directory.path().join("src/main.rs"))
+                .unwrap()
+                .contains("let _ = 1")
         );
     }
 }

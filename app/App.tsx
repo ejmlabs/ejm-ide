@@ -42,6 +42,7 @@ import { FileIcon, FileTree } from './components/FileTree';
 import { GitDiffPane } from './components/GitDiffPane';
 import { GitHistoryPane, GitSidebar } from './components/GitPane';
 import { MarkdownPane } from './components/MarkdownPane';
+import { ProposalDiffPane } from './components/ProposalDiffPane';
 import { SourceEditor } from './components/SourceEditor';
 import { Problems, TerminalPane } from './components/Tools';
 import { Button } from './components/ui/button';
@@ -91,6 +92,7 @@ import {
   moveEditorTab,
   openEditorTab,
   openMarkdownPreview,
+  proposalDiffTab,
   replaceEditorFile,
   resolveNewFilePath,
   splitEditorGroup,
@@ -135,6 +137,7 @@ import type {
   Workspace,
 } from './lib/types';
 import { basename, hasBuiltInLanguageService, languageId, relativePath } from './lib/utils';
+import { showApprovalBadge, type WriteApproval } from './lib/write-approval';
 
 type Sidebar = 'project' | 'search' | 'changes' | 'extensions';
 type Tool = 'hierarchy' | 'problems' | 'terminal' | 'git' | 'debug';
@@ -183,6 +186,7 @@ function App() {
   const [sidebar, setSidebar] = useState<Sidebar>('project');
   const [showSidebar, setShowSidebar] = useState(true);
   const [showChat, setShowChat] = useState(true);
+  const [approvalPending, setApprovalPending] = useState(false);
   const [showTools, setShowTools] = useState(false);
   const [presentations, setPresentations] = useState<ChatDisplay[]>([]);
   const [agentHint, setAgentHint] = useState<AgentHintValue | null>(null);
@@ -2393,9 +2397,13 @@ function App() {
               size="icon"
               aria-label="Toggle chat panel"
               aria-pressed={showChat}
+              className="chat-toggle"
               onClick={() => setShowChat((v) => !v)}
             >
               <PanelRight size={16} />
+              {showApprovalBadge(approvalPending, showChat) && (
+                <span className="rail-badge">1</span>
+              )}
             </Button>
           </Tooltip>
         </div>
@@ -2656,6 +2664,23 @@ function App() {
                     );
                   }}
                   renderContent={(group, tab) => {
+                    if (tab?.kind === 'proposal-diff')
+                      return (
+                        <ProposalDiffPane
+                          key={tab.id}
+                          path={tab.path}
+                          before={tab.before}
+                          after={tab.after}
+                          onDecide={(decision, note) => {
+                            void invokeAgent(agentSelection.providerId, 'agent_write_decision', {
+                              reviewId: tab.reviewId,
+                              decision,
+                              note: note.trim() || null,
+                              connectionId: tab.connectionId,
+                            });
+                          }}
+                        />
+                      );
                     if (tab?.kind === 'diff' && workspace)
                       return (
                         <GitDiffPane
@@ -2992,6 +3017,10 @@ function App() {
               onDropReference={addReference}
               onTurnComplete={() => void refreshDocuments()}
               onBusy={setBusy}
+              onApprovalPending={setApprovalPending}
+              onOpenProposal={(approval: WriteApproval) => {
+                updateEditorLayout(openEditorTab(layoutRef.current, proposalDiffTab(approval)));
+              }}
               externalPrompt={externalPrompt}
             />
           </Panel>
