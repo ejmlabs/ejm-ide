@@ -228,7 +228,7 @@ fn proc_macro_source(root: &Path, segments: &[String]) -> bool {
     let Some(name) = segments.last() else {
         return false;
     };
-    if !name.ends_with(".rs") {
+    if !fold_segment(name).ends_with(".rs") {
         return false;
     }
     let mut depth = segments.len().saturating_sub(1);
@@ -315,11 +315,15 @@ mod tests {
             ".GitHub/workflows/x.yml",
             "scripts/postinstall.sh",
             "macros/src/lib.rs",
+            "macros/src/LIB.RS",
+            "macros/src/lib.rS",
+            "macros/src/lib.\u{FF32}\u{FF33}",
             "\u{FF53}\u{FF43}\u{FF52}\u{FF49}\u{FF50}\u{FF54}\u{FF53}/run.sh",
         ] {
             assert!(class(root.path(), path).sensitive, "{path}");
         }
         assert!(!class(root.path(), "src/lib.rs").sensitive);
+        assert!(!class(root.path(), "src/LIB.RS").sensitive);
         assert!(!class(root.path(), "src/main.rs").sensitive);
         assert!(!class(root.path(), "README.md").sensitive);
         assert!(!class(root.path(), "Cargo.lock").sensitive);

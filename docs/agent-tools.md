@@ -25,6 +25,9 @@ File tools accept regular UTF-8 files up to 128 KiB. Paths stay within the
 captured workspace. Git metadata, symbolic links, special files, parent
 traversal, and paths outside the workspace are rejected.
 
+Sensitive-path checks ignore ASCII case and Unicode normalization differences,
+including the `.rs` suffix of proc-macro sources.
+
 Updates require the exact `expectedVersion` returned by `workbench_read_file`.
 Creates require explicit `expectedVersion: null` and an existing parent folder.
 Every proposal receives automatic review through a separate model request with

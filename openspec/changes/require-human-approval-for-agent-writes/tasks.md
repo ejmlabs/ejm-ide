@@ -26,6 +26,23 @@ This change implements the Option A specs. Do not implement Option B, and do not
 
 - [x] 3.1 Run the focused web tests and `npm run test:rust` for the classifier, the 20 minute deadline (injected short), the warning, the retry prompt, the notification policy, and the non-sensitive cases. Then run `npm run verify`. In the browser preview, walk the card in light and dark: the full diff is visible, keyboard travel reaches Deny then Approve, and Enter does not approve.
 
+## 4. Review correction
+
+- [x] 4.1 Match proc-macro Rust suffixes with the existing Unicode and ASCII case folding while retaining the original path for manifest lookup. Extend the classifier regression to cover mixed-case suffixes and an ordinary-source control. Update the public guide and changelog, run focused checks within the disk budget, and record unrun full gates.
+
+### Review verification, 2026-10-20
+
+- The classifier contract test failed on `macros/src/LIB.RS` before the fix and
+  passed after it. The offline scratch crate imported the production module
+  directly and used cached dependencies. Its `unicode-normalization 0.1.25`
+  satisfies the product's `0.1` requirement; locked `0.1.26` was not cached.
+  The product manifest and lockfile are unchanged.
+- Rust formatting, diff whitespace, and strict OpenSpec validation passed.
+- Full host `cargo check --tests`, native tests, Clippy, `npm run verify`, and
+  the docs build remain unrun with about 4 GiB free. This focused check does
+  not establish full host or locked-dependency acceptance.
+- The public guide and changelog are updated in source. Publication is unverified.
+
 ## Not in this change
 
 Option B would replace only the non-sensitive requirement: human confirmation by default, with the AI reviewer allowed to approve non-sensitive writes only after an opt-in. It needs a spec edit before any task is added. Suspending auto-lint for agent-changed files stays the follow-up named in the proposal. `.envrc`, `go.mod`, and `biome.json(c)` stay off the sensitive list. A batch stack and Review all wait until the engine can present more than one tool call at a time.

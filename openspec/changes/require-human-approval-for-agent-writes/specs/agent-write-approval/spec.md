@@ -94,6 +94,11 @@ The IDE MUST classify the same normalized, workspace-relative path that it will 
 - **WHEN** the agent proposes a change to `BUILD.RS`, `cargo.toml` or `.GitHub/workflows/x.yml`
 - **THEN** each write requires human confirmation
 
+#### Scenario: Case variants in proc-macro source suffixes
+- **WHEN** the agent targets `macros/src/LIB.RS` or `macros/src/lib.rS` and the nearest `Cargo.toml` sets `[lib] proc-macro = true`
+- **THEN** the write requires human confirmation
+- **AND** manifest lookup retains the original directory spelling
+
 #### Scenario: Dot segments and absolute paths
 - **WHEN** the agent targets `./crates/./a/Cargo.toml` or the absolute path of `Cargo.toml` inside the workspace
 - **THEN** the write requires human confirmation
