@@ -37,6 +37,7 @@ sha2 = "0.10"
 tauri = { version = "=2.12.4", features = [] }
 tauri-plugin-dialog = "2"
 tauri-plugin-opener = "2"
+tempfile = "3"
 tokio = { version = "1", features = ["process", "io-util", "net", "sync", "time", "rt", "macros"] }
 tokio-util = { version = "0.7", features = ["rt"] }
 tracing = { version = "0.1", default-features = false, features = ["std"] }
@@ -54,9 +55,6 @@ cap-fs-ext = "3"
 
 [target.'cfg(target_os = "macos")'.dependencies]
 keyring = "4.2.0"
-
-[dev-dependencies]
-tempfile = "3"
 
 [lints.rust]
 unsafe_code = "deny"
