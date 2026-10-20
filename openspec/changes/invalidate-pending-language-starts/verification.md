@@ -199,3 +199,107 @@ drive the app's folder picker, workspace IPC, or GUI. Task 2.4 remains open.
 No hosted admission, merge, release, installer, deployment, or website
 publication occurred. Keep the change open; sync and archive only after all
 required acceptance and review gates pass.
+
+## Frontend startup presentation follow-up
+
+This later, uncommitted candidate starts from published IDE commit
+`06260fd07ba82cc0981ec1e13c0a1d36441ab2f7`. It changes frontend startup result
+publication and adds one language synchronization test. The native source,
+native fixture, dependency locks, harness pin, and gate definitions are unchanged.
+The earlier full native gate is evidence for those unchanged native bytes, not
+a claim that `npm run verify` ran again for the frontend candidate.
+
+### Reproduction and correction
+
+The existing Vite browser facility ran the real React App effects, folder
+commands, `language-sync`, and Monaco in a separate source export. A local Vite
+plugin replaced only backend calls and event subscription. The controlled
+workspace responses followed A to B to A while the first `language_open`
+response stayed pending.
+
+Before the fix, reopening the file without trust showed `untrusted`; releasing
+the old unavailable result replaced it with `Syntax only`. In a second case,
+trusting returned A requested a fresh startup and showed `starting`; rejecting
+the old request replaced that status with `error`. Completing the current
+request then showed `LSP`.
+
+After the fix, both sequences ran through the same real App paths. DOM
+assertions confirmed that the first case stayed `untrusted`, the second stayed
+`starting`, and the current request still reached `LSP`.
+
+Same-path requests are serialized by `language-sync`. The old request cannot
+overtake a newer ready startup. The confirmed defect is an earlier workspace's
+result replacing the current untrusted or starting state. The added Vitest
+regression holds initialization, allows another folder's path to finish first,
+rejects the old initialization, and verifies that reopening the same path waits
+for its close before starting and can then become ready.
+
+The correction captures the existing workspace object and checks its identity
+before publishing a returned status or error. Every successful folder open
+replaces that object. The only other replacements are initial workspace load
+and trust. Initial load runs only with no workspace; trust installs its new
+object before restarting each open file. Ordinary renders and Git, file,
+document, index, and language refreshes preserve the object. An independent
+source review found no unrelated refresh that discards a valid current start.
+No new state, allocation, timer, worker, dependency, or shared API is added.
+
+### Retained evidence
+
+Evidence is under
+`/private/tmp/ejm-audit-verification-20261020/ide13-frontend-race/`:
+
+- `before-source.json`, `after-app-source.json`, and `tested-source.json` record
+  the base commit and source hashes. The tested export matches the repair
+  checkout for the app, language synchronization code and test, Monaco, real
+  backend, dependency locks, native source, and native fixture.
+- `before-browser-events.jsonl` and `after-browser-events.jsonl` retain backend
+  command order and observed workspace/status transitions. `browser-result.json`
+  records the before/after DOM assertions and their scope.
+- `browser-fixture.mjs` retains the local test boundary. No browser test adapter
+  is included in the production build.
+- The original browser run used a fallback font because the reused
+  `node_modules` symlink fell outside Vite's asset allowlist. The scratch fixture
+  now allows that exact dependency directory; `08-fixture-font.json` records a
+  200 response with 21,168 bytes for the font. Two Monaco tokenization time-limit
+  warnings appeared. No unhandled frontend exception was observed. These runs
+  establish controller state, not a layout or performance result.
+
+App SHA-256 before the correction:
+`1d5e0bf144def5398e9126092b51dedfc8a93ab56366613195b2aff9e20c2aba`.
+Tested App SHA-256 after the correction:
+`77e96879deebde68771897ec930c996b3aeb94beabccadd2d2dcd3f0edca77e9`.
+Test SHA-256:
+`e45132fd17165b3ac9ca4ef9a6bbd9d7be661909fa3aff370d325878dab77587`.
+The native source and fixture still have the exact hashes recorded above:
+`ba921266cd409b9db48ffd43faee733bc64c130819be6d59427c23ddd31aa5a7`
+and `e4d20393cebc01c2c91de5110382b23765073474319369ecd1e17a23ea86f024`.
+
+### Non-native checks
+
+Each log has a matching JSON record with arguments, exit code, elapsed time, and
+the non-secret environment allowlist. The source export reused already
+installed dependencies. No dependency installation or native build ran.
+
+| Log stem | Command | Result |
+| --- | --- | --- |
+| `02-language-sync-regression` | `npm test -- app/lib/language-sync.test.ts` | Passed, 5 tests |
+| `03-web-format` | `biome format .` | Passed, no edits |
+| `04-web-lint` | `npm run lint` | Passed |
+| `05-web-check` | `npm run check` | Passed |
+| `06-web-tests` | `npm test -- --maxWorkers=2` | Passed, all 612 tests in 40 files |
+| `07-web-build` | `npm run build` | Passed; existing 5.53 MB main-chunk warning |
+| `09-openspec-validation` | `openspec validate invalidate-pending-language-starts --strict` | Passed |
+| `10-diff-whitespace` | `git diff --check` | Passed |
+
+The public site's language overview at `website/index.html` describes startup
+and advertised server capabilities. It has no status recovery or workspace
+session claims to change. This source pin has no public docs routes or copied
+language guide. The canonical `docs/languages.md` and unreleased changelog now
+cover the frontend guard and distinguish the new web evidence from the earlier
+native gate. Site runtime and build inputs are unchanged, so the earlier site
+checks were not repeated. No website or installer publication is claimed.
+
+Task 2.4 remains open. Browser backend fixtures do not establish native folder
+picking, workspace IPC, language process startup, or child cleanup. No native
+gate was repeated, and this candidate has not been committed, pushed, merged,
+released, or deployed.

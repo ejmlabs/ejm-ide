@@ -14,6 +14,12 @@
 - [x] 2.3 Exercise the production native publication error path across two workspace clears with a real initializing LSP client, bounded loopback barriers, and child-owned socket EOF after rejection. Confirm successful initialization, an empty session map, and normal child cleanup.
 - [ ] 2.4 Confirm the native app's folder-picker behavior while switching away and reopening the same folder during startup. The controlled native fixture does not establish this GUI acceptance check.
 
+## 3. Frontend startup presentation
+
+- [x] 3.1 Reproduce stale returned and rejected startup results through the real App controller across A to B to A; bind result publication to the requesting workspace object while preserving open-file checks and same-path serialization.
+- [x] 3.2 Verify current untrusted and starting states survive old success and error completions, confirm the current startup can become ready, and add focused coverage for the existing serialized close/reopen contract.
+- [x] 3.3 Run focused web regressions and the existing non-native gates, update the language guide and changelog, and retain before/after source hashes and browser evidence without claiming native GUI acceptance or a repeated full native gate.
+
 ## Workflow follow-up
 
 - Keep the change and specs open while any required check is unrun.

@@ -15,6 +15,9 @@ leaving a folder and reopening it while that start is pending.
 - Exercise the production cache, start, and publication path with a real native
   client paused during initialization across workspace clears. Confirm rejected
   child cleanup with the existing public LSP transport package.
+- Bind frontend startup results to the workspace object that requested them.
+  Ignore earlier status and capability updates after leaving and reopening the
+  same root, including both returned statuses and rejected requests.
 - Update the canonical language guide and changelog with the lifecycle and
   verification limits.
 
@@ -31,7 +34,8 @@ None. This checkout has no main specs.
 
 ## Impact
 
-`ejm-ide` owns the workspace service adapter in `src-tauri/src/language.rs`.
+`ejm-ide` owns the workspace service adapter in `src-tauri/src/language.rs` and
+the language startup presentation in `app/App.tsx`.
 No public harness API, IPC shape, dependency, or sibling source changes. The
 dependency direction remains from IDE to public harness packages. Existing
 client ownership supplies cleanup when a rejected startup returns.
@@ -48,3 +52,10 @@ is claimed. Focused checks supplement, but do not replace, clean-pin native and
 full repository gates. Keep the change open until those required gates pass.
 The test uses bounded loopback barriers and the existing Node transport package;
 it does not establish GUI folder-picker acceptance.
+
+The frontend reuses each folder open's existing workspace object as identity.
+It captures one reference and checks it before applying a result. The real App
+controller is exercised with controlled local backend responses in the existing
+Vite browser facility. Same-path starts remain serialized by `language-sync`;
+the confirmed frontend regression is an old result replacing the current
+untrusted or starting status, not an old result overtaking a newer ready start.

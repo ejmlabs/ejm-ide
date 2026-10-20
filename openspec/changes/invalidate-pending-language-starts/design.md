@@ -57,6 +57,16 @@ not distinguish two open sessions for the same folder.
    provides bounded accept and IO; parent socket closure exits the fixture on
    failure. Use no sleeps, custom LSP framing, dependency, or unsafe process probe.
    GUI folder picking remains a separate acceptance check.
+7. Capture the existing workspace object in the frontend startup callback and
+   compare its identity before applying either a returned status or an error.
+   Each successful folder open creates a new object, so A to B to A cannot make
+   an old callback current. Reuse this identity instead of adding another
+   generation counter, request map, or dependency. Preserve the open-file check
+   and the existing `language-sync` close/reopen ordering. Real App reproduction
+   confirms an old result can replace untrusted or starting status; same-path
+   serialization prevents it from overtaking a newer ready startup. Exercise
+   both completion paths through real React effects and folder commands with
+   only local backend responses replaced in a separate Vite verification export.
 
 ## Risks / Trade-offs
 
@@ -65,6 +75,9 @@ not distinguish two open sessions for the same folder.
   switching remains unverified until a separate acceptance check runs.
 - A request during a workspace switch can be rejected. Reopen a file after
   trusting the current workspace to request its language service again.
+- Browser verification can establish frontend controller state and ordering.
+  Its controlled backend does not exercise native folder picking, workspace
+  IPC, process initialization, or child cleanup.
 - Primary draft checks used active sibling source. Preserve their exact scope
   and keep clean-pin native and repository gates open until they run.
 
