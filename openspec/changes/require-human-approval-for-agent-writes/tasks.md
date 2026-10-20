@@ -28,20 +28,74 @@ This change implements the Option A specs. Do not implement Option B, and do not
 
 ## 4. Review correction
 
-- [x] 4.1 Match proc-macro Rust suffixes with the existing Unicode and ASCII case folding while retaining the original path for manifest lookup. Extend the classifier regression to cover mixed-case suffixes and an ordinary-source control. Update the public guide and changelog, run focused checks within the disk budget, and record unrun full gates.
+- [x] 4.1 Match proc-macro Rust suffixes with the existing Unicode and ASCII case folding while retaining the original path for manifest lookup. Extend the classifier regression to cover mixed-case suffixes and an ordinary-source control. Update the public guide and changelog, run focused and exact-pin full checks within the disk budget, and record their evidence and limits.
 
 ### Review verification, 2026-10-20
 
-- The classifier contract test failed on `macros/src/LIB.RS` before the fix and
-  passed after it. The offline scratch crate imported the production module
-  directly and used cached dependencies. Its `unicode-normalization 0.1.25`
-  satisfies the product's `0.1` requirement; locked `0.1.26` was not cached.
-  The product manifest and lockfile are unchanged.
-- Rust formatting, diff whitespace, and strict OpenSpec validation passed.
-- Full host `cargo check --tests`, native tests, Clippy, `npm run verify`, and
-  the docs build remain unrun with about 4 GiB free. This focused check does
-  not establish full host or locked-dependency acceptance.
-- The public guide and changelog are updated in source. Publication is unverified.
+The earlier scratch classifier contract test failed on `macros/src/LIB.RS`
+before the fix and passed after it. That runner imported the production module
+and used cached `unicode-normalization 0.1.25`; locked `0.1.26` was absent then.
+This historical focused result has now been followed by the exact locked host
+checks below. The product manifest, lockfile, and harness pin are unchanged.
+
+Verification used independent clean clones under
+`/private/tmp/ejm-audit-verification-20261020/ide11/`: product commit
+`1d06b935c6f757a89b171c41fb083f522b17c809`, tree
+`bd8837e41f2addd322cab47006567363f72ba2c7`, with harness pin
+`09b779ee0452dda07b7f52503be22e65fe238373`, tree
+`c98793042e99e9a7c716aee39e69b05428edfaa8`. Source and post-gate provenance
+are in `logs/ide11/source-provenance.json` and `post-gate-provenance.json`
+under that audit root. `gate-input-hashes.json` records the checked host,
+manifest, and gate input hashes. The corrected classifier SHA-256 is
+`bb514dfa5756003f213b579305c078d1e9b209f6526c5ee0e509756ce4d847b2`.
+
+The initial cache inventory found six absent locked crate archives. A scoped
+official-registry `cargo fetch --locked` downloaded exactly those versions,
+including `unicode-normalization 0.1.26`. `cache-preflight.json` records the
+initial gap; `03-locked-registry-fetch.log` records the fetch. All following
+Cargo checks were offline. No dependency or lock was changed to pass a gate.
+
+Node was `v24.19.0`; Rust was `1.99.1` on `aarch64-apple-darwin`. Every Cargo
+command, including nested npm gates, held the exclusive
+`/tmp/ejm-capacity-cargo.lock`, used two build jobs, and disabled incremental
+compilation. Normal debug profiles were retained. A wrapper excluded credential
+environment variables and stopped work if disk fell below 10 GiB. The full gate
+used scoped local loopback permission for existing provider fixtures, with no
+real provider or account calls.
+
+Raw logs and matching command/result JSON files are under
+`/private/tmp/ejm-audit-verification-20261020/logs/ide11/`:
+
+| Log stem | Command | Result |
+| --- | --- | --- |
+| `01-npm-ci-offline` | `npm ci --ignore-scripts --offline` | Passed, 347 packages, 3.792 s |
+| `04-native-check` | `cargo check --manifest-path src-tauri/Cargo.toml --tests --locked --offline` | Passed, 16.506 s |
+| `05-npm-verify` | `npm run verify`, once on the exact product commit and harness pin | Passed, 68.022 s |
+| `06-site-check` | `npm run site:check` | Passed, 4.156 s |
+| `07-site-build` | `npm run site:build` | Passed, 3.265 s |
+
+The full gate passed formatting, lint, strict TypeScript, 622 web tests, strict
+Clippy, 217 native unit tests, 8 workspace integrity integration tests, and the
+frontend production build. It ran the real classifier regression with locked
+`unicode-normalization 0.1.26`, including mixed-case and normalized suffixes.
+The normal command still ignores the disposable sample-workspace acceptance
+test and six installed-LSP integration tests. The frontend reports the existing
+main-chunk warning, about 5.54 MB minified. These command times include any lock
+wait and do not measure runtime performance. Final free disk exceeded 26 GiB.
+
+Tauri removed only the final newline from tracked generated
+`src-tauri/gen/schemas/macOS-schema.json`. Parsed JSON was identical. The raw
+diff and before/after hashes are retained in `generated-schema-newline.patch`
+and `generated-schema-newline.json`; only that generated audit output was
+restored to its original committed bytes. Final product and harness provenance
+is clean, with unchanged runtime and dependency inputs.
+
+The public guide and changelog remain accurate; this verification update changes
+only execution evidence. The source-pin site has no authored docs routes, so its
+normal site check and build cover the available public site inputs. This pass
+did not repeat the browser card, theme, or keyboard acceptance in task 3.1.
+Local checks do not establish hosted admission, approval, merge, release,
+installer availability, deployment, or website publication.
 
 ## Not in this change
 
