@@ -14,6 +14,7 @@
       "!**/*.tsbuildinfo",
       "!!distribution/worker-configuration.d.ts",
       "!!website/public/design-kit",
+      "!!website/src/generated",
       "!!app/theme.css"
     ]
   },

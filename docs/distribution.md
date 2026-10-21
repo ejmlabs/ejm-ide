@@ -249,3 +249,23 @@ artifact uploads. Worker dry run compiles the site assets and R2 binding.
 Native installer builds, signatures, platform smoke tests, and public binary
 downloads remain release gates. An empty production manifest is intentional
 until those gates pass.
+
+## Site source and publication checks
+
+Authored site content lives in `website/content/` and `website/src/`. The build
+uses public `@ejm/*` contracts from the revision in `.github/ui-source.json`.
+Use [development checks](development.md#public-docs-maintenance) to keep the
+public guides, source references, navigation and unchanged budgets in sync.
+
+Run the four site gates before a deployment. Inspect the Wrangler dry run and
+confirm the account, `ejmlabs-ide` Worker, `ide.ejmlabs.com` route and existing
+R2 binding. Keep `workers_dev` and `preview_urls` disabled. Site publication
+must not change `releases/latest.json`, upload an installer or substitute a
+source archive for a verified native release.
+
+Retain the prior Worker version and the exact accepted source and UI commit
+identities. After authorized publication, request `/`, `/download/`, all docs
+routes, `/api/releases`, playback assets and an unknown path. Verify status,
+security headers, console output and visible behavior in a browser. Compare
+the release API before and after the site change. A successful local build,
+dry run or source PR is not proof that the public site has changed.
