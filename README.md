@@ -17,7 +17,7 @@ See [distribution](docs/distribution.md) for the remaining native release gates.
 
 Install Git, Node.js 24 LTS, stable Rust, and the
 [Tauri prerequisites](https://v2.tauri.app/start/prerequisites/). Keep the shared
-harness checkout beside this project:
+harness and UI checkouts beside this project:
 
 ```text
 workspace/
@@ -25,6 +25,8 @@ workspace/
   ejm-harness/
     crates/ejm-harness/
     crates/ejm-harness-auth/
+  ejm-ui/
+    packages/
 ```
 
 The native app depends on `../../ejm-harness/crates/ejm-harness` from
@@ -32,15 +34,18 @@ The native app depends on `../../ejm-harness/crates/ejm-harness` from
 
 ## Quick start
 
-Clone both public repositories into the same parent folder and use the
-reviewed harness revision expected by this IDE source.
+Clone the public repositories into the same parent folder and use the
+reviewed dependency revisions expected by this IDE source.
 
 ```sh
 git clone https://github.com/ejmlabs/ejm-harness.git
-git -C ejm-harness checkout 09b779ee0452dda07b7f52503be22e65fe238373
+git clone https://github.com/ejmlabs/ejm-ui.git
 git clone https://github.com/ejmlabs/ejm-ide.git
 cd ejm-ide
-npm ci
+git -C ../ejm-harness checkout --detach "$(cat .github/harness-revision)"
+git -C ../ejm-ui checkout --detach "$(node -p "require('./.github/ui-source.json').revision")"
+npm --prefix ../ejm-ui ci --ignore-scripts
+npm ci --ignore-scripts
 rustup component add rust-analyzer rustfmt clippy
 npm run dev:desktop
 ```
@@ -242,21 +247,28 @@ human approval and two AI review passes.
 This is a working foundation. Language features depend on server capabilities;
 inferred calls can be incomplete, and completion latency depends on the provider.
 
-### Website and desktop downloads
+### Website
 
-The public download site targets [ide.ejmlabs.com](https://ide.ejmlabs.com).
-It builds independently of the desktop UI and uses Cloudflare Worker Static
-Assets with R2 for installers. Platform choices include macOS, Windows, and
-Linux; download links appear only for published, verified release files.
-
-See [distribution](docs/distribution.md) for local preview, deployment, release
-publication, and the remaining native-platform release work.
+The public site at [ide.ejmlabs.com](https://ide.ejmlabs.com) uses public
+`@ejm/*` packages from the pinned sibling UI checkout. Authored pages and guides
+live in `website/`; Vite prerenders them into untracked `website/dist/` output.
+The Cloudflare Worker serves the site and reserves `/api/` and `/downloads/`
+for validated release metadata and installer streams.
 
 ```sh
 npm run site:build
 npm run site:check
+npm run site:docs:check
+npm run site:test
 npm run site:preview
 ```
+
+Use the [user guide](https://ide.ejmlabs.com/docs/user-guide/) or
+[developer guide](https://ide.ejmlabs.com/docs/developer-guide/), and keep them
+aligned with the canonical references in `docs/`. See
+[development](docs/development.md#public-docs-maintenance) for source and budget
+gates, and [distribution](docs/distribution.md) for hosting, installer
+publication and recovery. A local build does not publish a site or installer.
 
 ## Contributing
 

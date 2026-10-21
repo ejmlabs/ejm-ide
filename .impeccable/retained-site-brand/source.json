@@ -1,0 +1,345 @@
+{
+  "repository": "ejmlabs/ejm-ide",
+  "retained_from_commit": "0309cb7aceae91034d710ee3dbe992edd9a9df31",
+  "status": "historical brand source; not served or imported",
+  "active_owner": "ejmlabs/ejm-ui/packages/tokens",
+  "purpose": "Retain original brand motifs, fonts, font licenses and source identities while the public site adopts shared public exports. This directory is outside publicDir and build output. Do not use these files as active tokens, styles or site assets.",
+  "files": [
+    {
+      "original_path": "website/public/design-kit/motifs/contour-forest.svg",
+      "fixture": "motifs/contour-forest.svg",
+      "mode": "100644",
+      "blob": "96c3a8037f5c51e250850bb625cce6bb606eaaa3",
+      "size": 30186,
+      "sha256": "c0f01ba9d92f80f9dc9fb730ebb0e14a300e2d1f39ea99d8d7ef85937e53f74b"
+    },
+    {
+      "original_path": "website/public/design-kit/motifs/contour-ink.svg",
+      "fixture": "motifs/contour-ink.svg",
+      "mode": "100644",
+      "blob": "342a8bb223013edc64433fa69da9e89ed64bb8d7",
+      "size": 30180,
+      "sha256": "12589a69ead785a981602d8dc912131d3a80e569ae0f03f723dc08a13fc23574"
+    },
+    {
+      "original_path": "website/public/design-kit/motifs/contour-mist.svg",
+      "fixture": "motifs/contour-mist.svg",
+      "mode": "100644",
+      "blob": "eaa65a37d5be24001c0a9c52c141c1c7503ab9c2",
+      "size": 30182,
+      "sha256": "61b582aa9ee4800a05044f485c7fdfa470b695c4ffad1eff8e210576d457a605"
+    },
+    {
+      "original_path": "website/public/design-kit/motifs/contour-paper.svg",
+      "fixture": "motifs/contour-paper.svg",
+      "mode": "100644",
+      "blob": "32a2467f7bc8016c1ac1c5cb5e7dcbec59ec5291",
+      "size": 30184,
+      "sha256": "60604d06e4376ea106216384e7435a2726d42bd656cd697fd0d6e32e5155909d"
+    },
+    {
+      "original_path": "website/public/design-kit/motifs/dots-forest.svg",
+      "fixture": "motifs/dots-forest.svg",
+      "mode": "100644",
+      "blob": "2ef11f44116338e8fbceedb4280579fe0c598d82",
+      "size": 86815,
+      "sha256": "234bcb502a4d82ef618facea3ddbea0deda8d86d435d790846a6013b903d4b08"
+    },
+    {
+      "original_path": "website/public/design-kit/motifs/dots-ink.svg",
+      "fixture": "motifs/dots-ink.svg",
+      "mode": "100644",
+      "blob": "a52219e2a2747c9d462be390f3e272f61eae52a1",
+      "size": 86809,
+      "sha256": "9994cf4ed9c5307ed194eb2e85700343905a0e80bb89593c6545c2554a82f7d6"
+    },
+    {
+      "original_path": "website/public/design-kit/motifs/dots-mist.svg",
+      "fixture": "motifs/dots-mist.svg",
+      "mode": "100644",
+      "blob": "3c0f7982fae4273fbd471ec927491175e03dabf3",
+      "size": 86811,
+      "sha256": "cd65adbcf391a93ab68e738c4db382d35b0d0313f0bee92d16ddbfebb73435d3"
+    },
+    {
+      "original_path": "website/public/design-kit/motifs/dots-paper.svg",
+      "fixture": "motifs/dots-paper.svg",
+      "mode": "100644",
+      "blob": "6bcb8f3678463bc9a24fe4b42f92effa604d54f1",
+      "size": 86813,
+      "sha256": "ff43dd4f3faba9cec228280bd03ff9cedbd523b3fa0735ce8052e354726f57a7"
+    },
+    {
+      "original_path": "website/public/design-kit/motifs/echo-forest.svg",
+      "fixture": "motifs/echo-forest.svg",
+      "mode": "100644",
+      "blob": "a8cf2f624129d370e7b4b96a9c38d1dab1f11e9a",
+      "size": 15721,
+      "sha256": "5adfa73991155a6d714ac51eacd534c9f83fe699a2f063fbbe21d2834ced1946"
+    },
+    {
+      "original_path": "website/public/design-kit/motifs/echo-paper.svg",
+      "fixture": "motifs/echo-paper.svg",
+      "mode": "100644",
+      "blob": "074da8cb0e118d18f745fd87f904be02f7c0e267",
+      "size": 15719,
+      "sha256": "f3dd878745a5a5d5bae66505e81a4d9c1061d896b64fd56e8eaa09d0d2eacd9d"
+    },
+    {
+      "original_path": "website/public/design-kit/motifs/echo-tile.svg",
+      "fixture": "motifs/echo-tile.svg",
+      "mode": "100644",
+      "blob": "25762e14ece5f429c205e8df230d73721a0d8b01",
+      "size": 15503,
+      "sha256": "503e3e30f038d869a886426b1cf9d8f81f322b37c0ab760b6817169a0510f624"
+    },
+    {
+      "original_path": "website/public/design-kit/motifs/flow-forest.svg",
+      "fixture": "motifs/flow-forest.svg",
+      "mode": "100644",
+      "blob": "003b10065b1d5f093cf443e143ba7fcd69aec0c3",
+      "size": 63958,
+      "sha256": "200a744250dcc325eafd0c8b8f1bed689d4c7fef781723298f8313367329eeb5"
+    },
+    {
+      "original_path": "website/public/design-kit/motifs/flow-paper.svg",
+      "fixture": "motifs/flow-paper.svg",
+      "mode": "100644",
+      "blob": "d0c6d65e9c2313b520b6a5cf4f297c16e8b23126",
+      "size": 63957,
+      "sha256": "e33dc09c4e7b51fdd40a5c323f1db1e9440674c8985202cb58437f94814cf623"
+    },
+    {
+      "original_path": "website/public/design-kit/motifs/grid-forest.svg",
+      "fixture": "motifs/grid-forest.svg",
+      "mode": "100644",
+      "blob": "e9acaff4ecff583fd16226736892790d4b6ce8fe",
+      "size": 1580,
+      "sha256": "3732049f7c5a5e0bc5b0e5faa329c10326bf6dbb8f97de242307cce505951e4f"
+    },
+    {
+      "original_path": "website/public/design-kit/motifs/grid-ink.svg",
+      "fixture": "motifs/grid-ink.svg",
+      "mode": "100644",
+      "blob": "47021ee5e63bddcf3d720e53836c9752367bd94b",
+      "size": 1574,
+      "sha256": "9feefb397e2db73e16b4c61d2e51448dcccabbfff48f22149790859409753c83"
+    },
+    {
+      "original_path": "website/public/design-kit/motifs/grid-mist.svg",
+      "fixture": "motifs/grid-mist.svg",
+      "mode": "100644",
+      "blob": "defb2bf21e34991d514dfd91df3cf604fcb4dfb7",
+      "size": 1576,
+      "sha256": "5b1229ecb99a61ef6292dce033792237ba96f40cb6fd9701e0d597ea9d1970d2"
+    },
+    {
+      "original_path": "website/public/design-kit/motifs/grid-paper.svg",
+      "fixture": "motifs/grid-paper.svg",
+      "mode": "100644",
+      "blob": "18692bfd5b3de35fb0db70e74ba8554a7c4c8c02",
+      "size": 1578,
+      "sha256": "a9e46d54038606c5748be41bddf8a81e5603e5c6f75ba3e8208e387ee5634ed5"
+    },
+    {
+      "original_path": "website/public/design-kit/motifs/orbit-forest.svg",
+      "fixture": "motifs/orbit-forest.svg",
+      "mode": "100644",
+      "blob": "c8619cc3cb179b86a3434a8e91d0b3a031e18030",
+      "size": 2488,
+      "sha256": "2d9c9c41a7567554db0586004b170744c4276628c4b3a64208076fe6e9a3dcc9"
+    },
+    {
+      "original_path": "website/public/design-kit/motifs/orbit-paper.svg",
+      "fixture": "motifs/orbit-paper.svg",
+      "mode": "100644",
+      "blob": "7c5adbb64ee5245267e5107a7ad41fe133f20ab9",
+      "size": 2486,
+      "sha256": "b5aa08a140a9ce471a031f106a66f64daf05e1b45dbfaea9c517d2947280c932"
+    },
+    {
+      "original_path": "website/public/design-kit/motifs/ripple-forest.svg",
+      "fixture": "motifs/ripple-forest.svg",
+      "mode": "100644",
+      "blob": "9bde327c4fe77601705ad45e9e4e00a145d0886b",
+      "size": 3538,
+      "sha256": "10058a53131087b7478d928c2281932184cda9fc3be7b6daeb3a182c00db99d4"
+    },
+    {
+      "original_path": "website/public/design-kit/motifs/ripple-ink.svg",
+      "fixture": "motifs/ripple-ink.svg",
+      "mode": "100644",
+      "blob": "36e0801b56d137564614acd503427832ea2c1726",
+      "size": 3529,
+      "sha256": "5ea29498f0960ec80b6c1928b625b0708a4b528dac9686717e70685a29cb5f43"
+    },
+    {
+      "original_path": "website/public/design-kit/motifs/ripple-mist.svg",
+      "fixture": "motifs/ripple-mist.svg",
+      "mode": "100644",
+      "blob": "5011b1fc74484ee9aed7971811841406577d0ab1",
+      "size": 3536,
+      "sha256": "6ea1325500d3fc762a4b42568d23b69342d409f19403f10c10ca571aaeafc4e8"
+    },
+    {
+      "original_path": "website/public/design-kit/motifs/ripple-paper.svg",
+      "fixture": "motifs/ripple-paper.svg",
+      "mode": "100644",
+      "blob": "3eb0250d000188d16e1469e66f0b4dcbb3ab8832",
+      "size": 3538,
+      "sha256": "f240d496a4da57799b1136fdbb2510d1b029876939e6e4a00ed0529d9801d5a0"
+    },
+    {
+      "original_path": "website/public/design-kit/motifs/signature-crop-forest.svg",
+      "fixture": "motifs/signature-crop-forest.svg",
+      "mode": "100644",
+      "blob": "7437ecadb8f908e574c19ba4b53c22f17d7039bf",
+      "size": 7919,
+      "sha256": "67d5555faf12c117220f7cf3903deb36fb463cf66ac329c27b5b8a6d4d38ed1e"
+    },
+    {
+      "original_path": "website/public/design-kit/motifs/signature-crop-paper.svg",
+      "fixture": "motifs/signature-crop-paper.svg",
+      "mode": "100644",
+      "blob": "05b8e7a344dd07eff82d70345b4663c6a52171ab",
+      "size": 7918,
+      "sha256": "4f0be2676134fba4c587f282dbc652354855cc208d691a7ee15f632484e8614e"
+    },
+    {
+      "original_path": "website/public/design-kit/motifs/signature-crop-sage.svg",
+      "fixture": "motifs/signature-crop-sage.svg",
+      "mode": "100644",
+      "blob": "7fa2097951ada33c23d3eb0b97e57e7541813cd7",
+      "size": 7916,
+      "sha256": "f456c7a28ee9df843d3ecd9d54a873c61e7a08b00c1e4f757dc21ad999fe20ca"
+    },
+    {
+      "original_path": "website/public/design-kit/motifs/stripe-forest.svg",
+      "fixture": "motifs/stripe-forest.svg",
+      "mode": "100644",
+      "blob": "d5c27f2d5e04f04436b5f51bacf86334c21fbbbc",
+      "size": 41152,
+      "sha256": "9f3ec2f3564910ae92a58891c7407ab5be253b63beb5c68661a36be6cc539e94"
+    },
+    {
+      "original_path": "website/public/design-kit/motifs/stripe-ink.svg",
+      "fixture": "motifs/stripe-ink.svg",
+      "mode": "100644",
+      "blob": "fdf95e0f35e6bd1a36f92dc55d86ad460485aa1f",
+      "size": 41146,
+      "sha256": "6eb346dd070a78c3bfd02b046d39d23ddd525e21aa19084d6de2a7807637b269"
+    },
+    {
+      "original_path": "website/public/design-kit/motifs/stripe-mist.svg",
+      "fixture": "motifs/stripe-mist.svg",
+      "mode": "100644",
+      "blob": "b9664cc6d967c8cbc4e422d564b8936815f5a0c2",
+      "size": 41148,
+      "sha256": "1644faaf6fc42a88a2dda42309bbc2dc135f915396847815ada9faf5558d6b55"
+    },
+    {
+      "original_path": "website/public/design-kit/motifs/stripe-paper.svg",
+      "fixture": "motifs/stripe-paper.svg",
+      "mode": "100644",
+      "blob": "99bc14cbea38abd63e7ef8ee9247f22566a60c3a",
+      "size": 41150,
+      "sha256": "a634a338af1f1d2f22899dcb87f9eb785a90de712d645d7453582c28839da51c"
+    },
+    {
+      "original_path": "website/public/design-kit/motifs/tiles/dots-tile-dark.svg",
+      "fixture": "motifs/tiles/dots-tile-dark.svg",
+      "mode": "100644",
+      "blob": "d0dbf36422c484a493a2192d317058b536c61e50",
+      "size": 3738,
+      "sha256": "2e24adbd9c18f3aa34b4d3322300c2a6f94f0dea9909333b6c2e5a8f985db43c"
+    },
+    {
+      "original_path": "website/public/design-kit/motifs/tiles/dots-tile-light.svg",
+      "fixture": "motifs/tiles/dots-tile-light.svg",
+      "mode": "100644",
+      "blob": "ac90aef1471689a7daef982fc2c140033a1bce50",
+      "size": 3739,
+      "sha256": "9584cf1c6b92cbea55958b49b829b9466cea813037597fadb384326262c2ce43"
+    },
+    {
+      "original_path": "website/public/design-kit/motifs/tiles/grid-tile-dark.svg",
+      "fixture": "motifs/tiles/grid-tile-dark.svg",
+      "mode": "100644",
+      "blob": "38f8a55107959e3b0e4ddd25f4da6ba28f9a437d",
+      "size": 389,
+      "sha256": "7807a0dfff132c8d0c600643ea650fea42be2e515ecaba8b1208ad485b522306"
+    },
+    {
+      "original_path": "website/public/design-kit/motifs/tiles/grid-tile-light.svg",
+      "fixture": "motifs/tiles/grid-tile-light.svg",
+      "mode": "100644",
+      "blob": "0b79b605b71d4c3d19ab9c0a56770ba4d92bb3a5",
+      "size": 389,
+      "sha256": "b2fa843aada5d35789bf846e9a8bdd8027b94f6cd0be3cf3022cf018f13f11fe"
+    },
+    {
+      "original_path": "website/public/design-kit/motifs/tiles/stripe-tile-dark.svg",
+      "fixture": "motifs/tiles/stripe-tile-dark.svg",
+      "mode": "100644",
+      "blob": "c479f6f2a5653b7a75901dcb2ca12f9c80c48cba",
+      "size": 8311,
+      "sha256": "0d81094c7c8513ef871ced3377f155427a3280abba07fb4c8cef76a1ad75217b"
+    },
+    {
+      "original_path": "website/public/design-kit/motifs/tiles/stripe-tile-light.svg",
+      "fixture": "motifs/tiles/stripe-tile-light.svg",
+      "mode": "100644",
+      "blob": "da75db3810b168234772da4d65038bf53aa4c503",
+      "size": 8312,
+      "sha256": "470d6d763e0351cca4cba9f4a7e9ccae6673024caf2f45a28410b28f8057415f"
+    },
+    {
+      "original_path": "website/public/design-kit/fonts/IBMPlexMono-Medium.ttf",
+      "fixture": "fonts/IBMPlexMono-Medium.ttf",
+      "mode": "100644",
+      "blob": "33c546f68b6007a45a3f10e845523abb2db25399",
+      "size": 136704,
+      "sha256": "a9b4c49bb299e05b5f6c481e7fb5e78943d2793249a0c8874ab574a2d1ea6755"
+    },
+    {
+      "original_path": "website/public/design-kit/fonts/IBMPlexMono-Medium.woff2",
+      "fixture": "fonts/IBMPlexMono-Medium.woff2",
+      "mode": "100644",
+      "blob": "83af1b0a72e4f74620703914b40748a0e55ba2dd",
+      "size": 40136,
+      "sha256": "c529c8f6c717f8cf2bc90389a1439d0b011d45acb03af5bafb6632f7f4895a5d"
+    },
+    {
+      "original_path": "website/public/design-kit/fonts/IBMPlexMono-OFL.txt",
+      "fixture": "fonts/IBMPlexMono-OFL.txt",
+      "mode": "100644",
+      "blob": "c35c4c618fab33da8695177b3a6cefe0810b7b28",
+      "size": 4456,
+      "sha256": "7e6b2818edbd8f6a01ae80641cc8f16a51080d08fb4e532be3a0b6f74adb07da"
+    },
+    {
+      "original_path": "website/public/design-kit/fonts/Manrope-OFL.txt",
+      "fixture": "fonts/Manrope-OFL.txt",
+      "mode": "100644",
+      "blob": "e271172a9ed0cddc895aabb6509f1c7d880b492d",
+      "size": 4387,
+      "sha256": "58172e0c0fac2cda8a37b348164bb55e44b0e69051e557e92b1d3f6910141f7b"
+    },
+    {
+      "original_path": "website/public/design-kit/fonts/Manrope-Variable.ttf",
+      "fixture": "fonts/Manrope-Variable.ttf",
+      "mode": "100644",
+      "blob": "75274da58537d6123b14f2cd0c355ad4681fc2b3",
+      "size": 164700,
+      "sha256": "3ae11c49db0455a3cc33e37d380f20fdb8c7f8b41dc07625c177e3d87a9d6ae6"
+    },
+    {
+      "original_path": "website/public/design-kit/fonts/Manrope-Variable.woff2",
+      "fixture": "fonts/Manrope-Variable.woff2",
+      "mode": "100644",
+      "blob": "65cbdb1d7b7c29be73b58fb2b925747238764f8f",
+      "size": 53832,
+      "sha256": "19331f90effd1b9cd435afef48ef43af014e4c343605f3781b23107a53e18b6b"
+    }
+  ]
+}

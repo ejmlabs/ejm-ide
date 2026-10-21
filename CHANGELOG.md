@@ -4,6 +4,13 @@ Changes follow [Semantic Versioning](https://semver.org/). Each repository is ve
 
 ## [Unreleased]
 
+### Website
+
+- Replace copied design assets with public shared UI contracts, prerendered
+  product pages and complete user and developer guides.
+- Preserve explicit installer states, current macOS and credential limits,
+  passive example playback and the unchanged site budgets.
+
 ## [0.1.0] - 2026-10-19
 
 Prepared development source for the first `0.1.0` release. These notes do not

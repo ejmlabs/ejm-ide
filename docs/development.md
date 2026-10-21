@@ -3,11 +3,13 @@
 Use Node.js 24 LTS and stable Rust with the `clippy` and `rustfmt` components.
 The native host needs the [Tauri development prerequisites](https://v2.tauri.app/start/prerequisites/)
 for your operating system. CI runs on macOS, the current desktop target.
-Keep `ejm-harness` beside the `ejm-ide` checkout. The native host uses
+Keep `ejm-harness` and `ejm-ui` beside the `ejm-ide` checkout, at the revisions
+selected by `.github/harness-revision` and `.github/ui-source.json`. Run
+`npm --prefix ../ejm-ui ci --ignore-scripts` first. The native host uses
 `../../ejm-harness/crates/ejm-harness` as its shared library dependency.
 
 ```sh
-npm ci
+npm ci --ignore-scripts
 rustup component add clippy rustfmt
 CARGO_BUILD_JOBS=4 npm run verify
 ```
@@ -70,8 +72,11 @@ separately. Keep the documented unsupported Linux GLib advisory and native
 platform limits in [the dependency audit](package-audit.md#public-readiness-dependency-check).
 
 The installed shared revision keeps this IDE protected-base selection and the
-existing macOS Quality commands. It supports an optional public UI source pin,
-but this repository supplies none, so no UI checkout or installation is added.
+macOS Quality commands. Trusted preparation also reads `.github/ui-source.json`
+from protected base `main`, validates the official public UI repository and full
+commit identity, then installs its locked dependencies. A PR-selected UI pin is
+validated but is not used to check that PR. Accept a pin change in its own PR
+first, then admit a fresh site PR against that accepted revision.
 
 [PR #3](https://github.com/ejmlabs/ejm-ide/pull/3) proved the installed harness
 pin and previous `c4f2873ef0eef5bc3c7d75cf71fa3489a911d134` caller in
@@ -169,3 +174,40 @@ own workspace formatting, strict Clippy, and focused tests from the
 `ejm-harness` checkout. Native dependency compilation does not run those tests.
 Use replay responses or local HTTP fixtures. Hosted model calls are separate
 from automated verification.
+
+## Public docs maintenance
+
+The IDE owns `website/content/*.md`, product pages, routes and release state.
+Canonical subsystem references remain in `docs/`. Update affected guides,
+examples, configuration, limits and recovery steps in the same change. Public
+source availability does not establish platform support or installer readiness.
+
+Use Node.js 24 and the pinned public UI checkout. The site consumes public
+`@ejm/*` exports; shared components, themes, docs rendering, build rules, capture
+and demo machinery belong in ejm-ui. Do not copy design files or add local
+visual CSS.
+
+```sh
+npm run site:build
+npm run site:check
+npm run site:docs:check
+npm run site:test
+```
+
+The build prerenders every route and checks the unchanged gzip limits: 110 KiB
+JavaScript, 15.5 KiB CSS, 70 KiB fonts and 30 KiB HTML. The built checks cover
+navigation, headings, asset and source links, release states, public tool names
+and the passive recorded example. They complement the required `npm run verify`
+source gate. Browser examples run locally without a worker or model connection;
+they do not prove native saves, credentials or process cleanup.
+
+Review changed routes in light and dark at measured narrow and desktop
+viewports. Check keyboard navigation, copy controls, local fragments, playback
+controls and release loading, error, empty and available states. Record the
+actual client width and check page overflow.
+
+A UI source pin needs acceptance on protected `main` before a site PR can test
+that revision. Keep human admission, approval and both AI reviews. Site source,
+local output, protected-main checks and live publication are separate states.
+Follow [distribution](distribution.md) for scoped Worker deployment and live
+verification; do not publish native installers as part of a site-only change.

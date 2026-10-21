@@ -14,7 +14,11 @@
     "skipLibCheck": true,
     "types": ["vite/client", "node"],
     "paths": {
-      "@/*": ["./app/*"]
+      "@/*": ["./app/*"],
+      "react": ["./node_modules/@types/react"],
+      "react/*": ["./node_modules/@types/react/*"],
+      "react-dom": ["./node_modules/@types/react-dom"],
+      "react-dom/*": ["./node_modules/@types/react-dom/*"]
     }
   },
   "include": ["app", "vite.config.ts", "website/src", "website/vite.config.ts"]
