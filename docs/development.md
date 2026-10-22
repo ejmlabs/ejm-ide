@@ -188,3 +188,11 @@ own workspace formatting, strict Clippy, and focused tests from the
 `ejm-harness` checkout. Native dependency compilation does not run those tests.
 Use replay responses or local HTTP fixtures. Hosted model calls are separate
 from automated verification.
+
+## Shared UI source
+
+The exact UI revision is recorded in `.github/ui-source.json`. Shared CI reads
+this pin from protected main and installs the owner workspace with lifecycle
+scripts disabled. The reviewed source and install metadata are retained as
+inert files under `review/dependency-sources/ejm-ui/`. Do not import those
+snapshots. Site migration is a separate change after the pin is accepted.
