@@ -1,3 +1,16 @@
+# Accepted UI pin adoption
+
+The proposed pin selects accepted UI commit `d4f7b06fbca61f2311a9b81971fbc6afb99b2821`,
+tree `e753fae8a4d697dd952fed7459c12903b67c34f7`. Source prerequisites #17, #18,
+#19 and #20 are accepted. The active manifest and source supplement bind
+13 install metadata records and 272 changed files to retained exact bytes.
+All 285 bindings were verified. Consumer pin acceptance remains pending.
+These snapshots remain inert; product source and the site are unchanged.
+
+## Historical bootstrap record
+
+The following record describes the earlier pin.
+
 # Public UI source review inputs
 
 The active owner pin is `.github/ui-source.json`. It selects the already protected `ejmlabs/ejm-ui` main commit `79a1aa8b1075f834717bc0c0299dc2c41a22b966`. The existing shared workflow reads that selection from protected base, never from the pull request head. It then exports the exact owner source and installs that sibling with `npm ci --ignore-scripts`.
