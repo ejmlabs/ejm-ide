@@ -12,6 +12,14 @@ rustup component add clippy rustfmt
 CARGO_BUILD_JOBS=4 npm run verify
 ```
 
+## Test discovery
+
+Vitest preserves its default exclusions and also excludes
+`review/dependency-sources/**`. Those files retain immutable upstream source
+for review and must never run as IDE tests. Application, website and distribution
+tests remain discoverable through the normal `npm test` command. Do not install
+snapshot dependencies or edit their bytes to fix a consumer check.
+
 ## Package choices
 
 Use trusted, maintained packages for standard problems. Check platform APIs,
@@ -180,3 +188,11 @@ own workspace formatting, strict Clippy, and focused tests from the
 `ejm-harness` checkout. Native dependency compilation does not run those tests.
 Use replay responses or local HTTP fixtures. Hosted model calls are separate
 from automated verification.
+
+## Shared UI source
+
+The exact UI revision is recorded in `.github/ui-source.json`. Shared CI reads
+this pin from protected main and installs the owner workspace with lifecycle
+scripts disabled. The reviewed source and install metadata are retained as
+inert files under `review/dependency-sources/ejm-ui/`. Do not import those
+snapshots. Site migration is a separate change after the pin is accepted.
