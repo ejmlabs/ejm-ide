@@ -4,6 +4,11 @@ Changes follow [Semantic Versioning](https://semver.org/). Each repository is ve
 
 ## [Unreleased]
 
+- Propose the accepted shared UI source pin after complete retained-source review; site migration follows protected pin acceptance.
+
+- Keep retained dependency source outside Vitest discovery while preserving
+  default exclusions and all IDE application, website and distribution tests.
+
 ### Fixed
 
 - Reject language-server starts from an earlier workspace session, including
