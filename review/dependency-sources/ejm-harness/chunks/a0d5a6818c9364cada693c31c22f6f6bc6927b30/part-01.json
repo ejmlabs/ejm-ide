@@ -1,0 +1,116 @@
+{
+  "repository": "ejmlabs/ejm-harness",
+  "owner_commit": "a0d5a6818c9364cada693c31c22f6f6bc6927b30",
+  "owner_tree": "2ec7e7047428b6297252d6e8ae55c11d7a595924",
+  "base_commit": "09b779ee0452dda07b7f52503be22e65fe238373",
+  "base_tree": "c98793042e99e9a7c716aee39e69b05428edfaa8",
+  "status": "inert immutable owner snapshots; not an active pin or accepted consumer",
+  "part": 1,
+  "parts": 4,
+  "purpose": "Complete read-only source bytes for static review. Never import, execute, install or package these fixtures.",
+  "files": [
+    {
+      "path": "Cargo.lock",
+      "base": {
+        "mode": "100644",
+        "blob": "345989cb654794dcac2305abf739b75b10e432f7",
+        "size": 78806,
+        "sha256": "ea0d974c629dce3deeb29d4bd1b3b274779d8466acf51b2c68bcf8f99c351178"
+      },
+      "target": {
+        "mode": "100644",
+        "blob": "796e6619961836c75a39f930ddf8258bedb3e543",
+        "size": 84747,
+        "sha256": "51ec076488dde7b4adc699fe7ff8f0ed3d276f69d76941a62b06f40547ee22b0"
+      },
+      "fixture": "a0d5a6818c9364cada693c31c22f6f6bc6927b30/Cargo.lock",
+      "fixture_mode": "100644",
+      "current_source_bytes_match_fixture": true
+    },
+    {
+      "path": "crates/ejm-harness-auth/src/engine.rs",
+      "base": {
+        "mode": "100644",
+        "blob": "0dd164e2ac37e111807c5bff92bf7ef73050785d",
+        "size": 38934,
+        "sha256": "3958425cc62cf63d463204e81f1f4e1be4664880d9d6acf14d7b096b01aa9970"
+      },
+      "target": {
+        "mode": "100644",
+        "blob": "9eeea46e6767880d5591883f1ff66b2500d544ba",
+        "size": 38923,
+        "sha256": "e5ba4835d04899d091112a6e75c67ee85bd91f4789d63bc19123e920301ec9c0"
+      },
+      "fixture": "a0d5a6818c9364cada693c31c22f6f6bc6927b30/crates/ejm-harness-auth/src/engine.rs",
+      "fixture_mode": "100644",
+      "current_source_bytes_match_fixture": true
+    },
+    {
+      "path": "crates/ejm-harness-auth/src/store/tests.rs",
+      "base": null,
+      "target": {
+        "mode": "100644",
+        "blob": "b09b85a1546b3c6a311747db0ac587da939ebdfd",
+        "size": 34881,
+        "sha256": "4ce1c2e9473d38c60e4427c193f81b265ceab225c5ff725086b6105d6c866c37"
+      },
+      "fixture": "a0d5a6818c9364cada693c31c22f6f6bc6927b30/crates/ejm-harness-auth/src/store/tests.rs",
+      "fixture_mode": "100644",
+      "current_source_bytes_match_fixture": true
+    },
+    {
+      "path": "registry/Cargo.lock",
+      "base": {
+        "mode": "100644",
+        "blob": "601b79806702eb4d37da5813cd9caba25e76de49",
+        "size": 25563,
+        "sha256": "fe7bae32e1d1e53db3412e17ed1135648a98bcae45a534b0b54e50245201a339"
+      },
+      "target": {
+        "mode": "100644",
+        "blob": "b839698c8c21e15baf5aad4520e015138e811859",
+        "size": 25561,
+        "sha256": "d64f18694d29f62627a29bc9cd961909662bfb73d407faf7359f8008c9283670"
+      },
+      "fixture": "a0d5a6818c9364cada693c31c22f6f6bc6927b30/registry/Cargo.lock",
+      "fixture_mode": "100644",
+      "current_source_bytes_match_fixture": true
+    },
+    {
+      "path": "registry/package-lock.json",
+      "base": {
+        "mode": "100644",
+        "blob": "4ff845bdd9ceee16f6a3b62e4adbf31681e3cd45",
+        "size": 111046,
+        "sha256": "00cfe5cf34d6a6ae7c8ee369a3dd9f0a253e6a41094f4a6747ff1f74af12c1ea"
+      },
+      "target": {
+        "mode": "100644",
+        "blob": "ec7d0e5b26495ee6a42222c089d7ce700eccf878",
+        "size": 111042,
+        "sha256": "86905810d9ec1f852f66d8b935537942f11eecf9af2b53e493da3d002ee11786"
+      },
+      "fixture": "a0d5a6818c9364cada693c31c22f6f6bc6927b30/registry/package-lock.json",
+      "fixture_mode": "100644",
+      "current_source_bytes_match_fixture": true
+    },
+    {
+      "path": "site/public/index.html",
+      "base": {
+        "mode": "100644",
+        "blob": "80bb6de95adf0d3ba02f2e564d83790d8f398ded",
+        "size": 21196,
+        "sha256": "df60f871b49de7f8a1e2b989c4adb2ab961e771a7106e98dbf06814db89f9fbd"
+      },
+      "target": {
+        "mode": "100644",
+        "blob": "04314beeaa3f7d348f266741c53fe0b535c4a325",
+        "size": 21608,
+        "sha256": "e5b35812e6508ba03f95d2f4c0007bbdf4abe4455224b8c96ae6ae20fb858a32"
+      },
+      "fixture": "a0d5a6818c9364cada693c31c22f6f6bc6927b30/site/public/index.html",
+      "fixture_mode": "100644",
+      "current_source_bytes_match_fixture": true
+    }
+  ]
+}

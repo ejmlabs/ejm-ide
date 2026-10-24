@@ -12,6 +12,14 @@ rustup component add clippy rustfmt
 CARGO_BUILD_JOBS=4 npm run verify
 ```
 
+## Test discovery
+
+Vitest preserves its default exclusions and also excludes
+`review/dependency-sources/**`. Those files retain immutable upstream source
+for review and must never run as IDE tests. Application, website and distribution
+tests remain discoverable through the normal `npm test` command. Do not install
+snapshot dependencies or edit their bytes to fix a consumer check.
+
 ## Package choices
 
 Use trusted, maintained packages for standard problems. Check platform APIs,
@@ -70,8 +78,19 @@ separately. Keep the documented unsupported Linux GLib advisory and native
 platform limits in [the dependency audit](package-audit.md#public-readiness-dependency-check).
 
 The installed shared revision keeps this IDE protected-base selection and the
-existing macOS Quality commands. It supports an optional public UI source pin,
-but this repository supplies none, so no UI checkout or installation is added.
+existing macOS Quality commands. The optional public UI source pin now selects
+protected owner commit `79a1aa8b1075f834717bc0c0299dc2c41a22b966`. Trusted
+preparation reads `.github/ui-source.json` from protected base and places that
+owner at sibling `ejm-ui`; Quality installs it with `npm ci --ignore-scripts`.
+Changing the pin in a pull request does not change that pull request's checkout.
+
+The [UI source metadata](../review/dependency-sources/ejm-ui/manifest.json)
+binds the complete root manifest, lockfile, workspace manifests and license to
+exact owner Git bytes. These mode-644 fixtures are inert review data. Biome
+excludes `review/dependency-sources` to preserve their original bytes. Verify
+source modes, blobs, hashes and sizes separately. A newer site dependency needs
+complete readable source context and a separate protected pin update before
+the site pull request can be admitted. This bootstrap adds no product dependency.
 
 [PR #3](https://github.com/ejmlabs/ejm-ide/pull/3) proved the installed harness
 pin and previous `c4f2873ef0eef5bc3c7d75cf71fa3489a911d134` caller in
@@ -169,3 +188,11 @@ own workspace formatting, strict Clippy, and focused tests from the
 `ejm-harness` checkout. Native dependency compilation does not run those tests.
 Use replay responses or local HTTP fixtures. Hosted model calls are separate
 from automated verification.
+
+## Shared UI source
+
+The exact UI revision is recorded in `.github/ui-source.json`. Shared CI reads
+this pin from protected main and installs the owner workspace with lifecycle
+scripts disabled. The reviewed source and install metadata are retained as
+inert files under `review/dependency-sources/ejm-ui/`. Do not import those
+snapshots. Site migration is a separate change after the pin is accepted.
