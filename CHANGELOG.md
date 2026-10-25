@@ -13,6 +13,29 @@ Changes follow [Semantic Versioning](https://semver.org/). Each repository is ve
 
 - Require human confirmation for proc-macro source writes with mixed-case or
   Unicode-normalized Rust suffixes.
+- Sync provider profile replacement before retiring its prior Keychain key.
+  Preserve both credentials when the config changed but folder sync failed,
+  and direct users to reopen Model connections before retrying. Clear and
+  remove retain the prior key under the same uncertain outcome.
+- Use the already locked tempfile package for private config staging and
+  failed-write cleanup. Credential formats, Keychain services and the pinned
+  shared harness stay unchanged.
+
+### Verification and limits
+
+- On October 20, 2026, macOS on Apple Silicon passed 16 focused profile tests,
+  the locked offline native check and `npm run verify` with local fixture
+  loopback access. The full gate passed 611 web tests, 207 native unit tests
+  and eight workspace integrity tests. One index acceptance test and six
+  language-server fixtures remained ignored. Vite reported a large-chunk
+  warning in the successful production build.
+- Regression fixtures use real file publication and synthetic credentials.
+  A controlled mutant that skipped folder sync failed the retirement check;
+  it was not an exact protected-base test. Real Keychain access, AppHandle
+  paths, forced power loss and new platform support remain unverified. See
+  [Provider profile writes](docs/harness.md#provider-profile-writes) for
+  recovery steps and retained-key limits. No release or live docs publication
+  is announced.
 
 ## [0.1.0] - 2026-10-19
 
