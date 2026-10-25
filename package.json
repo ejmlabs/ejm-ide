@@ -70,10 +70,10 @@
     "shiki": "4.5.0",
     "tailwind-merge": "^3.5.0",
     "unified": "^11.0.5",
-    "vscode-css-languageservice": "6.2.14",
-    "vscode-html-languageservice": "5.2.0",
-    "vscode-json-languageservice": "5.3.11",
-    "vscode-languageserver-textdocument": "1.0.11"
+    "vscode-css-languageservice": "6.3.10",
+    "vscode-html-languageservice": "5.6.2",
+    "vscode-json-languageservice": "5.7.2",
+    "vscode-languageserver-textdocument": "1.0.15"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.15",
@@ -83,7 +83,7 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "6.1.2",
-    "esbuild": "^0.28.1",
+    "esbuild": "^0.28.2",
     "pyright": "^1.1.408",
     "tailwindcss": "4.3.3",
     "typescript": "6.0.3",
