@@ -12,6 +12,14 @@ rustup component add clippy rustfmt
 CARGO_BUILD_JOBS=4 npm run verify
 ```
 
+## Test discovery
+
+Vitest preserves its default exclusions and also excludes
+`review/dependency-sources/**`. Those files retain immutable upstream source
+for review and must never run as IDE tests. Application, website and distribution
+tests remain discoverable through the normal `npm test` command. Do not install
+snapshot dependencies or edit their bytes to fix a consumer check.
+
 ## Package choices
 
 Use trusted, maintained packages for standard problems. Check platform APIs,
@@ -38,35 +46,21 @@ updating a PR starts no checks or AI review. A human maintainer first posts
 recheck that admission. See [Contributing](../CONTRIBUTING.md) for approval,
 revocation, and retry rules.
 
-The default branch currently uses shared revision
-`af4ee77e9ee8da606c4ae3a0838bc3b46fd9d7f3`. Its earlier AI invocation
-failure remains unresolved there, and it has no explicit review completion
-guard. This change prepares revision
-`c4f2873ef0eef5bc3c7d75cf71fa3489a911d134`; the earlier local
-`965cd684713ae91a7804745eddd452cc392af11d` preparation is recorded in the
-[change tasks](../openspec/changes/public-repository-standards/tasks.md).
-The proposed revision requires boolean `complete: true` from each review pass.
-Missing, false, or nonboolean completion fails even with no findings. The
+Both normal callers and the release `standards-ref` use the same immutable
+shared revision, `6717b433c462e01abaed86e2118e4843827598cb`. The release
+validator preserves committed license and document bytes, including their line
+endings. The
 [source manifest](../.github/review-context/manifest.json) identifies both exact
-workflow implementations supplied for static review. Those copies are review
-data and must never be executed or imported. Biome excludes
-`.github/review-context` so formatting cannot change the canonical bytes.
-Validate those copies separately against the manifest and exact shared Git
-objects, including their hashes, modes, and total size. Application formatting
-and lint rules remain in force.
+implementations for static review. These copies must never be executed or
+imported. Biome excludes `.github/review-context` to preserve canonical bytes;
+check their Git identities, hashes, modes, and total size separately.
 
-A submitted caller does not replace the trusted workflow on the default
-branch. Local preparation proves neither hosted acceptance nor repair of that
-default caller. This preparation authorizes no IDE readiness decision or
-recovery exception. Live acceptance remains open in the change tasks.
-The initial combined draft exceeded the shared 1,000,000-byte review diff
-limit. Seven generated OpenSpec skill files were preserved unchanged in
-[tooling PR #3](https://github.com/ejmlabs/ejm-ide/pull/3). Configuration and
-this change's plans remain here. Merge this product PR first, then refresh the
-tooling draft's base and obtain new human decisions for its current head.
-Project-local skill installation remains pending until that tooling draft
-lands. Check the full assembled diff before admission; keep both exact review
-source sets and the shared limit intact.
+Each AI pass must return boolean `complete: true`. Missing, false, or nonboolean
+completion fails even with no findings. Human readiness, maintainer approval,
+both complete medium Codex passes, and every required check remain required.
+A submitted caller does not replace the trusted workflow used to check its own
+PR. A caller update therefore needs fresh admission and normal hosted checks
+before merge; local standards checks do not establish hosted acceptance.
 
 Trusted preparation reads `.github/harness-revision` from the base branch. It
 must contain a full commit SHA for a compatible `ejmlabs/ejm-harness` revision.
@@ -75,28 +69,66 @@ The Quality job places the admitted IDE sources at `product` and the pinned
 harness at sibling `ejm-harness` under the runner workspace. npm commands run
 from `product`.
 
-After harness publication, admitted run
-[`39294657006`](https://github.com/ejmlabs/ejm-ide/actions/runs/39294657006)
-successfully fetched trusted base pin
-`4a751c6a3f24d7d143140f79ff53517fb93e3531`. Quality then stopped at the
-canonical review-schema formatting conflict. The narrow Biome exclusion fixes
-that local failure; hosted quality still needs a fresh admitted run. The earlier
-decision to provision no private cross-repository token remains in force.
-The proposed `.github/harness-revision` selects reviewed protected
-harness main `09b779ee0452dda07b7f52503be22e65fe238373`. Prepare the sibling
-checkout at that exact revision with Rust 1.99.1 or newer. Its resolved core,
-auth, and execution production sources and harness lock match the earlier
-verified dependency source. The pin refresh changes no IDE runtime source,
-dependency lock, credentials, or access.
+The unchanged harness pin is
+`09b779ee0452dda07b7f52503be22e65fe238373`. Prepare the sibling checkout
+at that exact revision with Rust 1.99.1 or newer. The harness is public, so this
+update needs no private cross-repository token. Cargo Dependabot cannot resolve
+the sibling harness path; review its immutable pin and compatible source
+separately. Keep the documented unsupported Linux GLib advisory and native
+platform limits in [the dependency audit](package-audit.md#public-readiness-dependency-check).
 
-This product PR still tests trusted base pin
-`4a751c6a3f24d7d143140f79ff53517fb93e3531`; the submitted pin cannot change
-its own Quality checkout. After this PR lands, refresh [tooling PR #3](https://github.com/ejmlabs/ejm-ide/pull/3)
-onto that base and obtain fresh human decisions. That run must prove the
-installed new harness pin and shared caller `c4f2873ef0eef5bc3c7d75cf71fa3489a911d134`,
-with both complete actual Codex passes and every required gate. Preserve the
-historical old-pin evidence. Neither local preparation nor an old-pin Quality
-result establishes the new hosted checkout or authorizes a recovery exception.
+The installed shared revision keeps this IDE protected-base selection and the
+existing macOS Quality commands. The optional public UI source pin now selects
+protected owner commit `79a1aa8b1075f834717bc0c0299dc2c41a22b966`. Trusted
+preparation reads `.github/ui-source.json` from protected base and places that
+owner at sibling `ejm-ui`; Quality installs it with `npm ci --ignore-scripts`.
+Changing the pin in a pull request does not change that pull request's checkout.
+
+The [UI source metadata](../review/dependency-sources/ejm-ui/manifest.json)
+binds the complete root manifest, lockfile, workspace manifests and license to
+exact owner Git bytes. These mode-644 fixtures are inert review data. Biome
+excludes `review/dependency-sources` to preserve their original bytes. Verify
+source modes, blobs, hashes and sizes separately. A newer site dependency needs
+complete readable source context and a separate protected pin update before
+the site pull request can be admitted. This bootstrap adds no product dependency.
+
+[PR #3](https://github.com/ejmlabs/ejm-ide/pull/3) proved the installed harness
+pin and previous `c4f2873ef0eef5bc3c7d75cf71fa3489a911d134` caller in
+[run 39302791631](https://github.com/ejmlabs/ejm-ide/actions/runs/39302791631).
+[PR #8](https://github.com/ejmlabs/ejm-ide/pull/8) then passed under that caller
+in [run 39344302241](https://github.com/ejmlabs/ejm-ide/actions/runs/39344302241)
+and installed `6717b433…` on main. Both runs passed all five gates and two
+complete actual `gpt-6.1-sol` medium reviews without an exception. The
+installed `6717b433…` caller then passed
+[PR #9](https://github.com/ejmlabs/ejm-ide/pull/9) in
+[run 39347126851](https://github.com/ejmlabs/ejm-ide/actions/runs/39347126851),
+attempt 1, with macOS Quality, all five statuses, native approval and two
+complete actual medium reviews with no findings. Its exact reviewed tree
+merged normally as `1c92944ee6c5c463472a730890d15eff7bdd3940`, with
+protections unchanged. The genuine outside-account fork test remains open
+by owner choice. See the
+[change tasks](../openspec/changes/public-repository-standards/tasks.md).
+
+## Draft source releases
+
+Follow [Releases](../RELEASING.md) for independent SemVer, matching package
+versions, dated changelog notes, checked main commits, and explicit draft
+review. The manual workflow creates source archives, `SHA256SUMS`, and
+`provenance.json`; it does not build or sign an installer. Committed notices
+retain their original bytes. Fetch the exact harness pin separately when
+building from a source archive.
+
+The dated `0.1.0` [source notes](../CHANGELOG.md) are prepared for review.
+No IDE draft is announced. After their normal protected merge, freeze the
+resulting main commit before requesting a source-only draft. Check both source
+archives, original notice bytes, checksums and provenance before publication.
+
+An existing `vVERSION` tag or release blocks another request. Do not use a rerun
+or move a tag after a failure. Inspect the retained run, tag, draft, and assets
+before choosing the next version. Installing the workflow and testing its PR
+caller create no IDE tag or release. Native signing, platform checks, installer
+publication, and site deployment keep their separate gates in
+[distribution](distribution.md).
 
 ## Commands
 
@@ -156,3 +188,11 @@ own workspace formatting, strict Clippy, and focused tests from the
 `ejm-harness` checkout. Native dependency compilation does not run those tests.
 Use replay responses or local HTTP fixtures. Hosted model calls are separate
 from automated verification.
+
+## Shared UI source
+
+The exact UI revision is recorded in `.github/ui-source.json`. Shared CI reads
+this pin from protected main and installs the owner workspace with lifecycle
+scripts disabled. The reviewed source and install metadata are retained as
+inert files under `review/dependency-sources/ejm-ui/`. Do not import those
+snapshots. Site migration is a separate change after the pin is accepted.

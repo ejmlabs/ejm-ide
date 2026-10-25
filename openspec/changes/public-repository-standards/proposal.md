@@ -12,6 +12,7 @@ The IDE has unprotected main, failed remote CI, mutable workflow dependencies, a
 - Allow a maintainer to approve their own current commit explicitly, without bypassing checks.
 - Standardize contributor, security, support, license, documentation, and dependency maintenance guidance.
 - Add independent semantic versions, release notes, version consistency checks, immutable tags, checksums, and a manual draft release pipeline.
+- Preserve committed license and document bytes, including line endings, when validating source release archives.
 - Preserve existing work and keep publication, package uploads, deployment, and paid security enrollment separate from setup.
 - Add the four registered provider auth commands to the host ACL and check command parity.
 - Require explicit trust before automatic language servers or project quality tools execute code from a workspace.

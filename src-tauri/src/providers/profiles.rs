@@ -1,6 +1,10 @@
 use super::driver::{Protocol, ReasoningMode, is_native_openai, validate_endpoint};
 use serde::{Deserialize, Serialize};
-use std::{collections::HashSet, path::PathBuf, sync::Mutex};
+use std::{
+    collections::HashSet,
+    path::{Path, PathBuf},
+    sync::Mutex,
+};
 use tauri::{AppHandle, Manager, State, WebviewWindow};
 
 const KEY_SERVICE: &str = "dev.workbench.ide.providers";
@@ -239,37 +243,63 @@ fn encode_profiles(profiles: &[ProviderProfile]) -> Result<Vec<u8>, String> {
     serde_json::to_vec_pretty(&values).map_err(|_| "Provider config could not be encoded.".into())
 }
 
-fn write_profiles(app: &AppHandle, profiles: &[ProviderProfile]) -> Result<(), String> {
+enum ProfilePublication {
+    Synced,
+    Unsynced(String),
+}
+
+fn write_profiles(
+    app: &AppHandle,
+    profiles: &[ProviderProfile],
+) -> Result<ProfilePublication, String> {
+    write_profiles_at(&profile_path(app)?, profiles, sync_profile_directory)
+}
+
+fn sync_profile_directory(path: &Path) -> std::io::Result<()> {
+    #[cfg(unix)]
+    {
+        std::fs::File::open(path)?.sync_all()
+    }
+    #[cfg(not(unix))]
+    {
+        let _ = path;
+        Err(std::io::Error::new(
+            std::io::ErrorKind::Unsupported,
+            "Provider config directory synchronization is unavailable on this target.",
+        ))
+    }
+}
+
+fn write_profiles_at(
+    path: &Path,
+    profiles: &[ProviderProfile],
+    sync_directory: impl FnOnce(&Path) -> std::io::Result<()>,
+) -> Result<ProfilePublication, String> {
     use std::io::Write;
-    let path = profile_path(app)?;
     let parent = path
         .parent()
         .ok_or("The provider config folder is unavailable.")?;
     std::fs::create_dir_all(parent)
         .map_err(|_| "The provider config folder could not be created.")?;
-    let temporary = parent.join(format!(".providers-{}.tmp", uuid::Uuid::new_v4()));
-    let mut options = std::fs::OpenOptions::new();
-    options.write(true).create_new(true);
-    #[cfg(unix)]
-    {
-        use std::os::unix::fs::OpenOptionsExt;
-        options.mode(0o600);
+    let bytes = encode_profiles(profiles)?;
+    // NamedTempFile creates private files on Unix and removes failed staging files.
+    let mut temporary = tempfile::NamedTempFile::new_in(parent)
+        .map_err(|_| "Provider config could not be saved.")?;
+    temporary
+        .write_all(&bytes)
+        .and_then(|_| temporary.as_file().sync_all())
+        .map_err(|_| "Provider config could not be saved.")?;
+    temporary
+        .persist(path)
+        .map_err(|_| "Provider config could not be replaced.")?;
+    // Replacement is visible. An uncertain sync must not trigger credential rollback.
+    if sync_directory(parent).is_err() {
+        return Ok(ProfilePublication::Unsynced(
+            "The saved provider configuration changed, but its durability could not be confirmed. Saved credentials were retained. Close and reopen Model connections before retrying."
+                .into(),
+        ));
     }
-    let result = (|| {
-        let mut file = options
-            .open(&temporary)
-            .map_err(|_| "Provider config could not be saved.")?;
-        let bytes =
-            encode_profiles(profiles).map_err(|_| "Provider config could not be encoded.")?;
-        file.write_all(&bytes)
-            .and_then(|_| file.sync_all())
-            .map_err(|_| "Provider config could not be saved.")?;
-        std::fs::rename(&temporary, &path).map_err(|_| "Provider config could not be replaced.")
-    })();
-    if result.is_err() {
-        let _ = std::fs::remove_file(temporary);
-    }
-    result.map_err(str::to_string)
+    Ok(ProfilePublication::Synced)
 }
 
 pub(crate) async fn load(
@@ -379,7 +409,7 @@ fn save_profile(
     clear_key: bool,
     mut put: impl FnMut(&str, &str) -> Result<(), String>,
     mut remove: impl FnMut(&str) -> Result<(), String>,
-    commit: impl FnOnce(&[ProviderProfile]) -> Result<(), String>,
+    commit: impl FnOnce(&[ProviderProfile]) -> Result<ProfilePublication, String>,
 ) -> Result<ProviderProfile, String> {
     let previous = profiles.iter().find(|item| item.id == profile.id);
     if previous.is_none() && profiles.len() >= 32 {
@@ -430,15 +460,19 @@ fn save_profile(
     profile.has_key = profile.credential_ref.is_some();
     profiles.retain(|item| item.id != profile.id);
     profiles.push(profile.clone());
-    if let Err(error) = commit(&profiles) {
-        if let Some(reference) = &staged_ref
-            && remove(reference).is_err()
-        {
-            return Err(format!(
-                "{error} The staged credential could not be removed."
-            ));
+    match commit(&profiles) {
+        Ok(ProfilePublication::Synced) => {}
+        Ok(ProfilePublication::Unsynced(error)) => return Err(error),
+        Err(error) => {
+            if let Some(reference) = &staged_ref
+                && remove(reference).is_err()
+            {
+                return Err(format!(
+                    "{error} The staged credential could not be removed."
+                ));
+            }
+            return Err(error);
         }
-        return Err(error);
     }
     if let Some(reference) = previous_ref
         && Some(&reference) != profile.credential_ref.as_ref()
@@ -451,7 +485,7 @@ fn save_profile(
 fn remove_profile(
     mut profiles: Vec<ProviderProfile>,
     id: &str,
-    commit: impl FnOnce(&[ProviderProfile]) -> Result<(), String>,
+    commit: impl FnOnce(&[ProviderProfile]) -> Result<ProfilePublication, String>,
     mut remove: impl FnMut(&str) -> Result<(), String>,
 ) -> Result<(), String> {
     let previous = profiles
@@ -460,7 +494,10 @@ fn remove_profile(
         .ok_or("This provider profile no longer exists.")?;
     let previous_ref = previous.credential_ref.clone();
     profiles.retain(|profile| profile.id != id);
-    commit(&profiles)?;
+    match commit(&profiles)? {
+        ProfilePublication::Synced => {}
+        ProfilePublication::Unsynced(error) => return Err(error),
+    }
     if let Some(reference) = previous_ref {
         remove(&reference).map_err(|_| "The provider profile was removed, but its credential could not be removed from the system credential store.")?;
     }
@@ -644,12 +681,33 @@ mod tests {
             self.profiles.borrow()[0].clone()
         }
 
-        fn commit(&self, profiles: &[ProviderProfile]) -> Result<(), String> {
+        fn commit(&self, profiles: &[ProviderProfile]) -> Result<ProfilePublication, String> {
             if self.fail_commit.get() {
                 return Err("Config write failed.".into());
             }
             self.profiles.replace(profiles.to_vec());
-            Ok(())
+            Ok(ProfilePublication::Synced)
+        }
+
+        fn publish(
+            &self,
+            path: &Path,
+            profiles: &[ProviderProfile],
+            sync_directory: impl FnOnce(&Path) -> std::io::Result<()>,
+        ) -> Result<ProfilePublication, String> {
+            let publication = write_profiles_at(path, profiles, sync_directory)?;
+            self.profiles
+                .replace(decode_profiles(&std::fs::read(path).unwrap()).unwrap());
+            Ok(publication)
+        }
+
+        fn put_key(&self, reference: &str, key: &str) -> Result<(), String> {
+            self.keys.borrow_mut().insert(reference.into(), key.into());
+            if self.fail_put.get() {
+                Err("Key write failed.".into())
+            } else {
+                Ok(())
+            }
         }
 
         fn remove_key(&self, reference: &str) -> Result<(), String> {
@@ -670,9 +728,19 @@ mod tests {
 
         fn save(
             &self,
+            profile: ProviderProfile,
+            key: Option<&str>,
+            clear: bool,
+        ) -> Result<ProviderProfile, String> {
+            self.save_with_commit(profile, key, clear, |profiles| self.commit(profiles))
+        }
+
+        fn save_with_commit(
+            &self,
             mut profile: ProviderProfile,
             key: Option<&str>,
             clear: bool,
+            commit: impl FnOnce(&[ProviderProfile]) -> Result<ProfilePublication, String>,
         ) -> Result<ProviderProfile, String> {
             validate(&mut profile)?;
             let profiles = self.profiles.borrow().clone();
@@ -681,27 +749,24 @@ mod tests {
                 profile,
                 key,
                 clear,
-                |reference, key| {
-                    self.keys.borrow_mut().insert(reference.into(), key.into());
-                    if self.fail_put.get() {
-                        Err("Key write failed.".into())
-                    } else {
-                        Ok(())
-                    }
-                },
+                |reference, key| self.put_key(reference, key),
                 |reference| self.remove_key(reference),
-                |profiles| self.commit(profiles),
+                commit,
             )
         }
 
         fn remove(&self) -> Result<(), String> {
+            self.remove_with_commit(|profiles| self.commit(profiles))
+        }
+
+        fn remove_with_commit(
+            &self,
+            commit: impl FnOnce(&[ProviderProfile]) -> Result<ProfilePublication, String>,
+        ) -> Result<(), String> {
             let profiles = self.profiles.borrow().clone();
-            remove_profile(
-                profiles,
-                "test",
-                |profiles| self.commit(profiles),
-                |reference| self.remove_key(reference),
-            )
+            remove_profile(profiles, "test", commit, |reference| {
+                self.remove_key(reference)
+            })
         }
 
         fn assert_original(&self) {
@@ -743,13 +808,25 @@ mod tests {
     }
 
     #[test]
-    fn failed_config_commit_preserves_endpoint_and_old_key_and_removes_staged_key() {
+    fn failed_replacement_preserves_old_key_and_removes_staged_key_and_file() {
         let saved = Persistence::configured();
-        saved.fail_commit.set(true);
+        let directory = tempfile::tempdir().unwrap();
+        let path = directory.path().join("providers.json");
+        // A directory blocks real replacement. This is not a prior JSON-file fixture.
+        std::fs::create_dir(&path).unwrap();
+        let sentinel = path.join("keep");
+        std::fs::write(&sentinel, b"unchanged").unwrap();
         let mut changed = saved.profile();
         changed.endpoint = "https://new.example.test/v1/".into();
-        assert!(saved.save(changed, Some("new-key"), false).is_err());
+        let result = saved.save_with_commit(changed, Some("new-key"), false, |profiles| {
+            saved.publish(&path, profiles, |_| {
+                panic!("Directory sync must not run after failed replacement.")
+            })
+        });
+        assert!(result.is_err());
         saved.assert_original();
+        assert_eq!(std::fs::read(&sentinel).unwrap(), b"unchanged");
+        assert_eq!(std::fs::read_dir(directory.path()).unwrap().count(), 1);
     }
 
     #[test]
@@ -760,12 +837,60 @@ mod tests {
         saved.assert_original();
     }
 
+    #[cfg(unix)]
     #[test]
-    fn replacement_commits_a_new_credential_before_retiring_the_previous_one() {
+    fn replacement_syncs_complete_config_before_retiring_the_previous_key() {
+        use std::os::unix::fs::PermissionsExt;
+
         let saved = Persistence::configured();
+        let directory = tempfile::tempdir().unwrap();
+        let path = directory.path().join("providers.json");
+        std::fs::write(&path, encode_profiles(&saved.profiles.borrow()).unwrap()).unwrap();
+        let synced = Cell::new(false);
         let mut changed = saved.profile();
         changed.endpoint = "https://new.example.test/v1/".into();
-        let result = saved.save(changed, Some("new-key"), false).unwrap();
+        validate(&mut changed).unwrap();
+        let profiles = saved.profiles.borrow().clone();
+        let result = save_profile(
+            profiles,
+            changed,
+            Some("new-key"),
+            false,
+            |reference, key| saved.put_key(reference, key),
+            |reference| {
+                assert!(
+                    synced.get(),
+                    "A prior key must survive until directory sync."
+                );
+                saved.remove_key(reference)
+            },
+            |profiles| {
+                saved.publish(&path, profiles, |parent| {
+                    assert_eq!(parent, directory.path());
+                    let visible = decode_profiles(&std::fs::read(&path).unwrap()).unwrap();
+                    assert_eq!(visible.len(), 1);
+                    assert_eq!(visible[0].endpoint, "https://new.example.test/v1/");
+                    let reference = visible[0].credential_ref.as_ref().unwrap();
+                    assert_ne!(reference, "existing-reference");
+                    assert_eq!(
+                        *saved.keys.borrow(),
+                        HashMap::from([
+                            ("existing-reference".into(), "old-key".into()),
+                            (reference.clone(), "new-key".into()),
+                        ])
+                    );
+                    assert_eq!(
+                        std::fs::metadata(&path).unwrap().permissions().mode() & 0o777,
+                        0o600
+                    );
+                    sync_profile_directory(parent)?;
+                    synced.set(true);
+                    Ok(())
+                })
+            },
+        )
+        .unwrap();
+        assert!(synced.get());
         let reference = result.credential_ref.unwrap();
         assert_ne!(reference, "existing-reference");
         assert_eq!(saved.profile().endpoint, "https://new.example.test/v1/");
@@ -777,6 +902,75 @@ mod tests {
             *saved.keys.borrow(),
             HashMap::from([(reference, "new-key".into())])
         );
+    }
+
+    #[test]
+    fn failed_directory_sync_keeps_both_keys_for_the_visible_replacement() {
+        let saved = Persistence::configured();
+        let directory = tempfile::tempdir().unwrap();
+        let path = directory.path().join("providers.json");
+        std::fs::write(&path, encode_profiles(&saved.profiles.borrow()).unwrap()).unwrap();
+        let mut changed = saved.profile();
+        changed.endpoint = "https://new.example.test/v1/".into();
+        let error = saved
+            .save_with_commit(changed, Some("new-key"), false, |profiles| {
+                saved.publish(&path, profiles, |_| {
+                    let visible = decode_profiles(&std::fs::read(&path).unwrap()).unwrap();
+                    assert_eq!(visible.len(), 1);
+                    assert_eq!(visible[0].endpoint, "https://new.example.test/v1/");
+                    assert!(visible[0].credential_ref.is_some());
+                    Err(std::io::Error::other("Injected directory-sync failure."))
+                })
+            })
+            .err()
+            .unwrap();
+        assert!(error.contains("changed"));
+        assert!(error.contains("reopen Model connections"));
+        let visible = decode_profiles(&std::fs::read(&path).unwrap()).unwrap();
+        let reference = visible[0].credential_ref.as_ref().unwrap();
+        assert_ne!(reference, "existing-reference");
+        assert_eq!(
+            *saved.keys.borrow(),
+            HashMap::from([
+                ("existing-reference".into(), "old-key".into()),
+                (reference.clone(), "new-key".into()),
+            ])
+        );
+        assert_eq!(saved.profile().credential_ref.as_ref(), Some(reference));
+    }
+
+    #[test]
+    fn clearing_or_removing_retains_the_key_when_visible_config_is_unsynced() {
+        for remove in [false, true] {
+            let saved = Persistence::configured();
+            let directory = tempfile::tempdir().unwrap();
+            let path = directory.path().join("providers.json");
+            std::fs::write(&path, encode_profiles(&saved.profiles.borrow()).unwrap()).unwrap();
+            let commit = |profiles: &[ProviderProfile]| {
+                saved.publish(&path, profiles, |_| {
+                    Err(std::io::Error::other("Injected directory-sync failure."))
+                })
+            };
+            let result = if remove {
+                saved.remove_with_commit(commit)
+            } else {
+                saved
+                    .save_with_commit(saved.profile(), None, true, commit)
+                    .map(|_| ())
+            };
+            assert!(result.unwrap_err().contains("changed"));
+            let visible = decode_profiles(&std::fs::read(&path).unwrap()).unwrap();
+            if remove {
+                assert!(visible.is_empty());
+            } else {
+                assert_eq!(visible.len(), 1);
+                assert!(visible[0].credential_ref.is_none());
+            }
+            assert_eq!(
+                *saved.keys.borrow(),
+                HashMap::from([("existing-reference".into(), "old-key".into())])
+            );
+        }
     }
 
     #[test]

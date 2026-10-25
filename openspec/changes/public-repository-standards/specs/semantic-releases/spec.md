@@ -16,6 +16,8 @@ Each repository MUST use a canonical SemVer version and keep its releasable pack
 ### Requirement: Releases use checked immutable commits
 A release MUST select an exact main commit with successful required checks, validate its version and notes, and produce a draft release with source archives and SHA-256 checksums. Existing version tags or released assets MUST NOT be overwritten.
 
+Source archive validation MUST preserve committed license and document bytes, including original line endings. Workflow adoption MUST keep the governance caller, release caller, and release standards revision on the same reviewed immutable commit.
+
 #### Scenario: A release is prepared
 - **WHEN** a maintainer requests a release of a checked main commit
 - **THEN** the pipeline validates the version and creates a draft with traceable sources and checksums
@@ -23,6 +25,10 @@ A release MUST select an exact main commit with successful required checks, vali
 #### Scenario: A version already exists
 - **WHEN** a release request reuses an existing version
 - **THEN** the pipeline refuses to move the tag or replace its release
+
+#### Scenario: A committed notice uses CRLF line endings
+- **WHEN** source release validation compares the notice with its archive entry
+- **THEN** it compares the original committed bytes without newline normalization
 
 ### Requirement: Publication remains explicit
 Pipeline setup MUST NOT publish a product release, package, installer, or deployment. Native installer signing and package registry publication MUST have separate, explicit gates.

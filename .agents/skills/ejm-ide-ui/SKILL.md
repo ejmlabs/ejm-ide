@@ -99,16 +99,23 @@ Keep findings scoped to the flows actually checked.
 ## Public website branding
 
 For `website/`, use the Public download site section in
-[DESIGN.md](../../../DESIGN.md) and the official kit at
-`/Users/everettmorgan/Desktop/agent/marketing/public/brand` (version 1.4).
-Read its `README.md`, token CSS, `seasons.json`, `LICENSE.txt`, and `PROVENANCE.md`
-before changing identity assets. Use the copied tokens, WOFF2 fonts, and SVG
-masters. Do not import the guide's global CSS or change the desktop IDE palette.
+[DESIGN.md](../../../DESIGN.md), [the website skill](../ejm-ide-website/SKILL.md),
+and the committed [site source](../../../website/index.html). This source snapshot
+includes its [brand assets](../../../website/public/design-kit/),
+[font licenses](../../../website/public/design-kit/fonts/), and
+[brand and icon notices](../../../website/public/notices.txt). Contributors need
+no private brand directory. The asset manifest's historical source paths record
+provenance rather than required checkouts.
 
-Preserve the supplied wordmark and its trademark mark, with IDE as a separate
-suffix. Use the canonical season script and supplied light/dark variants. Keep
-font and icon licenses, and distinguish the brand use notice from the IDE's MIT
-license. Record every shipping raster's source and hash in
+Active shared tokens, generated themes, reusable visuals, and site infrastructure
+belong to `ejm-ui` public exports. Retained design-kit files support the current
+asset snapshot and earlier references; change shared behavior in its owner. See
+[the shared-repository rules](../ejm-ide-shared-repos/SKILL.md). An upstream brand
+asset refresh is an optional maintainer action described in the website skill.
+
+Preserve the supplied SVG wordmark, with IDE as a separate suffix. Keep font and
+icon licenses, and distinguish the brand use notice from the IDE's MIT license.
+Record every shipping raster's source and hash in
 [the asset manifest](../../../.impeccable/download-site-assets.json).
 
 Keep the download page static, accessible, and small. Prefer native HTML controls

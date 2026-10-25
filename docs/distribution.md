@@ -35,12 +35,28 @@ Before publishing desktop builds, resolve these source-level blockers:
 - Produce release builds. Sign and notarize macOS distribution; configure
   Windows signing. Verify Linux installer dependencies and launch behavior.
   Keep signing credentials in the native CI secret store.
-- Publish the source repository and set the real source URL before offering an
-  open source link. No source location is inferred or invented here.
+
+The [source repository](https://github.com/ejmlabs/ejm-ide) is public.
+Source availability does not establish native installer readiness.
 
 Do not substitute a debug app bundle, a browser demo, or another platform's
 installer for a missing release. Platform readiness is reflected by artifacts
 in the manifest, not by a marketing promise.
+
+## Source release drafts
+
+The manual GitHub source workflow follows [Releases](../RELEASING.md) and the
+[development guide](development.md#draft-source-releases). It validates the
+selected checked main commit, SemVer metadata, dated notes, and original
+license/document bytes. It reserves a new version tag and creates an
+unpublished draft containing source archives, checksums, and provenance.
+Existing tags or releases are refused. Its source archives need the separately
+pinned harness checkout to build the IDE.
+
+Adopting the repaired shared caller creates no IDE tag or release. A source
+draft does not update the R2 manifest, build or sign desktop installers, deploy
+the website, or establish any platform's support. Review those artifacts and
+their native evidence under the installer gates below before publication.
 
 ## Files and official platform tools
 
