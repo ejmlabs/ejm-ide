@@ -38,6 +38,53 @@ usage detail remains unknown when absent and is included in the token totals.
 Anthropic API keys remain supported. The shared auth contract does not provide
 a native Anthropic subscription credential source.
 
+## Provider profile writes
+
+Saving a replacement API key creates a fresh Keychain reference. The IDE writes
+`providers.json` through a private temporary file in the same config folder,
+syncs that file, replaces the saved config, then syncs the containing folder.
+Only after that sequence succeeds does it remove the previous key. Clearing a
+saved key or removing a profile follows the same order. The Keychain service
+IDs, native-only credential references and profile file format are unchanged.
+
+If saving fails before replacement, the prior saved profile and key remain.
+The IDE removes only the staged replacement key. If that cleanup also fails,
+the error reports that a staged credential may remain.
+
+Folder sync can fail after the new config becomes visible. In that case the
+command reports that saved state changed and durability is uncertain. It keeps
+both the new referenced key and the prior key. Clear and remove also keep the
+prior key in case earlier config bytes return after a crash. A failed command
+therefore does not always mean the saved profile stayed unchanged.
+
+Before retrying, close **Model connections**, open **Manage connections** in
+Preferences again, and inspect the saved endpoint and key setting. The dialog
+refreshes its connection list after a failed write, but the open form can still
+hold the draft. Closing and reopening reloads the saved selection. The IDE does
+not retry or roll back an uncertain write. Repeated uncertain writes can leave
+unused keys in Keychain; this repair adds no automatic key cleanup.
+
+A target without the required folder-sync operation reports the same uncertain
+outcome and retains credentials. It never treats a skipped sync as success.
+The current native target remains macOS on Apple Silicon; this behavior does
+not establish Linux or Windows support.
+
+Regression fixtures use real temporary files and replacements, synthetic keys,
+and an injected final folder-sync failure. The successful real-sync fixture is
+restricted to Unix. On October 20, 2026, macOS on Apple Silicon passed all 16
+focused profile tests, the locked offline native check and `npm run verify`.
+The full gate used local loopback access for its fixtures. A controlled mutant
+that omitted folder sync failed the old-key retirement assertion; it was not a
+test of the exact protected base.
+
+These fixtures do not exercise AppHandle path lookup, real Keychain access or
+forced power loss. The failed-replacement fixture blocks the destination with
+a directory; it does not test preservation of a prior JSON file under that
+failure. Completing file and folder sync is not proof of power-loss recovery
+on every file system or device.
+
+## Provider observations
+
 Responses HTTP observations enter a bounded 16-record nonblocking queue before
 local storage/UI work. Request bodies, allowlisted response headers, decoded SSE
 payloads, error bodies, and finish markers remain inspectable. A full queue
