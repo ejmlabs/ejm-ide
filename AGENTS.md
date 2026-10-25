@@ -37,7 +37,7 @@ storage keys.
 | `docs/` | Subsystem guides; read the one for the area you change |
 | `extension-template/` | Fixed SDK and sample for local extensions |
 | `examples/harbor/` | Disposable sample workspace |
-| `.impeccable/` | Site brief and asset provenance |
+| `.impeccable/` | Asset provenance and retained visual references |
 
 Commands and gates are in [docs/development.md](docs/development.md).
 Run `npm run verify` before calling a change done.
@@ -87,11 +87,13 @@ keyboard access, and split/move behavior when reorganizing the workspace.
 ## Themes and brand
 
 Every surface works in light and dark, and Preferences offers System, Light, and
-Dark. Use theme tokens, never raw colors. The palette and rules come from the
-ejmlabs design kit (`~/Desktop/ejmlabs/design-kit`). Read the
-[theme skill](.agents/skills/ejm-ide-theme/SKILL.md) before changing a color.
-Check visible changes in both themes. Do not type the ejmlabs wordmark; use the
-kit's logo files.
+Dark. Use theme tokens, never raw colors. Read the
+[theme skill](.agents/skills/ejm-ide-theme/SKILL.md) and [DESIGN.md](DESIGN.md)
+for this source snapshot. `ejm-ui` owns active shared tokens, generated themes,
+and reusable visuals through public `@ejm/*` exports. Retained design-kit assets
+support brand references and earlier source snapshots. Check visible changes in
+both themes. Use the committed logo files and preserve their notices; do not
+type the ejmlabs wordmark.
 
 ## Ownership and product constraints
 
