@@ -31,7 +31,7 @@ commands.allow = ["terminal_run"]
 [[permission]]
 identifier = "agent"
 description = "Configure providers and control ejm-harness in ejm-ide."
-commands.allow = ["provider_list", "provider_save", "provider_remove", "provider_auth_status", "provider_auth_start", "provider_auth_cancel", "provider_auth_logout", "agent_connect", "agent_send", "agent_cancel", "agent_ide_ack", "agent_new_chat", "agent_list_chats", "agent_open_chat", "agent_chat_turns", "agent_rename_chat", "agent_archive_chat", "agent_complete", "agent_complete_cancel", "harness_snapshot", "harness_clear", "harness_event_detail", "harness_diagnostics"]
+commands.allow = ["provider_list", "provider_save", "provider_remove", "provider_auth_status", "provider_auth_start", "provider_auth_cancel", "provider_auth_logout", "agent_connect", "agent_send", "agent_cancel", "agent_ide_ack", "agent_write_decision", "agent_new_chat", "agent_list_chats", "agent_open_chat", "agent_chat_turns", "agent_rename_chat", "agent_archive_chat", "agent_complete", "agent_complete_cancel", "harness_snapshot", "harness_clear", "harness_event_detail", "harness_diagnostics"]
 
 [[permission]]
 identifier = "extensions"

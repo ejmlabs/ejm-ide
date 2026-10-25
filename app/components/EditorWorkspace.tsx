@@ -418,7 +418,7 @@ function tabDirectory(tab: EditorTab, tabs: EditorTab[]): string | undefined {
 }
 
 function TabIcon({ tab }: { tab: EditorTab }) {
-  if (tab.kind === 'diff') return <FileDiff size={14} />;
+  if (tab.kind === 'diff' || tab.kind === 'proposal-diff') return <FileDiff size={14} />;
   if (tab.kind === 'markdown-preview') return <BookOpen size={14} />;
   return <FileIcon path={tab.path} />;
 }
@@ -496,6 +496,7 @@ function EditorTabItem({
             <span className="editor-tab-name">{tab.title}</span>
             {tab.kind === 'markdown-preview' && <span className="editor-tab-kind">Preview</span>}
             {tab.kind === 'diff' && <span className="editor-tab-kind">Changes</span>}
+            {tab.kind === 'proposal-diff' && <span className="editor-tab-kind">Proposal</span>}
             {detail && <span className="editor-tab-directory">{detail}</span>}
           </Tabs.Trigger>
           <button

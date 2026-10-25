@@ -1,4 +1,5 @@
 mod agent;
+mod agent_sensitive;
 mod agent_store;
 mod agent_tools;
 mod extensions;
@@ -257,7 +258,7 @@ impl HostAccessState {
         self.check_label(window.label(), auth)
     }
 
-    fn check_label(&self, label: &str, auth: &str) -> Result<(), String> {
+    pub(crate) fn check_label(&self, label: &str, auth: &str) -> Result<(), String> {
         if label != "main" || auth != self.0 {
             return Err(
                 "This desktop operation is only available to the main ejm-ide interface.".into(),
@@ -275,6 +276,7 @@ pub fn run() {
     );
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_opener::init())
         .register_uri_scheme_protocol("workbench-extension", |context, request| {
             extensions::serve_panel(context.app_handle(), request)
@@ -369,6 +371,7 @@ pub fn run() {
             agent::agent_send,
             agent::agent_cancel,
             agent::agent_ide_ack,
+            agent::agent_write_decision,
             agent::agent_new_chat,
             agent::agent_list_chats,
             agent::agent_open_chat,

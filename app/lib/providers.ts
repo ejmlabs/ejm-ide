@@ -103,7 +103,8 @@ export type AgentCommand =
   | 'agent_archive_chat'
   | 'agent_complete'
   | 'agent_complete_cancel'
-  | 'agent_ide_ack';
+  | 'agent_ide_ack'
+  | 'agent_write_decision';
 
 const LOCAL_CHAT_COMMANDS: readonly AgentCommand[] = [
   'agent_new_chat',

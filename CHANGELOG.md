@@ -9,6 +9,11 @@ Changes follow [Semantic Versioning](https://semver.org/). Each repository is ve
 - Keep retained dependency source outside Vitest discovery while preserving
   default exclusions and all IDE application, website and distribution tests.
 
+### Fixed
+
+- Require human confirmation for proc-macro source writes with mixed-case or
+  Unicode-normalized Rust suffixes.
+
 ## [0.1.0] - 2026-10-19
 
 Prepared development source for the first `0.1.0` release. These notes do not
