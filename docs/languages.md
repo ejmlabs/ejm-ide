@@ -14,6 +14,32 @@ highlighting, and bundled JSON, HTML, CSS, and Markdown tools remain available.
 Workspace trust does not sandbox explicit terminal commands or other execution
 actions you request.
 
+## Workspace changes during server startup
+
+Language services belong to one open workspace session. Opening another folder
+clears that session. Returning to the same folder starts a new session, so an
+earlier pending server cannot become its active language service.
+
+The frontend also ignores startup statuses and errors from an earlier open
+session. Returning to the same folder does not let an old result replace the
+current file's untrusted or starting status or change its language capabilities.
+
+Server initialization may continue until it returns. The IDE then rejects and
+releases the earlier client; this guard does not interrupt startup immediately.
+If a file reports that the workspace changed before its language service
+started, trust the current workspace and reopen the file to request its server.
+
+This is unreleased source behavior. A native regression passed with a real LSP
+client paused during initialization, two workspace clears, rejection through
+the production publication path, and cleanup of the rejected child. Native
+checks and the full repository checks passed for that native guard against the
+exact harness pin. The later frontend identity guard passed real App controller
+checks with controlled local backend responses and separate web checks. Those
+browser checks do not exercise native workspace commands or language processes;
+the native gates were not repeated for this frontend-only change.
+The app's folder picker and manual folder-switch behavior remain unverified.
+These checks do not establish a published website or installer update.
+
 ## Languages and tools
 
 | Language | Files | Code insight | Format on save | Lint on save |

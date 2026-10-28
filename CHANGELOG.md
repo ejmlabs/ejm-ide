@@ -11,6 +11,11 @@ Changes follow [Semantic Versioning](https://semver.org/). Each repository is ve
 
 ### Fixed
 
+- Reject language-server starts from an earlier workspace session, including
+  leaving and reopening the same folder. Pending initialization still runs
+  until it returns, then releases the rejected client.
+- Keep the current file's language status and capabilities when an earlier
+  workspace's startup returns or fails after the same folder reopens.
 - Sync provider profile replacement before retiring its prior Keychain key.
   Preserve both credentials when the config changed but folder sync failed,
   and direct users to reopen Model connections before retrying. Clear and
@@ -20,6 +25,17 @@ Changes follow [Semantic Versioning](https://semver.org/). Each repository is ve
   shared harness stay unchanged.
 
 ### Verification and limits
+
+- The native pending-start and child-cleanup regression, exact-pin native checks,
+  and full repository checks passed for the native guard. The later frontend
+  guard passed real App controller checks with controlled local backend
+  responses and separate web checks; native gates were not repeated for it.
+  Manual app folder-switch acceptance remains unrun. See the
+  [language guide](docs/languages.md#workspace-changes-during-server-startup).
+- No release, installer, or live website update is claimed.
+
+
+### Provider profile verification and limits
 
 - On October 20, 2026, macOS on Apple Silicon passed 16 focused profile tests,
   the locked offline native check and `npm run verify` with local fixture

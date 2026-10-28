@@ -58,6 +58,42 @@ describe('language document startup', () => {
     ]);
     await closeLanguageDocument('/versions.rs');
   });
+  it('keeps a same-path restart behind earlier initialization even when another folder finishes first', async () => {
+    const path = '/workspace-a/main.ts';
+    const otherPath = '/workspace-b/main.ts';
+    let rejectOld!: (error: Error) => void;
+    let finishCurrent!: (value: unknown) => void;
+    let starts = 0;
+    invoke.mockImplementation((command, args) => {
+      if (command !== 'language_open') return Promise.resolve();
+      if (args.path === otherPath)
+        return Promise.resolve({ language: 'typescript', status: 'ready' });
+      return new Promise((resolve, reject) => {
+        if (++starts === 1) rejectOld = reject;
+        else finishCurrent = resolve;
+      });
+    });
+    const old = openLanguageDocument(path, 'old workspace', 1);
+    const failed = expect(old).rejects.toThrow('Old workspace closed.');
+    const closed = closeLanguageDocument(path);
+    await openLanguageDocument(otherPath, 'other folder', 1);
+    const current = openLanguageDocument(path, 'returned workspace', 1);
+    expect(invoke.mock.calls.filter(([command]) => command === 'language_open')).toEqual([
+      ['language_open', { path, content: 'old workspace', version: 1 }],
+      ['language_open', { path: otherPath, content: 'other folder', version: 1 }],
+    ]);
+    rejectOld(new Error('Old workspace closed.'));
+    await failed;
+    await closed;
+    await vi.waitFor(() => expect(finishCurrent).toBeTypeOf('function'));
+    expect(invoke.mock.calls.slice(-2)).toEqual([
+      ['language_close', { path }],
+      ['language_open', { path, content: 'returned workspace', version: 1 }],
+    ]);
+    finishCurrent({ language: 'typescript', status: 'ready' });
+    await expect(current).resolves.toMatchObject({ status: 'ready' });
+    await Promise.all([closeLanguageDocument(path), closeLanguageDocument(otherPath)]);
+  });
   it('waits for the server and sends the latest edits typed during startup', async () => {
     let ready!: (value: unknown) => void;
     invoke.mockImplementation((command) =>
