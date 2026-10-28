@@ -13,11 +13,13 @@ import {
   editorTabPath,
   fileEditorTab,
   focusEditorGroup,
+  isGitDiffTab,
   MAX_EDITOR_GROUPS,
   markdownPreviewTab,
   moveEditorTab,
   openEditorTab,
   openMarkdownPreview,
+  proposalDiffTab,
   replaceEditorFile,
   resolveNewFilePath,
   splitEditorGroup,
@@ -388,5 +390,26 @@ describe('pending editor closes', () => {
     expect(editorClosingPaths(withoutSource, closeEditorGroup(withoutSource, 'preview'))).toEqual(
       new Set(['/repo/saved.md']),
     );
+  });
+});
+
+describe('proposal diff tabs', () => {
+  it('keeps a proposed write out of the Git diff request', () => {
+    const proposal = proposalDiffTab({
+      reviewId: 'review-1',
+      path: 'build.rs',
+      before: 'fn main() {}\n',
+      after: 'fn main() { println!("no"); }\n',
+      connectionId: 4,
+    });
+    expect(proposal.kind).toBe('proposal-diff');
+    expect(isGitDiffTab(proposal)).toBe(false);
+    expect(proposal).not.toHaveProperty('request');
+    expect(editorTabPath(proposal)).toBeUndefined();
+    const layout = openEditorTab(createEditorLayout(), proposal);
+    expect(activeEditorTab(layout)).toEqual(proposal);
+    expect(editorDocumentPaths(layout)).toEqual(new Set());
+    const closed = closeEditorTab(layout, layout.activeGroup, proposal.id);
+    expect(closed.tabs[proposal.id]).toBeUndefined();
   });
 });

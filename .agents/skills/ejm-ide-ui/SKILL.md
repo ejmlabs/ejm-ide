@@ -65,8 +65,9 @@ If a new primitive is needed, check the package and document the choice.
   available. Distinguish unknown values and estimates from measured data.
 - Keep Stop, correction, and recovery easy to reach. Preserve reading position
   while streaming and provide a route back to the latest message.
-- Auto-review is fixed. References to other products do not authorize Ask/Edit
-  modes, an approval-policy selector, or extra confirmation steps.
+- Auto-review is fixed for ordinary writes. A sensitive path still waits on the
+  inline approval card. References to other products do not authorize Ask/Edit
+  modes, an approval-policy selector, or a way to skip that card.
 - Keep the debugger useful: causal spans, timing, full captured request/response/tool/error
   content, and explicit redaction, truncation, dropped data, and sample labels.
   Never present opaque encrypted continuation as readable reasoning.

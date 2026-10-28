@@ -11,6 +11,8 @@ Changes follow [Semantic Versioning](https://semver.org/). Each repository is ve
 
 ### Fixed
 
+- Require human confirmation for proc-macro source writes with mixed-case or
+  Unicode-normalized Rust suffixes.
 - Sync provider profile replacement before retiring its prior Keychain key.
   Preserve both credentials when the config changed but folder sync failed,
   and direct users to reopen Model connections before retrying. Clear and

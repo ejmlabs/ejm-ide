@@ -8,7 +8,7 @@ native tools with the shared ejm-harness.
 | `workbench_search_code` | Search the shared local code index. |
 | `workbench_code_neighbors` | Traverse all indexed caller or callee branches through continuation pages. |
 | `workbench_read_file` | Read a saved UTF-8 file and its source version. |
-| `workbench_write_file` | Propose an exact file create or update for automatic review. |
+| `workbench_write_file` | Propose an exact file create or update. Sensitive paths wait for the person. |
 | `workbench_show_ui` | Show Markdown, callouts, tables, charts, or diagrams in chat. |
 | `workbench_open_file` | Open a workspace file and reveal a line and column. |
 | `workbench_highlight_code` | Reveal and highlight a source range without editing it. |
@@ -25,12 +25,22 @@ File tools accept regular UTF-8 files up to 128 KiB. Paths stay within the
 captured workspace. Git metadata, symbolic links, special files, parent
 traversal, and paths outside the workspace are rejected.
 
+Sensitive-path checks ignore ASCII case and Unicode normalization differences,
+including the `.rs` suffix of proc-macro sources.
+
 Updates require the exact `expectedVersion` returned by `workbench_read_file`.
 Creates require explicit `expectedVersion: null` and an existing parent folder.
 Every proposal receives automatic review through a separate model request with
-no tools. Only a valid approval can proceed to application. The host then checks
-the workspace, turn, and saved version again. A stale update or existing create
-destination is preserved. Writes are not retried automatically.
+no tools. A reviewer denial is final and writes nothing. Reviewer approval
+applies a path that is not sensitive. A sensitive path, including build files,
+package manifests, tool config, CI files, editor config, scripts, and Rust
+sources in a proc-macro package, is applied only after the person confirms it
+in the IDE. Reviewer approval does not apply a sensitive path. The confirmation
+lasts 20 minutes. During the last 5 minutes the card says how many minutes
+remain. When the deadline passes, the write is cancelled and nothing is
+applied. The host then checks the workspace, turn, and saved version again. A
+stale update or existing create destination is preserved. Writes are not
+retried automatically.
 
 Successful writes return the new version and a before/after record for the
 inline chat diff. Source content and comments remain untrusted data.
@@ -81,7 +91,8 @@ its arguments and result. The row shows running, completed, failed, or stopped.
 File writes include their captured diff and actual result inside that row.
 Output is bounded to keep a large result from overwhelming the chat.
 
-Automatic review and workspace checks govern file writes. Display tools provide
+Automatic review and a person's confirmation for sensitive paths govern file
+writes. Display tools provide
 declarative content and navigation. They cannot run scripts or click arbitrary
 controls. Inline Tab predictions have no tools and do not add activity rows to
 the conversation.

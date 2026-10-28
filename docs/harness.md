@@ -123,13 +123,17 @@ new capabilities. The same catalog supplies the model and Debug.
 A file write first becomes an exact proposal containing the path, prior
 content, replacement content, and saved source version. A separate model request
 with no tools must return a valid approval decision. Rejection, timeout, or an
-invalid decision leaves the file unchanged.
+invalid decision leaves the file unchanged. Reviewer approval applies a path
+that is not sensitive. A sensitive path waits for the person for 20 minutes.
+When that deadline passes, the write is cancelled and nothing is applied.
+Reviewer approval does not apply a sensitive path, and a reviewer denial is
+final.
 
-Approval alone cannot publish a write. The host rechecks the selected workspace,
-turn, path, and source version. Creates cannot overwrite an existing file.
-Updates preserve concurrent edits by rejecting a stale version. These are
-application save checks, not an operating-system sandbox or a cross-process
-filesystem transaction.
+The host rechecks the selected workspace, turn, path, and source version before
+any write. Creates cannot overwrite an existing file. Updates preserve
+concurrent edits by rejecting a stale version. These are application save
+checks, not an operating-system sandbox or a cross-process filesystem
+transaction.
 
 UI extensions retain their own host capabilities. See
 [Local extensions](extensions.md) and [Agent tools](agent-tools.md).

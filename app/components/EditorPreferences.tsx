@@ -1,7 +1,22 @@
 import * as Dialog from '@radix-ui/react-dialog';
 import { ChevronRight, Keyboard, X } from 'lucide-react';
 import { setThemePreference, type ThemePreference, useThemePreference } from '@/lib/theme';
+import { PROTECTED_PATHS } from '@/lib/write-approval';
 import { Button } from './ui/button';
+
+export function SensitivePathNote() {
+  return (
+    <details className="settings-shortcuts">
+      <summary>Edi asks before changing build and config files.</summary>
+      <p className="settings-note">These names are fixed. A project file cannot change them.</p>
+      <ul>
+        {PROTECTED_PATHS.map((name) => (
+          <li key={name}>{name}</li>
+        ))}
+      </ul>
+    </details>
+  );
+}
 
 export function EditorPreferences({
   open,
@@ -139,6 +154,7 @@ export function EditorPreferences({
             <p className="settings-note">
               Predictions send nearby code to your selected provider at the lowest supported effort.
             </p>
+            <SensitivePathNote />
             <div className="settings-row settings-connection-row">
               <span>
                 Model connections<small>Sign in or use an API key.</small>

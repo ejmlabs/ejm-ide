@@ -56,6 +56,7 @@ fn main() {
         "agent_send",
         "agent_cancel",
         "agent_ide_ack",
+        "agent_write_decision",
         "agent_new_chat",
         "agent_list_chats",
         "agent_open_chat",
