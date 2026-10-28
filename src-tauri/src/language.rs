@@ -12,8 +12,8 @@ use std::{
     path::{Path, PathBuf},
     process::Command,
     sync::{
-        Arc, Mutex,
-        atomic::{AtomicBool, Ordering},
+        Arc, Mutex, MutexGuard,
+        atomic::{AtomicBool, AtomicU64, Ordering},
     },
     thread,
     time::{Duration, Instant},
@@ -26,15 +26,17 @@ struct Session {
     hierarchy_items: Mutex<HierarchyItems>,
 }
 
-#[derive(Default)]
+#[derive(Clone, Default)]
 pub struct LanguageState {
     sessions: Arc<Mutex<HashMap<Language, Arc<Session>>>>,
+    generation: Arc<AtomicU64>,
     requests: Arc<Mutex<RequestCancellations>>,
 }
 
 impl LanguageState {
     pub fn clear(&self) {
         if let Ok(mut sessions) = self.sessions.lock() {
+            self.generation.fetch_add(1, Ordering::AcqRel);
             sessions.clear();
         }
         if let Ok(mut requests) = self.requests.lock() {
@@ -43,6 +45,20 @@ impl LanguageState {
             }
             requests.entries.clear();
         }
+    }
+
+    fn sessions_for_generation(
+        &self,
+        expected: u64,
+    ) -> Result<MutexGuard<'_, HashMap<Language, Arc<Session>>>, String> {
+        let sessions = self
+            .sessions
+            .lock()
+            .map_err(|_| "Language services are unavailable")?;
+        if self.generation.load(Ordering::Acquire) != expected {
+            return Err("The workspace changed before its language service started.".into());
+        }
+        Ok(sessions)
     }
 }
 
@@ -329,34 +345,28 @@ pub fn server_initialization_options(language: Language, resources: Option<&Path
     })
 }
 
-fn session(
-    sessions: &Mutex<HashMap<Language, Arc<Session>>>,
+fn session_with_start(
+    languages: &LanguageState,
+    generation: u64,
     root: &Path,
     language: Language,
-    app: &AppHandle,
+    start: impl FnOnce() -> Result<LspClient, String>,
+    on_created: impl FnOnce(&Arc<Session>),
 ) -> Result<Arc<Session>, String> {
     {
-        let mut sessions = sessions
-            .lock()
-            .map_err(|_| "Language services are unavailable")?;
+        let mut sessions = languages.sessions_for_generation(generation)?;
         sessions.retain(|_, session| session.root == root);
         if let Some(existing) = sessions.get(&language) {
             return Ok(existing.clone());
         }
     }
-    let resources = app.path().resource_dir().ok();
-    let command = server_command(language, resources.as_deref())?;
-    let options = server_initialization_options(language, resources.as_deref());
-    let client = LspClient::start_with_options(root, language, command, options)
-        .map_err(|error| error.to_string())?;
+    let client = start()?;
     let created = Arc::new(Session {
         root: root.to_path_buf(),
         client: Mutex::new(client),
         hierarchy_items: Mutex::new(HierarchyItems::default()),
     });
-    let mut sessions = sessions
-        .lock()
-        .map_err(|_| "Language services are unavailable")?;
+    let mut sessions = languages.sessions_for_generation(generation)?;
     if let Some(existing) = sessions.get(&language)
         && existing.root == root
     {
@@ -364,35 +374,60 @@ fn session(
     }
     sessions.insert(language, created.clone());
     drop(sessions);
-    let weak = Arc::downgrade(&created);
-    let app = app.clone();
-    thread::spawn(move || {
-        while let Some(session) = weak.upgrade() {
-            let Ok(client) = session.client.lock() else {
-                break;
-            };
-            let mut stopped = false;
-            for _ in 0..100 {
-                match client.try_recv() {
-                    Ok(Some(LspEvent::Notification { method, params })) => app.state::<NativeEvents>().publish("language:event", json!({ "language": key(language), "root": session.root, "method": method, "params": params })),
-                    Ok(Some(LspEvent::Error { id: None, message })) => {
-                        app.state::<NativeEvents>().publish("language:event", json!({ "language": key(language), "root": session.root, "method": "workbench/status", "params": { "status": "error", "message": message } }));
-                        stopped = true; break;
-                    }
-                    Ok(Some(_)) => {},
-                    Ok(None) => break,
-                    Err(_) => { stopped = true; break; }
-                }
-            }
-            drop(client);
-            drop(session);
-            if stopped {
-                break;
-            }
-            thread::sleep(Duration::from_millis(30));
-        }
-    });
+    on_created(&created);
     Ok(created)
+}
+
+fn session(
+    languages: &LanguageState,
+    generation: u64,
+    root: &Path,
+    language: Language,
+    app: &AppHandle,
+) -> Result<Arc<Session>, String> {
+    session_with_start(
+        languages,
+        generation,
+        root,
+        language,
+        || {
+            let resources = app.path().resource_dir().ok();
+            let command = server_command(language, resources.as_deref())?;
+            let options = server_initialization_options(language, resources.as_deref());
+            LspClient::start_with_options(root, language, command, options)
+                .map_err(|error| error.to_string())
+        },
+        |created| {
+            let weak = Arc::downgrade(created);
+            let app = app.clone();
+            thread::spawn(move || {
+                while let Some(session) = weak.upgrade() {
+                    let Ok(client) = session.client.lock() else {
+                        break;
+                    };
+                    let mut stopped = false;
+                    for _ in 0..100 {
+                        match client.try_recv() {
+                            Ok(Some(LspEvent::Notification { method, params })) => app.state::<NativeEvents>().publish("language:event", json!({ "language": key(language), "root": session.root, "method": method, "params": params })),
+                            Ok(Some(LspEvent::Error { id: None, message })) => {
+                                app.state::<NativeEvents>().publish("language:event", json!({ "language": key(language), "root": session.root, "method": "workbench/status", "params": { "status": "error", "message": message } }));
+                                stopped = true; break;
+                            }
+                            Ok(Some(_)) => {},
+                            Ok(None) => break,
+                            Err(_) => { stopped = true; break; }
+                        }
+                    }
+                    drop(client);
+                    drop(session);
+                    if stopped {
+                        break;
+                    }
+                    thread::sleep(Duration::from_millis(30));
+                }
+            });
+        },
+    )
 }
 
 fn checked_document(
@@ -436,6 +471,7 @@ pub async fn language_open(
     activity
         .record_request(&serde_json::json!({"path": path, "content": content, "version": version}));
     let result: Result<LanguageStatus, String> = async {
+        let generation = languages.generation.load(Ordering::Acquire);
         let (path, language) = checked_document(&workspace, &path, &content, version)?;
         let Some(language) = language else {
             return Ok(LanguageStatus {
@@ -446,13 +482,13 @@ pub async fn language_open(
             });
         };
         let root = workspace.trusted_root_path()?;
-        let sessions = languages.sessions.clone();
+        let languages = languages.inner().clone();
         let workspace = workspace.inner().clone();
         tauri::async_runtime::spawn_blocking(move || {
             if workspace.trusted_root_path()? != root {
                 return Err("The workspace changed before its language service started.".into());
             }
-            let session = match session(&sessions, &root, language, &app) {
+            let session = match session(&languages, generation, &root, language, &app) {
                 Ok(session) => session,
                 Err(message) => {
                     return Ok(LanguageStatus {
@@ -790,6 +826,82 @@ pub fn language_close(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[tokio::test]
+    async fn pending_language_start_cannot_publish_after_workspace_clear() {
+        use tokio::{
+            io::{AsyncReadExt, AsyncWriteExt},
+            net::TcpListener,
+            time::timeout,
+        };
+
+        let deadline = Duration::from_secs(10);
+        let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let address = listener.local_addr().unwrap();
+        let root = tempfile::tempdir().unwrap();
+        let path = root.path().to_path_buf();
+        let state = LanguageState::default();
+        let pending = state.clone();
+        let generation = state.generation.load(Ordering::Acquire);
+        let initialized = Arc::new(AtomicBool::new(false));
+        let started = initialized.clone();
+        let mut command = Command::new(node_path().unwrap());
+        command
+            .arg(
+                Path::new(env!("CARGO_MANIFEST_DIR"))
+                    .join("tests/fixtures/initializing-language-server.cjs"),
+            )
+            .arg(address.port().to_string());
+        let worker = tokio::task::spawn_blocking(move || {
+            session_with_start(
+                &pending,
+                generation,
+                &path,
+                Language::TypeScript,
+                || {
+                    let client = LspClient::start_with_options(
+                        &path,
+                        Language::TypeScript,
+                        command,
+                        json!({}),
+                    )
+                    .map_err(|error| error.to_string())?;
+                    started.store(true, Ordering::Release);
+                    Ok(client)
+                },
+                |_| panic!("An invalidated client must not start an event pump"),
+            )
+            .map(|_| ())
+        });
+        let (mut control, _) = timeout(deadline, listener.accept()).await.unwrap().unwrap();
+        assert_eq!(
+            timeout(deadline, control.read_u8()).await.unwrap().unwrap(),
+            1
+        );
+        // Opening another folder and returning to the same path are separate sessions.
+        state.clear();
+        state.clear();
+        timeout(deadline, control.write_all(&[1]))
+            .await
+            .unwrap()
+            .unwrap();
+        let result = timeout(deadline, worker).await.unwrap().unwrap();
+        assert!(initialized.load(Ordering::Acquire));
+        assert!(result.is_err());
+        assert!(state.sessions.lock().unwrap().is_empty());
+        // The fixture keeps this socket open after shutdown and exit. Only the
+        // production client's child cleanup closes it before the parent does.
+        let mut byte = [0];
+        assert_eq!(
+            timeout(deadline, control.read(&mut byte))
+                .await
+                .unwrap()
+                .unwrap(),
+            0
+        );
+        let current = state.generation.load(Ordering::Acquire);
+        assert!(state.sessions_for_generation(current).is_ok());
+    }
 
     fn item(name: &str, uri: &str) -> Value {
         json!({
