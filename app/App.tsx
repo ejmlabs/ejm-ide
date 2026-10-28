@@ -461,9 +461,9 @@ function App() {
     [updateEditorLayout],
   );
   const startLanguageDocument = useCallback((doc: EditorDocument) => {
-    const root = workspaceRef.current?.root;
+    const workspace = workspaceRef.current;
     const { path, language } = doc;
-    if (!workspaceRef.current?.trusted) {
+    if (!workspace?.trusted) {
       configureLanguageModel(path);
       setLanguageStates((old) => ({
         ...old,
@@ -479,7 +479,7 @@ function App() {
     void openLanguageDocument(path, doc.content, doc.modelVersion)
       .then((status) => {
         if (
-          root !== workspaceRef.current?.root ||
+          workspace !== workspaceRef.current ||
           !docsRef.current.some((item) => item.path === path)
         )
           return;
@@ -488,7 +488,7 @@ function App() {
       })
       .catch((error) => {
         if (
-          root !== workspaceRef.current?.root ||
+          workspace !== workspaceRef.current ||
           !docsRef.current.some((item) => item.path === path)
         )
           return;
