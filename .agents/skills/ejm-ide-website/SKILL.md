@@ -58,7 +58,7 @@ Forest band with a few honest numbers, a "get" section, and an Ink footer.
 | `npm run site:build` | Build into `website/dist` |
 | `npm run site:check` | Types for the site and Worker |
 | `npm run site:preview` | Worker plus assets on port 1423 (start it detached) |
-| `npm run site:deploy` | Build, check, and `wrangler deploy` |
+| `npm run site:deploy` | Build, check, test, and `wrangler deploy` |
 
 ## Before deploying
 

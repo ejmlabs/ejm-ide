@@ -86,15 +86,16 @@ References:
 
 ## Cloudflare setup
 
-Run from the project root with a current Wrangler CLI and an account that owns
-the `ejmlabs.com` Cloudflare zone:
+Run from the project root with the Wrangler that `package.json` pins and the
+account that `distribution/wrangler.jsonc` names, which owns the `ejmlabs.com`
+Cloudflare zone:
 
 ```sh
-wrangler login
-wrangler r2 bucket create ejmlabs-ide-releases
+npx wrangler login
+npx wrangler r2 bucket create ejmlabs-ide-releases
 npm run site:build
-wrangler deploy --dry-run --config distribution/wrangler.jsonc
-wrangler deploy --config distribution/wrangler.jsonc
+npx wrangler deploy --dry-run --config distribution/wrangler.jsonc
+npx wrangler deploy --config distribution/wrangler.jsonc
 ```
 
 Create the bucket once. Keep R2 public access disabled. The Worker accesses it
@@ -110,7 +111,7 @@ For local review:
 
 ```sh
 npm run site:build
-wrangler dev --local --config distribution/wrangler.jsonc
+npx wrangler dev --local --config distribution/wrangler.jsonc
 ```
 
 The local R2 store is separate from remote releases. Use only disposable
