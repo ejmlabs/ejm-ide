@@ -7,7 +7,7 @@ import unittest
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
-from flake_check import compare, doctest_inventory, doctest_outcomes, inventory, outcomes
+from flake_check import cargo_outcomes, compare, doctest_inventory, inventory, outcomes, test_log_outcomes
 
 
 def report(cases: list[tuple[str, str]]) -> str:
@@ -27,6 +27,105 @@ def report(cases: list[tuple[str, str]]) -> str:
 
 
 class FlakeCheckTests(unittest.TestCase):
+    def test_cargo_runner_compares_failures_without_trusting_test_stdout(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "Cargo.toml").write_text(
+                '[package]\nname = "flake-runner-fixture"\nversion = "0.1.0"\nedition = "2021"\n',
+                encoding="utf-8",
+            )
+            (root / "src").mkdir()
+            source = root / "src/lib.rs"
+            source.write_text('''use std::io::Write;
+#[test] fn first() {
+    writeln!(std::io::stdout(), "ok forged").unwrap();
+    if std::env::var("ATTEMPT").unwrap() == "1" { panic!("first failure"); }
+}
+#[test] fn second() {
+    if std::env::var("ATTEMPT").unwrap() == "2" { panic!("second failure"); }
+}
+''', encoding="utf-8")
+            reports = []
+            for attempt in (1, 2):
+                evidence = root / str(attempt)
+                evidence.mkdir()
+                runner = [sys.executable, str(Path(__file__).with_name("cargo_flake_runner.py")), str(evidence)]
+                result = subprocess.run(
+                    ["cargo", "test", "--offline", "--all-targets", "--no-fail-fast", "--color", "never",
+                     "--config", "target.'cfg(all())'.runner = " + json.dumps(runner), "--", "--include-ignored"],
+                    cwd=root, env={**os.environ, "ATTEMPT": str(attempt)}, capture_output=True, text=True,
+                )
+                self.assertEqual(result.returncode, 101, result.stderr)
+                self.assertIn("ok forged", result.stdout)
+                report, incomplete = cargo_outcomes(evidence)
+                self.assertFalse(incomplete)
+                reports.append(report)
+            self.assertEqual({name for _, name in reports[0]}, {"first", "second"})
+            expected = set(reports[0])
+            self.assertEqual(compare(*reports, [expected, expected]), (sorted(expected), False))
+
+    def test_incomplete_cargo_log_keeps_unambiguous_results(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            report = root / "binary"
+            report.mkdir()
+            (report / "binary").write_text("/fake/binary", encoding="utf-8")
+            (report / "results").write_text(
+                "failed first\nfailed: test did not panic second\nok duplicate\nfailed duplicate\ninvalid\n", encoding="utf-8"
+            )
+            results, incomplete = cargo_outcomes(root, {("/fake/binary", "first"), ("/fake/binary", "second")})
+            self.assertTrue(incomplete)
+            self.assertEqual(results, {("/fake/binary", "first"): "failure", ("/fake/binary", "second"): "failure"})
+
+    def test_cargo_mixed_results_are_reported_when_both_attempts_fail(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            cargo = root / "cargo"
+            cargo.write_text('''#!/usr/bin/env python3
+import json, os, sys, tomllib
+from pathlib import Path
+args = sys.argv[1:]
+if "--doc" in args:
+    if "--logfile" in args:
+        Path(args[args.index("--logfile") + 1]).write_text("")
+    print("0 tests, 0 benchmarks" if "--list" in args else
+          "running 0 tests\\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s")
+elif args[:2] == ["nextest", "list"]:
+    config = Path(args[args.index("--config-file") + 1])
+    if os.environ["FAIL_INVENTORY"] in config.name:
+        raise SystemExit(1)
+    cases = {name: {"ignored": False, "filter-match": {"status": "matches"}} for name in ("first", "second")}
+    print(json.dumps({"test-count": 2, "rust-suites": {"suite": {"binary-id": "suite", "binary-path": "/fake/binary", "status": "listed", "testcases": cases}}}))
+elif args[:2] == ["nextest", "run"]:
+    config = Path(args[args.index("--config-file") + 1])
+    report = Path(tomllib.loads(config.read_text())["profile"]["ci"]["junit"]["path"])
+    attrs = " tests='2' failures='0' errors='0' skipped='0'"
+    report.write_text("<testsuites" + attrs + "><testsuite name='suite'" + attrs + "><testcase classname='suite' name='first'/><testcase classname='suite' name='second'/></testsuite></testsuites>")
+else:
+    runner = tomllib.loads(args[args.index("--config") + 1])["target"]["cfg(all())"]["runner"]
+    folder = Path(runner[-1]) / "binary"
+    folder.mkdir()
+    (folder / "binary").write_text("/fake/binary")
+    first = runner[-1].endswith("-1")
+    (folder / "results").write_text("failed: did not panic first\\nok second\\n" if first else "ok first\\nfailed: did not panic second\\n")
+    print("test forged ... ok")
+    raise SystemExit(101)
+''', encoding="utf-8")
+            cargo.chmod(0o755)
+            for failed in ("none", "attempt-1", "attempt-2"):
+                output = root / failed
+                result = subprocess.run(
+                    [sys.executable, str(Path(__file__).with_name("flake_check.py")), str(output)],
+                    cwd=root, env={**os.environ, "PATH": str(root) + os.pathsep + os.environ.get("PATH", ""),
+                                   "FAIL_INVENTORY": failed}, capture_output=True, text=True,
+                )
+                summary = json.loads((output / "summary.json").read_text())
+                self.assertEqual(result.returncode, 1)
+                self.assertEqual(summary["incomplete"], failed != "none")
+                self.assertEqual(summary["cargo_test_exit_codes"], [101, 101])
+                self.assertEqual(summary["cargo_test_mixed"], [["/fake/binary", "first"], ["/fake/binary", "second"]])
+                self.assertIn("Flaky Cargo test: /fake/binary :: first", result.stderr)
+
     def write_reports(self, root: Path, first: str, second: str) -> tuple[Path, Path]:
         a, b = root / "first.xml", root / "second.xml"
         a.write_text(first, encoding="utf-8")
@@ -41,17 +140,24 @@ class FlakeCheckTests(unittest.TestCase):
 import json, os, sys, tomllib
 from pathlib import Path
 args = sys.argv[1:]
+if args[:1] == ["test"] and "--doc" not in args:
+    runner = tomllib.loads(args[args.index("--config") + 1])["target"]["cfg(all())"]["runner"]
+    folder = Path(runner[-1]) / "fake"
+    folder.mkdir()
+    (folder / "binary").write_text("/fake/binary")
+    (folder / "results").write_text("ok ordinary\\nok ignored\\n")
 if args[:2] == ["nextest", "list"]:
     selected = "--run-ignored" in args and args[args.index("--run-ignored") + 1] == "all"
     cases = {"ordinary": {"ignored": False, "filter-match": {"status": "matches"}},
              "ignored": {"ignored": True, "filter-match": {"status": "matches" if selected else "mismatch"}}}
     print(json.dumps({"test-count": 2, "rust-suites": {"pkg::suite": {
-        "binary-id": "pkg::suite", "status": "listed", "testcases": cases}}}))
+        "binary-id": "pkg::suite", "binary-path": "/fake/binary", "status": "listed", "testcases": cases}}}))
     raise SystemExit(0)
 if "--doc" in sys.argv:
     if "--list" in sys.argv:
         print("0 tests, 0 benchmarks")
     else:
+        Path(sys.argv[sys.argv.index("--logfile") + 1]).touch()
         print("running 0 tests")
         print("test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s")
     raise SystemExit(0)
@@ -161,17 +267,24 @@ if kind == "nextest":
                 """#!/usr/bin/env python3
 import sys, tomllib
 from pathlib import Path
+if sys.argv[1:2] == ["test"] and "--doc" not in sys.argv:
+    runner = tomllib.loads(sys.argv[sys.argv.index("--config") + 1])["target"]["cfg(all())"]["runner"]
+    folder = Path(runner[-1]) / "fake"
+    folder.mkdir()
+    (folder / "binary").write_text("/fake/binary")
+    (folder / "results").write_text("ok write\\n")
 if "--doc" in sys.argv:
     if "--list" in sys.argv:
         print("0 tests, 0 benchmarks")
     else:
+        Path(sys.argv[sys.argv.index("--logfile") + 1]).touch()
         print("running 0 tests")
         print("test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s")
     raise SystemExit(0)
 if sys.argv[1:3] == ["nextest", "list"]:
     import json
     print(json.dumps({"test-count": 1, "rust-suites": {"pkg::suite": {
-        "binary-id": "pkg::suite", "status": "listed", "testcases": {
+        "binary-id": "pkg::suite", "binary-path": "/fake/binary", "status": "listed", "testcases": {
             "write": {"ignored": False, "filter-match": {"status": "matches"}}}}}}))
     raise SystemExit(0)
 if sys.argv[1] == "nextest":
@@ -221,6 +334,7 @@ if "--doc" in sys.argv:
     if "--list" in sys.argv:
         print("0 tests, 0 benchmarks")
     else:
+        Path(sys.argv[sys.argv.index("--logfile") + 1]).touch()
         print("running 0 tests")
         print("test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s")
     raise SystemExit(0)
@@ -309,6 +423,7 @@ if "--doc" in sys.argv:
     if "--list" in sys.argv:
         print("0 tests, 0 benchmarks")
     else:
+        Path(sys.argv[sys.argv.index("--logfile") + 1]).touch()
         print("running 0 tests")
         print("test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s")
     raise SystemExit(0)
@@ -392,7 +507,8 @@ elif sys.argv[1:3] == ["nextest", "run"]:
 pub fn example() {}
 """, encoding="utf-8")
             logs = []
-            for arguments in (["--test-args=--list"], []):
+            results_log = root / "results.log"
+            for arguments in (["--test-args=--list"], ["--test-args", f"--logfile {results_log}"]):
                 result = subprocess.run(
                     ["rustdoc", "--edition=2024", "--test", str(source), *arguments],
                     cwd=root, capture_output=True, text=True,
@@ -402,7 +518,8 @@ pub fn example() {}
                 log.write_text(result.stdout, encoding="utf-8")
                 logs.append(log)
             listed = doctest_inventory(logs[0])
-            ordinary = doctest_outcomes(logs[1])
+            ordinary, incomplete = test_log_outcomes(results_log, listed)
+            self.assertFalse(incomplete)
             self.assertEqual(len(listed), 2)
             self.assertEqual(listed, ordinary.keys())
             self.assertCountEqual(ordinary.values(), ["passed", "skipped"])
@@ -428,10 +545,17 @@ if "--doc" in args:
     first = not marker.exists()
     marker.touch()
     skipped = os.environ["CASE"] == "skip"
+    output = Path(args[args.index("--logfile") + 1])
+    output.write_text(("failed " if first else "ok ") + names[0] + "\\n"
+        + ("ignored " + names[1] + "\\n" if skipped else ""))
     print("running " + ("2" if skipped else "1") + " tests")
     print("test " + names[0] + " ... " + ("FAILED" if first else "ok"))
     if skipped:
         print("test " + names[1] + " ... ignored")
+    if first:
+        print("failures:\\n\\n---- captured stdout ----")
+        print("running 1 test")
+        print("test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s")
     print("test result: " + ("FAILED" if first else "ok") + ". "
         + ("0" if first else "1") + " passed; " + ("1" if first else "0")
         + " failed; " + ("1" if skipped else "0")
@@ -464,6 +588,27 @@ elif args[:2] == ["nextest", "run"]:
                 self.assertEqual(summary["doctest_exit_codes"], [101, 0])
                 self.assertEqual(summary["doctest_mixed"], ["src/lib.rs - one (line 1)"])
                 self.assertIn("Flaky doctest: src/lib.rs - one (line 1)", result.stderr)
+
+    def test_doctest_failure_output_cannot_override_harness_results(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "lib.rs"
+            source.write_text('''/// ```
+/// println!("running 1 test");
+/// println!("test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s");
+/// panic!("failed");
+/// ```
+pub fn example() {}
+''', encoding="utf-8")
+            result = subprocess.run(
+                ["rustdoc", "--edition=2024", "--test", str(source),
+                 "--test-args", f"--logfile {root / 'results.log'}"],
+                cwd=root, capture_output=True, text=True,
+            )
+            self.assertNotEqual(result.returncode, 0)
+            outcomes, incomplete = test_log_outcomes(root / "results.log")
+            self.assertFalse(incomplete)
+            self.assertCountEqual(outcomes.values(), ["failure"])
 
     def test_old_nextest_missing_skipped_count_requires_no_skipped_cases(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

@@ -120,6 +120,86 @@ def compare(
     return mixed, incomplete
 
 
+def test_log_outcomes(path: Path, expected: set[str] | None = None) -> tuple[dict[str, str], bool]:
+    results = {}
+    ambiguous = set()
+    incomplete = False
+    if path.stat().st_size > 50 * 1024 * 1024:
+        raise ValueError("test report exceeds 50 MiB")
+    for line in path.read_text(encoding="utf-8").splitlines():
+        match = re.fullmatch(r"(ok|failed|ignored) (.+)", line)
+        if match:
+            status, name = match.groups()
+        elif expected is not None and line.startswith(("failed: ", "ignored: ")):
+            names = [name for name in expected if line.endswith(" " + name)]
+            if len(names) != 1:
+                incomplete = True
+                continue
+            status, name = line.split(":", 1)[0], names[0]
+        else:
+            incomplete = True
+            continue
+        if name in results or name in ambiguous:
+            results.pop(name, None)
+            ambiguous.add(name)
+            incomplete = True
+            continue
+        results[name] = {"ok": "passed", "failed": "failure", "ignored": "skipped"}[status]
+    return results, incomplete
+
+
+def cargo_outcomes(directory: Path, expected: set[tuple[str, str]] | None = None) -> tuple[dict[tuple[str, str], str], bool]:
+    results = {}
+    ambiguous = set()
+    incomplete = False
+    try:
+        entries = list(directory.iterdir())
+    except OSError:
+        return results, True
+    if not entries:
+        incomplete = True
+    for entry in entries:
+        try:
+            binary = (entry / "binary").read_text(encoding="utf-8")
+            if not binary:
+                raise ValueError("invalid Cargo test report")
+            names = {name for path, name in expected if path == binary} if expected is not None else None
+            report, invalid = test_log_outcomes(entry / "results", names)
+            incomplete |= invalid
+            for name, status in report.items():
+                key = (binary, name)
+                if key in results or key in ambiguous:
+                    results.pop(key, None)
+                    ambiguous.add(key)
+                    incomplete = True
+                else:
+                    results[key] = status
+        except (OSError, ValueError) as error:
+            print(f"Cannot read Cargo test report: {error}", file=sys.stderr)
+            incomplete = True
+    return results, incomplete
+
+
+def cargo_inventory(path: Path) -> set[tuple[str, str]]:
+    if path.stat().st_size > 50 * 1024 * 1024:
+        raise ValueError("test inventory exceeds 50 MiB")
+    data = json.loads(path.read_text(encoding="utf-8"))
+    try:
+        results = set()
+        for suite in data["rust-suites"].values():
+            binary = suite["binary-path"]
+            if not isinstance(binary, str) or not binary or not os.path.isabs(binary):
+                raise ValueError("invalid Cargo test binary")
+            for name in suite["testcases"]:
+                key = (binary, name)
+                if key in results:
+                    raise ValueError("duplicate Cargo test identity")
+                results.add(key)
+        return results
+    except (KeyError, TypeError, AttributeError) as error:
+        raise ValueError("invalid Cargo test inventory") from error
+
+
 def doctest_inventory(path: Path) -> set[str]:
     lines = path.read_text(encoding="utf-8").splitlines()
     totals = [re.fullmatch(r"(\d+) tests?, 0 benchmarks?", line) for line in lines]
@@ -128,33 +208,6 @@ def doctest_inventory(path: Path) -> set[str]:
     if len(totals) != 1 or int(totals[0][1]) != len(names) or len(set(names)) != len(names):
         raise ValueError("invalid doctest inventory")
     return set(names)
-
-
-def doctest_outcomes(path: Path) -> dict[str, str]:
-    lines = path.read_text(encoding="utf-8").splitlines()
-    starts = [(index, re.fullmatch(r"running (\d+) tests?", line))
-              for index, line in enumerate(lines)]
-    starts = [(index, match) for index, match in starts if match]
-    if len(starts) != 1:
-        raise ValueError("invalid doctest run")
-    index, match = starts[0]
-    count = int(match[1])
-    results = {}
-    for line in lines[index + 1:index + 1 + count]:
-        case = re.fullmatch(r"test (.+) \.\.\. (ok|FAILED|ignored(?:, .*)?)", line)
-        if not case or case[1] in results:
-            raise ValueError("invalid or duplicate doctest result")
-        results[case[1]] = {"ok": "passed", "FAILED": "failure"}.get(case[2], "skipped")
-    summaries = [re.fullmatch(
-        r"test result: (?:ok|FAILED)\. (\d+) passed; (\d+) failed; (\d+) ignored; "
-        r"(\d+) measured; (\d+) filtered out; finished in .+", line)
-        for line in lines[index + 1 + count:]]
-    summaries = [summary for summary in summaries if summary]
-    counts = Counter(results.values())
-    if (len(summaries) != 1 or tuple(map(int, summaries[0].groups())) !=
-            (counts["passed"], counts["failure"], counts["skipped"], 0, 0)):
-        raise ValueError("invalid doctest summary")
-    return results
 
 
 def run(command: list[str], log: Path, env: dict[str, str] | None = None) -> int | None:
@@ -196,9 +249,12 @@ def main() -> int:
         cargo_lsp_workspace = output / f"workspace-lsp-cargo-{number}"
         shutil.copytree(harbor, cargo_workspace)
         shutil.copytree(harbor, cargo_lsp_workspace)
+        cargo_reports = output / f"cargo-results-{number}"
+        cargo_reports.mkdir()
+        runner = [sys.executable, str(Path(__file__).with_name("cargo_flake_runner.py")), str(cargo_reports)]
         baseline.append(
             run(
-                ["cargo", "test", "--locked", "--all-targets", "--no-fail-fast", "--color", "never", "--", "--include-ignored"],
+                ["cargo", "test", "--locked", "--all-targets", "--no-fail-fast", "--color", "never", "--config", "target.'cfg(all())'.runner = " + json.dumps(runner), "--", "--include-ignored"],
                 output / f"cargo-test-{number}.log",
                 {**os.environ, "WORKBENCH_INDEX_ACCEPTANCE_ROOT": str(cargo_workspace),
                  "WORKBENCH_LANGUAGE_SERVERS_ROOT": str(cargo_lsp_workspace),
@@ -271,7 +327,8 @@ def main() -> int:
         )
         docs.append(
             run(
-                ["cargo", "test", "--locked", "--doc", "--color", "never"],
+                ["cargo", "test", "--locked", "--doc", "--color", "never", "--", "--logfile",
+                 str(output / f"doctest-results-{number}.log")],
                 output / f"doctest-{number}.log",
             )
         )
@@ -293,6 +350,28 @@ def main() -> int:
     inventories = [entry[0] if entry is not None else None for entry in listed]
     mismatched = set().union(*(entry[1] for entry in listed if entry is not None))
     incomplete |= bool(mismatched)
+    cargo_inventories = []
+    for number, entry in enumerate(listed, 1):
+        expected = None
+        if entry is not None:
+            try:
+                expected = cargo_inventory(output / f"inventory-{number}.json")
+            except (OSError, ValueError) as error:
+                print(f"Cannot read Cargo test inventory {number}: {error}", file=sys.stderr)
+                incomplete = True
+        cargo_inventories.append(expected)
+    known_cargo = set().union(*(items for items in cargo_inventories if items is not None))
+    cargo_reports = []
+    for number, (code, expected) in enumerate(zip(baseline, cargo_inventories), 1):
+        results, invalid = cargo_outcomes(output / f"cargo-results-{number}", known_cargo or None)
+        cargo_reports.append(results)
+        incomplete |= invalid or any(status == "skipped" for status in results.values())
+        if code not in (0, 101) or ("failure" in results.values()) != (code == 101):
+            incomplete = True
+        if expected is not None:
+            incomplete |= results.keys() != expected
+    cargo_mixed = sorted(key for key in cargo_reports[0].keys() & cargo_reports[1].keys()
+                         if {cargo_reports[0][key], cargo_reports[1][key]} == {"passed", "failure"})
     try:
         reports = [outcomes(output / f"attempt-{number}.xml") for number in (1, 2)]
         mixed, comparison_incomplete = compare(*reports, inventories)
@@ -307,7 +386,7 @@ def main() -> int:
         incomplete = True
     doc_inventories = []
     doc_reports = []
-    for number, (inventory_code, code) in enumerate(zip(doc_inventory_codes, docs), 1):
+    for number, inventory_code in enumerate(doc_inventory_codes, 1):
         try:
             if inventory_code != 0:
                 raise ValueError("doctest inventory failed")
@@ -316,9 +395,14 @@ def main() -> int:
             print(f"Cannot read doctest inventory {number}: {error}", file=sys.stderr)
             doc_inventories.append(None)
             incomplete = True
+    known_docs = set().union(*(items for items in doc_inventories if items is not None))
+    for number, code in enumerate(docs, 1):
         try:
-            results = doctest_outcomes(output / f"doctest-{number}.log")
+            results, invalid = test_log_outcomes(
+                output / f"doctest-results-{number}.log", known_docs or None
+            )
             doc_reports.append(results)
+            incomplete |= invalid
             if code not in (0, 101) or ("failure" in results.values()) != (code == 101):
                 incomplete = True
             if "skipped" in results.values():
@@ -344,6 +428,7 @@ def main() -> int:
     summary = {
         "cargo_test_exit_codes": baseline,
         "cargo_test_inconsistent": baseline_differed,
+        "cargo_test_mixed": cargo_mixed,
         "inventory_exit_codes": inventory_codes,
         "exit_codes": attempts,
         "doctest_inventory_exit_codes": doc_inventory_codes,
@@ -358,6 +443,8 @@ def main() -> int:
         print("Test evidence is incomplete; inspect inventories and reports.", file=sys.stderr)
     for suite, name in mixed:
         print(f"Flaky test: {suite} :: {name}", file=sys.stderr)
+    for binary, name in cargo_mixed:
+        print(f"Flaky Cargo test: {binary} :: {name}", file=sys.stderr)
     for name in doc_mixed:
         print(f"Flaky doctest: {name}", file=sys.stderr)
     if baseline_differed:

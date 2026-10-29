@@ -22,7 +22,7 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
-          node-version: '24'
+          node-version: '24.22.1'
       - name: Install frontend dependencies
         id: dependencies
         working-directory: work/ejm-ide
@@ -67,7 +67,7 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
-          node-version: '24'
+          node-version: '24.22.1'
       - run: rustup toolchain install 1.99.1 --profile minimal --component rust-analyzer && rustup default 1.99.1
       - uses: ruby/setup-ruby@e81a8fa391b11a595c1b7ed84177cc0fe02faf83
         with:
