@@ -1,0 +1,63 @@
+name: Native Rust test reliability
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '41 11 * * *'
+permissions:
+  contents: read
+env:
+  CARGO_BUILD_JOBS: 2
+  CARGO_INCREMENTAL: 0
+  CARGO_PROFILE_DEV_DEBUG: 0
+  CARGO_PROFILE_TEST_DEBUG: 0
+jobs:
+  reliability:
+    runs-on: macos-15
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          path: work/ejm-ide
+          persist-credentials: false
+      - name: Read reviewed harness revision
+        id: revision
+        shell: bash
+        run: |
+          set -euo pipefail
+          revision="$(tr -d '\n' < work/ejm-ide/.github/harness-revision)"
+          [[ "$revision" =~ ^[0-9a-f]{40}$ ]] || exit 1
+          echo "harness=$revision" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          repository: ejmlabs/ejm-harness
+          ref: ${{ steps.revision.outputs.harness }}
+          path: work/ejm-harness
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24'
+      - run: rustup toolchain install 1.99.1 --profile minimal && rustup default 1.99.1
+      - name: Install verified cargo-nextest
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive="$RUNNER_TEMP/cargo-nextest.tar.gz"
+          bindir="$RUNNER_TEMP/nextest-bin"
+          curl --fail --silent --show-error --location --proto '=https' --proto-redir '=https' \
+            https://github.com/nextest-rs/nextest/releases/download/cargo-nextest-0.9.124/cargo-nextest-0.9.124-universal-apple-darwin.tar.gz \
+            --output "$archive"
+          printf '%s  %s\n' 7fa40a74fbad476859211759528186252da77d6872bdb67b06a709152bd0a20c "$archive" | shasum -a 256 --check --status
+          mkdir "$bindir"
+          tar -xzf "$archive" -C "$bindir" cargo-nextest
+          "$bindir/cargo-nextest" --version
+          echo "$bindir" >> "$GITHUB_PATH"
+      - name: Install native bundle resources
+        working-directory: work/ejm-ide
+        run: npm ci --ignore-scripts
+      - name: Test the detector
+        working-directory: work/ejm-ide
+        run: python3 -B -m unittest discover -s scripts -p 'test_flake_check.py'
+      - name: Compare native Rust test runs
+        working-directory: work/ejm-ide/src-tauri
+        run: python3 ../scripts/flake_check.py "$RUNNER_TEMP/ide-rust-flakes"
