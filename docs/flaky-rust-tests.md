@@ -1,25 +1,25 @@
-# Native Rust test reliability
+# IDE test reliability
 
-The reliability workflow runs the native host tests on macOS on main and daily.
-It runs the normal all-targets Cargo tests twice, cargo-nextest 0.9.124 twice,
-and doctests twice. It names tests with both a pass and a failure in complete
-nextest reports. A failed or incomplete run fails the job; it is never retried
-into a pass. Cargo suite outcomes are compared separately because nextest runs
-each test in its own process. This cannot name shared-process races or prove
-that tests are free of flakes. Tests ignored by the normal gate remain ignored.
-The human-admitted PR gate is unchanged.
+The reliability workflow runs on macOS after pushes to main and daily. It
+collects the frontend suite and compares two independent Vitest runs, then runs
+Cargo and cargo-nextest twice each, including ignored tests, and runs doctests.
+A failure, missing or skipped case, ambiguous identity, or incomplete report
+fails the check; comparable tests with mixed outcomes are still named.
+
+The collector loads test modules and global setup, as a normal Vitest run does.
+Each native attempt uses a disposable index workspace. Language-server tests
+copy their own fixture, so concurrent servers cannot modify one another's data.
+The workflow provisions rust-analyzer, Pyright, TypeScript, Ruby LSP, and gopls.
 
 To reproduce on macOS, prepare the pinned sibling harness and install the IDE's
-npm dependencies as in [development](development.md). Install nextest with
-`cargo install --locked --version 0.9.124 cargo-nextest`, then from `src-tauri`
-run `python3 ../scripts/flake_check.py /tmp/ide-rust-flakes` with a new output
-directory. Logs and JUnit reports are kept there locally. The workflow streams
-logs and named inconsistencies to Actions; the temporary reports are not kept
-after the runner exits. The workflow disables incremental builds and debug
-symbols to reduce disk use; debug assertions remain enabled. Existing local Rust
-builds can exceed the hosted runner's documented disk capacity. A hosted macOS
-run must confirm that this job fits before it can be considered operational.
+npm dependencies as in [development](development.md). Install cargo-nextest
+0.9.124 and the language servers above. From the repository root, run
+`python3 scripts/frontend_flake_check.py /tmp/ide-frontend-flakes`; from
+`src-tauri`, run `python3 ../scripts/flake_check.py /tmp/ide-rust-flakes`.
+Each output directory must be new. The workflow uploads available logs and
+reports for seven days, including acceptance reports from each native attempt.
+The comparison steps have individual deadlines to leave time for upload.
 
-Nextest 0.9.124 omits ignored tests from its JUnit reports. Tests reported in
-only one attempt make the comparison incomplete; tests omitted from both
-are not classified or counted as passes.
+The workflow disables incremental builds and debug symbols to reduce disk use;
+debug assertions remain enabled. A hosted macOS run must confirm that the job
+fits the runner's disk and time limits. The human-admitted PR gate is unchanged.
