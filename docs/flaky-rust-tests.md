@@ -1,8 +1,9 @@
 # IDE test reliability
 
 The reliability workflow runs on macOS after pushes to main and daily. It
-collects the frontend suite and compares two independent Vitest runs, then runs
-Cargo and cargo-nextest twice each, including ignored tests, and runs doctests.
+collects the frontend suite and compares two independent Vitest runs in one job.
+Another job runs Cargo and cargo-nextest twice each, including ignored tests, and
+runs doctests. A failure in either job does not prevent the other from running.
 A failure, missing or skipped case, ambiguous identity, or incomplete report
 fails the check; comparable tests with mixed outcomes are still named.
 

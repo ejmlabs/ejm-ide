@@ -27,7 +27,7 @@ class FrontendFlakeCheckTests(unittest.TestCase):
             self.assertEqual({(case["name"], case["skipped"]) for case in cases},
                              {("outer > case 1", False), ("outer > case 2", False), ("outer > ignored", True)})
 
-    def check(self, first: list[dict], second: list[dict], inventory: list[dict], codes: list[int]) -> tuple[subprocess.CompletedProcess[str], dict]:
+    def check(self, first: list[dict], second: list[dict], inventory: list[dict], codes: list[int], inventory_mode: str = "valid") -> tuple[subprocess.CompletedProcess[str], dict]:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             node = root / "node"
@@ -35,6 +35,11 @@ class FrontendFlakeCheckTests(unittest.TestCase):
 import json, sys
 from pathlib import Path
 fixture = json.loads(Path('fixture.json').read_text())
+if fixture['inventory_mode'] == 'failed':
+    raise SystemExit(1)
+if fixture['inventory_mode'] == 'invalid':
+    Path(sys.argv[-1]).write_text('{')
+    raise SystemExit(0)
 Path(sys.argv[-1]).write_text(json.dumps([{**case, 'skipped': case.get('skipped', False)} for case in fixture['inventory']]))
 """, encoding="utf-8")
             node.chmod(0o755)
@@ -58,7 +63,7 @@ raise SystemExit(fixture['codes'][index])
                 encoding="utf-8",
             )
             npm.chmod(0o755)
-            (root / "fixture.json").write_text(json.dumps({"inventory": inventory, "attempts": [first, second], "codes": codes}), encoding="utf-8")
+            (root / "fixture.json").write_text(json.dumps({"inventory": inventory, "attempts": [first, second], "codes": codes, "inventory_mode": inventory_mode}), encoding="utf-8")
             result = subprocess.run(
                 [sys.executable, str(Path(__file__).with_name("frontend_flake_check.py")), str(root / "evidence")],
                 cwd=root,
@@ -98,6 +103,20 @@ raise SystemExit(fixture['codes'][index])
         self.assertEqual(result.returncode, 1)
         self.assertTrue(summary["incomplete"])
         self.assertEqual(summary["mixed"], [["/suite.test.ts", ["flake"]]])
+
+    def test_failed_inventory_does_not_hide_unambiguous_flakes(self) -> None:
+        flake = {"ancestorTitles": [], "title": "flake", "status": "failed"}
+        duplicate = {"ancestorTitles": ["a"], "title": "b", "status": "failed"}
+        collision = {"ancestorTitles": [], "title": "a > b", "status": "passed"}
+        for mode in ("failed", "invalid"):
+            result, summary = self.check(
+                [flake, duplicate, collision],
+                [{**flake, "status": "passed"}, {**duplicate, "status": "passed"}, collision],
+                [], [1, 0], mode,
+            )
+            self.assertEqual(result.returncode, 1)
+            self.assertTrue(summary["incomplete"])
+            self.assertEqual(summary["mixed"], [["/suite.test.ts", ["flake"]]])
 
     def test_complete_success_and_ambiguous_inventory(self) -> None:
         case = {"ancestorTitles": ["a"], "title": "b", "status": "passed"}

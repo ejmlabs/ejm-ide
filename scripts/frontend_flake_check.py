@@ -65,9 +65,14 @@ def main() -> int:
         codes.append(run(["npm", "test"], output / f"attempt-{number}.log"))
     incomplete = inventory_code != 0 or any(code not in (0, 1) for code in codes)
     mixed = []
+    expected = None
     try:
         expected, skipped = inventory(output / "inventory.json")
         incomplete |= skipped
+    except (OSError, ValueError, TypeError) as error:
+        print(f"Cannot read frontend test inventory: {error}", file=sys.stderr)
+        incomplete = True
+    try:
         first, second = (outcomes(output / f"attempt-{number}.json") for number in (1, 2))
         if first.keys() != second.keys():
             incomplete = True
@@ -77,13 +82,13 @@ def main() -> int:
             for (file, titles), statuses in results.items():
                 projected[(file, " > ".join(titles))] += len(statuses)
             projected_runs.append(projected)
-            if projected != expected or any(count != 1 for count in projected.values()) or any(count != 1 for count in expected.values()) or any(status not in ("passed", "failed") for statuses in results.values() for status in statuses):
+            if expected is None or projected != expected or any(count != 1 for count in projected.values()) or any(count != 1 for count in expected.values()) or any(status not in ("passed", "failed") for statuses in results.values() for status in statuses):
                 incomplete = True
             if any("failed" in statuses for statuses in results.values()) != (code == 1):
                 incomplete = True
         mixed = sorted(
             key for key in first.keys() & second.keys()
-            if expected[(key[0], " > ".join(key[1]))] == 1
+            if (expected is None or expected[(key[0], " > ".join(key[1]))] <= 1)
             and all(projected[(key[0], " > ".join(key[1]))] == 1 for projected in projected_runs)
             and {first[key][0], second[key][0]} == {"passed", "failed"}
         )

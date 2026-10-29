@@ -3,6 +3,7 @@
 
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -103,20 +104,57 @@ def inventory(path: Path) -> tuple[set[tuple[str, str]], set[tuple[str, str]]]:
 def compare(
     first: dict[tuple[str, str], str],
     second: dict[tuple[str, str], str],
-    inventories: list[set[tuple[str, str]]],
+    inventories: list[set[tuple[str, str]] | None],
 ) -> tuple[list[tuple[str, str]], bool]:
-    selected = inventories[0] & inventories[1]
     mixed = sorted(
-        key for key in selected & first.keys() & second.keys()
+        key for key in first.keys() & second.keys()
         if {first[key], second[key]} == {"passed", "failure"}
     )
     incomplete = (
-        inventories[0] != inventories[1]
+        any(items is None for items in inventories)
+        or inventories[0] != inventories[1]
         or first.keys() != inventories[0]
         or second.keys() != inventories[1]
         or any(status in ("skipped", "error") for status in (*first.values(), *second.values()))
     )
     return mixed, incomplete
+
+
+def doctest_inventory(path: Path) -> set[str]:
+    lines = path.read_text(encoding="utf-8").splitlines()
+    totals = [re.fullmatch(r"(\d+) tests?, 0 benchmarks?", line) for line in lines]
+    totals = [match for match in totals if match]
+    names = [line[:-6] for line in lines if line.endswith(": test")]
+    if len(totals) != 1 or int(totals[0][1]) != len(names) or len(set(names)) != len(names):
+        raise ValueError("invalid doctest inventory")
+    return set(names)
+
+
+def doctest_outcomes(path: Path) -> dict[str, str]:
+    lines = path.read_text(encoding="utf-8").splitlines()
+    starts = [(index, re.fullmatch(r"running (\d+) tests?", line))
+              for index, line in enumerate(lines)]
+    starts = [(index, match) for index, match in starts if match]
+    if len(starts) != 1:
+        raise ValueError("invalid doctest run")
+    index, match = starts[0]
+    count = int(match[1])
+    results = {}
+    for line in lines[index + 1:index + 1 + count]:
+        case = re.fullmatch(r"test (.+) \.\.\. (ok|FAILED|ignored(?:, .*)?)", line)
+        if not case or case[1] in results:
+            raise ValueError("invalid or duplicate doctest result")
+        results[case[1]] = {"ok": "passed", "FAILED": "failure"}.get(case[2], "skipped")
+    summaries = [re.fullmatch(
+        r"test result: (?:ok|FAILED)\. (\d+) passed; (\d+) failed; (\d+) ignored; "
+        r"(\d+) measured; (\d+) filtered out; finished in .+", line)
+        for line in lines[index + 1 + count:]]
+    summaries = [summary for summary in summaries if summary]
+    counts = Counter(results.values())
+    if (len(summaries) != 1 or tuple(map(int, summaries[0].groups())) !=
+            (counts["passed"], counts["failure"], counts["skipped"], 0, 0)):
+        raise ValueError("invalid doctest summary")
+    return results
 
 
 def run(command: list[str], log: Path, env: dict[str, str] | None = None) -> int | None:
@@ -150,6 +188,7 @@ def main() -> int:
     baseline = []
     attempts = []
     docs = []
+    doc_inventory_codes = []
     inventory_codes = []
     harbor = Path(__file__).resolve().parent.parent / "examples" / "harbor"
     for number in (1, 2):
@@ -224,7 +263,12 @@ def main() -> int:
         )
         shutil.rmtree(nextest_workspace)
         shutil.rmtree(nextest_lsp_workspace)
-        # nextest does not run doctests; keep their logs and exit codes separately.
+        doc_inventory_codes.append(
+            run(
+                ["cargo", "test", "--locked", "--doc", "--color", "never", "--", "--list"],
+                output / f"doctest-inventory-{number}.log",
+            )
+        )
         docs.append(
             run(
                 ["cargo", "test", "--locked", "--doc", "--color", "never"],
@@ -237,15 +281,21 @@ def main() -> int:
         or any(code is None for code in docs)
     )
     mixed = []
+    listed = []
+    for number, code in enumerate(inventory_codes, 1):
+        try:
+            listed.append(inventory(output / f"inventory-{number}.json"))
+        except (OSError, ValueError) as error:
+            print(f"Cannot read test inventory {number}: {error}", file=sys.stderr)
+            listed.append(None)
+        if code != 0 or listed[-1] is None:
+            incomplete = True
+    inventories = [entry[0] if entry is not None else None for entry in listed]
+    mismatched = set().union(*(entry[1] for entry in listed if entry is not None))
+    incomplete |= bool(mismatched)
     try:
-        if any(code != 0 for code in inventory_codes):
-            raise ValueError("nextest did not complete both inventories")
-        listed = [inventory(output / f"inventory-{number}.json") for number in (1, 2)]
-        inventories = [selected for selected, _ in listed]
-        incomplete |= any(mismatched for _, mismatched in listed)
         reports = [outcomes(output / f"attempt-{number}.xml") for number in (1, 2)]
         mixed, comparison_incomplete = compare(*reports, inventories)
-        mismatched = listed[0][1] | listed[1][1]
         mixed = [key for key in mixed if key not in mismatched]
         incomplete |= comparison_incomplete
         for code, results in zip(attempts, reports):
@@ -255,6 +305,38 @@ def main() -> int:
     except (OSError, ET.ParseError, ValueError) as error:
         print(f"Cannot compare test results: {error}", file=sys.stderr)
         incomplete = True
+    doc_inventories = []
+    doc_reports = []
+    for number, (inventory_code, code) in enumerate(zip(doc_inventory_codes, docs), 1):
+        try:
+            if inventory_code != 0:
+                raise ValueError("doctest inventory failed")
+            doc_inventories.append(doctest_inventory(output / f"doctest-inventory-{number}.log"))
+        except (OSError, ValueError) as error:
+            print(f"Cannot read doctest inventory {number}: {error}", file=sys.stderr)
+            doc_inventories.append(None)
+            incomplete = True
+        try:
+            results = doctest_outcomes(output / f"doctest-{number}.log")
+            doc_reports.append(results)
+            if code not in (0, 101) or ("failure" in results.values()) != (code == 101):
+                incomplete = True
+            if "skipped" in results.values():
+                incomplete = True
+        except (OSError, ValueError) as error:
+            print(f"Cannot read doctest results {number}: {error}", file=sys.stderr)
+            doc_reports.append(None)
+            incomplete = True
+    for expected, results in zip(doc_inventories, doc_reports):
+        if expected is not None and results is not None and expected != results.keys():
+            incomplete = True
+    if all(value is not None for value in doc_inventories) and doc_inventories[0] != doc_inventories[1]:
+        incomplete = True
+    doc_mixed = []
+    if all(value is not None for value in doc_reports):
+        first, second = doc_reports
+        doc_mixed = sorted(name for name in first.keys() & second.keys()
+                           if {first[name], second[name]} == {"passed", "failure"})
     baseline_differed = all(code is not None for code in baseline) and (baseline[0] == 0) != (
         baseline[1] == 0
     )
@@ -264,7 +346,9 @@ def main() -> int:
         "cargo_test_inconsistent": baseline_differed,
         "inventory_exit_codes": inventory_codes,
         "exit_codes": attempts,
+        "doctest_inventory_exit_codes": doc_inventory_codes,
         "doctest_exit_codes": docs,
+        "doctest_mixed": doc_mixed,
         "doctest_inconsistent": docs_differed,
         "mixed": mixed,
         "incomplete": incomplete,
@@ -274,6 +358,8 @@ def main() -> int:
         print("Test evidence is incomplete; inspect inventories and reports.", file=sys.stderr)
     for suite, name in mixed:
         print(f"Flaky test: {suite} :: {name}", file=sys.stderr)
+    for name in doc_mixed:
+        print(f"Flaky doctest: {name}", file=sys.stderr)
     if baseline_differed:
         print("Cargo test suite outcomes differed; inspect cargo-test logs.", file=sys.stderr)
     if docs_differed:
