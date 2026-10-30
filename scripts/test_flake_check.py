@@ -62,7 +62,7 @@ class FlakeCheckTests(unittest.TestCase):
                 reports.append(report)
             self.assertEqual({name for _, name in reports[0]}, {"first", "second"})
             expected = set(reports[0])
-            self.assertEqual(compare(*reports, [expected, expected]), (sorted(expected), False))
+            self.assertEqual(compare(reports[0], reports[1], [expected, expected]), (sorted(expected), False))
 
     def test_incomplete_cargo_log_keeps_unambiguous_results(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -225,7 +225,7 @@ if kind == "nextest":
             )
             results = [outcomes(path) for path in paths]
             expected = set(results[0])
-            self.assertEqual(compare(*results, [expected, expected]), (
+            self.assertEqual(compare(results[0], results[1], [expected, expected]), (
                 [("pkg::suite", "first"), ("pkg::suite", "second")], False
             ))
 
@@ -238,7 +238,7 @@ if kind == "nextest":
                           report([("x", ""), ("y", "<error/>")]),
                           report([("x", "")])]:
                 paths = self.write_reports(root, first, other)
-                self.assertEqual(compare(*(outcomes(path) for path in paths), [expected, expected]),
+                self.assertEqual(compare(outcomes(paths[0]), outcomes(paths[1]), [expected, expected]),
                                  ([("pkg::suite", "x")], True))
             for invalid in [report([("x", ""), ("x", "<failure/>")]),
                             first.replace('tests="2"', 'tests="3"', 1),

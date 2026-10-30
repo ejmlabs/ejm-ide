@@ -374,7 +374,7 @@ def main() -> int:
                          if {cargo_reports[0][key], cargo_reports[1][key]} == {"passed", "failure"})
     try:
         reports = [outcomes(output / f"attempt-{number}.xml") for number in (1, 2)]
-        mixed, comparison_incomplete = compare(*reports, inventories)
+        mixed, comparison_incomplete = compare(reports[0], reports[1], inventories)
         mixed = [key for key in mixed if key not in mismatched]
         incomplete |= comparison_incomplete
         for code, results in zip(attempts, reports):
