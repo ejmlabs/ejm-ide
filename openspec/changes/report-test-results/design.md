@@ -2,7 +2,7 @@
 
 ## Context
 
-The shared gate compares test outcomes from independent runs on the same commit.
+The reliability workflow compares test outcomes from independent runs on the same commit.
 
 ## Goals / Non-Goals
 
@@ -16,4 +16,4 @@ The reliability workflow collects the suite using Vitest's collection API, then 
 
 ## Risks / Trade-offs
 
-Reports can contain test output. The shared gate must sanitize and bound them before retention.
+Reports can contain test output. See the [test reliability guide](../../../docs/flaky-rust-tests.md) for retention details.

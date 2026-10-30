@@ -13,12 +13,14 @@ copy their own fixture, so concurrent servers cannot modify one another's data.
 The workflow provisions rust-analyzer, Pyright, TypeScript, Ruby LSP, and gopls.
 
 To reproduce on macOS, prepare the pinned sibling harness and install the IDE's
-npm dependencies as in [development](development.md). Install cargo-nextest
-0.9.124 and the language servers above. From the repository root, run
+npm dependencies as in [development](development.md). Follow the
+[workflow](../.github/workflows/flaky-rust-tests.yml) for exact tool versions
+and language-server setup. From the repository root, run
 `python3 scripts/frontend_flake_check.py /tmp/ide-frontend-flakes`; from
 `src-tauri`, run `python3 ../scripts/flake_check.py /tmp/ide-rust-flakes`.
 Each output directory must be new. The workflow uploads available logs and
 reports for seven days, including acceptance reports from each native attempt.
+Logs and reports may contain test output and are uploaded without sanitization.
 The comparison steps have individual deadlines to leave time for upload.
 
 The workflow disables incremental builds and debug symbols to reduce disk use;
