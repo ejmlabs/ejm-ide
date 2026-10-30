@@ -86,22 +86,19 @@ References:
 
 ## Cloudflare setup
 
-Run from the project root with the Wrangler that `package.json` pins and the
-account that `distribution/wrangler.jsonc` names, which owns the `ejmlabs.com`
-Cloudflare zone:
+Create the bucket once, from the project root with the Wrangler that
+`package.json` pins and the account that `distribution/wrangler.jsonc` names,
+which owns the `ejmlabs.com` Cloudflare zone:
 
 ```sh
 npx wrangler login
 npx wrangler r2 bucket create ejmlabs-ide-releases
-npm run site:build
-npx wrangler deploy --dry-run --config distribution/wrangler.jsonc
-npx wrangler deploy --config distribution/wrangler.jsonc
 ```
 
-Create the bucket once. Keep R2 public access disabled. The Worker accesses it
-through `RELEASES`; browsers use the controlled download routes. The custom
-domain route in the config handles `ide.ejmlabs.com`. Review any existing DNS
-record or Worker route before changing that hostname.
+Keep R2 public access disabled. The Worker accesses it through `RELEASES`;
+browsers use the controlled download routes. The custom domain route in the
+config handles `ide.ejmlabs.com`. Review any existing DNS record or Worker route
+before changing that hostname.
 
 `workers.dev` and preview URLs are disabled. Worker request logging is disabled;
 this public distribution service does not collect IDE sessions or request
@@ -116,6 +113,45 @@ npx wrangler dev --local --config distribution/wrangler.jsonc
 
 The local R2 store is separate from remote releases. Use only disposable
 fixtures there. Never upload fixtures to the remote release bucket.
+
+## Website deploys
+
+A push to main runs `.github/workflows/deploy.yml`, the canonical caller of the
+shared `ejmlabs/.github` workflow `deploy-site.yml`:
+
+1. A build job, with `contents: read` and no secrets, builds the website from
+   that main commit, with ejm-ui checked out at the pin in
+   `.github/ui-source.json`.
+2. A staging job then runs `wrangler deploy --env staging` automatically. It
+   publishes the Worker `ejmlabs-ide-staging` at `ide-staging.ejmlabs.com`,
+   which binds the same read-only R2 bucket `ejmlabs-ide-releases`.
+3. A production job deploys the same built files with the top-level config,
+   but only after the required reviewer (@everettmorgan) approves the run in
+   the GitHub `production` environment.
+
+Deploy jobs run Wrangler 4.151.3, pinned in the shared repository, not this
+repository's dependencies. The Cloudflare token is the `CLOUDFLARE_API_TOKEN`
+secret of the `staging` and `production` GitHub environments. Approving the
+production job is the owner's deploy authorization. A manual `wrangler deploy`
+from a workstation is no longer the procedure. A newer merge cancels an older
+production deploy that is still waiting. Local dry runs are still fine:
+
+```sh
+npm run site:build
+npx wrangler deploy --dry-run --config distribution/wrangler.jsonc
+npx wrangler deploy --dry-run --config distribution/wrangler.jsonc --env staging
+```
+
+Staging is publicly reachable and serves the latest main. Run the live checks
+in the [website skill](../.agents/skills/ejm-ide-website/SKILL.md) on staging
+after each merge, and on production after approval. To roll back the website,
+redeploy an earlier Worker version in Cloudflare, or approve an earlier run's
+production job while it is still available.
+
+Installer and manifest publishing with `distribution/publish.ts` is unchanged
+and separate from website deploys. See
+[Publish verified installers](#publish-verified-installers) and
+[Rollback](#rollback).
 
 ## Release manifest
 
