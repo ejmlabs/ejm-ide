@@ -9,6 +9,12 @@ Use trusted, maintained tools for standard problems. Write ejm-ide's distinct
 behavior and the thin adapters that join those tools. Read the root
 [AGENTS.md](../../../AGENTS.md) and the relevant subsystem docs before editing.
 
+## Principles
+
+KISS, YAGNI, DRY and Clean Code: the simplest code that solves the whole problem, only what a
+task needs now, one authoritative home for each rule, and clear names, small functions and
+structure.
+
 ## Make the package decision first
 
 Check platform and standard APIs, then installed dependencies. If they do not
