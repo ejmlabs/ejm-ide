@@ -12,14 +12,6 @@ rustup component add clippy rustfmt
 CARGO_BUILD_JOBS=4 npm run verify
 ```
 
-## Test discovery
-
-Vitest preserves its default exclusions and also excludes
-`review/dependency-sources/**`. Those files retain immutable upstream source
-for review and must never run as IDE tests. Application, website and distribution
-tests remain discoverable through the normal `npm test` command. Do not install
-snapshot dependencies or edit their bytes to fix a consumer check.
-
 ## Package choices
 
 Use trusted, maintained packages for standard problems. Check platform APIs,
@@ -40,75 +32,43 @@ only for behavior the shared API cannot yet preserve, and record that gap.
 
 ## CI checkout layout
 
-The PR workflow calls an immutable shared governance workflow. Admission is bound
-to the PR head commit and a draft PR is never admitted. A maintainer's own
+`.github/workflows/pr.yml` calls an immutable shared governance workflow, and
+`release.yml` and its `standards-ref` use the same pinned revision. A pull request
+run takes its workflow from the PR merge ref, so a PR that moves the pin is checked
+by the new pin. Review the pin line by hand. A local standards check does not
+establish hosted acceptance.
+
+Admission is bound to the PR head commit and never reads comment text, so `/ready`
+and `/approve` comments do nothing. A draft PR is never admitted. A maintainer's own
 same-repository PR admits itself on open, reopen, push and Ready for review. Any
 other PR is admitted when a current human maintainer marks it Ready for review or
-adds `gate:approve`. Fork PRs are never admitted. See
-[Contributing](../CONTRIBUTING.md) for approval, revocation, and rerun rules.
+adds `gate:approve`. Fork PRs are never admitted. A new commit needs a new
+admission. Re-running failed jobs keeps the admission; fix code in a new commit.
+See [Contributing](../CONTRIBUTING.md) for approval and revocation rules.
 
-Both normal callers and the release `standards-ref` use the same immutable
-shared revision, `6717b433c462e01abaed86e2118e4843827598cb`. The release
-validator preserves committed license and document bytes, including their line
-endings. The
-[source manifest](../.github/review-context/manifest.json) identifies both exact
-implementations for static review. These copies must never be executed or
-imported. Biome excludes `.github/review-context` to preserve canonical bytes;
-check their Git identities, hashes, modes, and total size separately.
+Trusted preparation exports the admitted head as committed bytes into `product` and
+checks out two pinned sources beside it:
 
-Each AI pass must return boolean `complete: true`. Missing, false, or nonboolean
-completion fails even with no findings. Human readiness, maintainer approval,
-both complete medium Codex passes, and every required check remain required.
-A submitted caller does not replace the trusted workflow used to check its own
-PR. A caller update therefore needs fresh admission and normal hosted checks
-before merge; local standards checks do not establish hosted acceptance.
+- `.github/harness-revision` is read from the admitted head. It must hold one full
+  lowercase commit SHA that is the head of protected `ejmlabs/ejm-harness` main or
+  an ancestor of it. The harness is placed at sibling `ejm-harness`. A pin change
+  and its lockfile travel in one PR, and that PR is checked against the harness it
+  pins.
+- `.github/ui-source.json` is read from trusted base, never from the PR head. The
+  owner source is placed at sibling `ejm-ui` and installed with
+  `npm ci --ignore-scripts`. Changing this pin in a PR does not change that PR's
+  checkout.
 
-Trusted preparation reads `.github/harness-revision` from the admitted PR head. It
-must contain one full lowercase commit SHA that is the head of protected
-`ejmlabs/ejm-harness` main or an ancestor of it. A pin change and its lockfile
-travel in one PR, and that PR is checked against the harness it pins.
-The Quality job places the admitted IDE sources at `product` and the pinned
-harness at sibling `ejm-harness` under the runner workspace. npm commands run
-from `product`.
-
-The unchanged harness pin is
-`09b779ee0452dda07b7f52503be22e65fe238373`. Prepare the sibling checkout
-at that exact revision with Rust 1.99.1 or newer. The harness is public, so this
-update needs no private cross-repository token. Cargo Dependabot cannot resolve
-the sibling harness path; review its immutable pin and compatible source
-separately. Keep the documented unsupported Linux GLib advisory and native
-platform limits in [the dependency audit](package-audit.md#public-readiness-dependency-check).
-
-The installed shared revision keeps the existing macOS Quality commands. The optional public UI source pin now selects
-protected owner commit `79a1aa8b1075f834717bc0c0299dc2c41a22b966`. Trusted
-preparation reads `.github/ui-source.json` from protected base and places that
-owner at sibling `ejm-ui`; Quality installs it with `npm ci --ignore-scripts`.
-Changing the pin in a pull request does not change that pull request's checkout.
-
-The [UI source metadata](../review/dependency-sources/ejm-ui/manifest.json)
-binds the complete root manifest, lockfile, workspace manifests and license to
-exact owner Git bytes. These mode-644 fixtures are inert review data. Biome
-excludes `review/dependency-sources` to preserve their original bytes. Verify
-source modes, blobs, hashes and sizes separately. A newer site dependency needs
-complete readable source context and a separate protected pin update before
-the site pull request can be admitted. This bootstrap adds no product dependency.
-
-[PR #3](https://github.com/ejmlabs/ejm-ide/pull/3) proved the installed harness
-pin and previous `c4f2873ef0eef5bc3c7d75cf71fa3489a911d134` caller in
-[run 39302791631](https://github.com/ejmlabs/ejm-ide/actions/runs/39302791631).
-[PR #8](https://github.com/ejmlabs/ejm-ide/pull/8) then passed under that caller
-in [run 39344302241](https://github.com/ejmlabs/ejm-ide/actions/runs/39344302241)
-and installed `6717b433…` on main. Both runs passed all five gates and two
-complete actual `gpt-6.1-sol` medium reviews without an exception. The
-installed `6717b433…` caller then passed
-[PR #9](https://github.com/ejmlabs/ejm-ide/pull/9) in
-[run 39347126851](https://github.com/ejmlabs/ejm-ide/actions/runs/39347126851),
-attempt 1, with macOS Quality, all five statuses, native approval and two
-complete actual medium reviews with no findings. Its exact reviewed tree
-merged normally as `1c92944ee6c5c463472a730890d15eff7bdd3940`, with
-protections unchanged. The genuine outside-account fork test remains open
-by owner choice. See the
-[change tasks](../openspec/changes/public-repository-standards/tasks.md).
+The Quality job is credential-free, has no token permissions, and runs on macOS
+with Node 24 and Rust 1.99.1 with Clippy and rustfmt. The repository has no
+`.github/quality` script, so the built-in commands run from `product`:
+`npm ci --ignore-scripts`, `npm run verify`, `npm run site:check` and
+`npm run site:build`. Prepare a local sibling harness checkout at the exact
+revision in `.github/harness-revision`. The harness is public, so preparation needs
+no private cross-repository token. Cargo Dependabot cannot resolve the sibling
+harness path; review its immutable pin and compatible source separately. Keep the
+documented unsupported Linux GLib advisory and native platform limits in
+[the dependency audit](package-audit.md#public-readiness-dependency-check).
 
 ## Draft source releases
 
@@ -193,7 +153,5 @@ from automated verification.
 ## Shared UI source
 
 The exact UI revision is recorded in `.github/ui-source.json`. Shared CI reads
-this pin from protected main and installs the owner workspace with lifecycle
-scripts disabled. The reviewed source and install metadata are retained as
-inert files under `review/dependency-sources/ejm-ui/`. Do not import those
-snapshots. Site migration is a separate change after the pin is accepted.
+this pin from trusted base and installs the owner workspace with lifecycle
+scripts disabled. Site migration is a separate change after the pin is accepted.
