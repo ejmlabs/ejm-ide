@@ -17,11 +17,5 @@
       "@/*": ["./app/*"]
     }
   },
-  "include": [
-    "app",
-    "vite.config.ts",
-    "vite.config.test.ts",
-    "website/src",
-    "website/vite.config.ts"
-  ]
+  "include": ["app", "vite.config.ts", "vite.config.test.ts"]
 }

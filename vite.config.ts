@@ -2,7 +2,7 @@ import { fileURLToPath, URL } from 'node:url';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import type { Plugin } from 'vite';
-import { defineConfig } from 'vitest/config';
+import { configDefaults, defineConfig } from 'vitest/config';
 
 export const MONACO_SANITIZER = '/monaco-editor/esm/vs/base/browser/domSanitize.js';
 export const MONACO_VENDORED_DOMPURIFY = './dompurify/dompurify.js';
@@ -35,4 +35,6 @@ export default defineConfig({
   clearScreen: false,
   server: { watch: { ignored: ['**/src-tauri/**', '**/.workbench/**', '**/target/**'] } },
   build: { target: 'es2022', chunkSizeWarningLimit: 2000 },
+  // The website is its own package with its own install and tests (website/package.json).
+  test: { exclude: [...configDefaults.exclude, 'website/**'] },
 });
