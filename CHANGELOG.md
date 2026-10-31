@@ -4,6 +4,9 @@ Changes follow [Semantic Versioning](https://semver.org/). Each repository is ve
 
 ## [Unreleased]
 
+- Adopt the shared ejmlabs/.github revision with the Ready-for-review gate, resync the shared agent
+  skills and house rules, and read the harness pin from the admitted PR head.
+
 - Propose the accepted shared UI source pin after complete retained-source review; site migration follows protected pin acceptance.
 
 - Keep retained dependency source outside Vitest discovery while preserving
