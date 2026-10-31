@@ -9,8 +9,9 @@ Changes follow [Semantic Versioning](https://semver.org/). Each repository is ve
 
 - Propose the accepted shared UI source pin after complete retained-source review; site migration follows protected pin acceptance.
 
-- Keep retained dependency source outside Vitest discovery while preserving
-  default exclusions and all IDE application, website and distribution tests.
+- Remove the retained review inputs under `review/dependency-sources/` and
+  `.github/review-context/` and their Biome and Vitest exclusions. The AI review
+  they fed is gone. Rewrite the CI checkout notes for the current gate.
 
 ### Fixed
 
