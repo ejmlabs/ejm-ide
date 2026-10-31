@@ -35,9 +35,11 @@ Changes follow [Semantic Versioning](https://semver.org/). Each repository is ve
   failed-write cleanup. Credential formats, Keychain services and the pinned
   shared harness stay unchanged.
 - Patch the undici, DOMPurify, pulldown-cmark, rustls-webpki, webpki-root-certs
-  and ctutils advisories with the smallest compatible bumps. The DOMPurify copy
-  that Monaco bundles is unchanged until Monaco releases a fix. See the
+  and ctutils advisories with the smallest compatible bumps. See the
   [dependency alert notes](docs/package-audit.md#dependency-alert-fixes-october-31-2026).
+- Bundle DOMPurify 3.4.17 in the editor. Monaco 0.57.0 ships its own DOMPurify
+  3.4.15, which the npm override never reached, so the app build now resolves
+  Monaco's copy to the dompurify package, and a build test keeps it that way.
 
 ### Verification and limits
 

@@ -152,11 +152,16 @@ rule yields to a security fix.
   bundle.
 - The DOMPurify override moves from 3.4.16 to 3.4.17 (published October 12) for
   GHSA-cg2g-xh64-v4q7 (critical), GHSA-mrv2-3pqr-j5jr (high) and GHSA-c6gr-qvv4-5v3f
-  (low). This clears the lockfile alert only. monaco-editor 0.57.0 imports its own copy of
-  DOMPurify 3.4.15 (`esm/vs/base/browser/dompurify/dompurify.js`), and the built app
-  bundle holds that copy, not the npm package. Monaco's own sanitize calls set none of
-  `IN_PLACE`, `SAFE_FOR_TEMPLATES` or `PARSER_MEDIA_TYPE`, which the three advisory titles
-  name. The bundled copy changes only with a new Monaco release, so check each one.
+  (low). monaco-editor 0.57.0 imports its own copy of DOMPurify 3.4.15
+  (`esm/vs/base/browser/dompurify/dompurify.js`) from `domSanitize.js`, so the override
+  alone left that copy in the built app. A resolver plugin in `vite.config.ts` points that
+  one import at the dompurify package, for the build and the dev server's dependency
+  optimizer, so the app bundles the version the override pins. `vite.config.test.ts`
+  builds the sanitizer and fails if Monaco imports its copy from anywhere else or the
+  bundle holds another version. Monaco's own sanitize calls set none of `IN_PLACE`,
+  `SAFE_FOR_TEMPLATES` or `PARSER_MEDIA_TYPE`, which the three advisory titles name, and
+  no installer has shipped the old copy. Drop the plugin once a Monaco release imports
+  the dompurify package itself.
 - Cargo: pulldown-cmark 0.13.4 to 0.13.5 (RUSTSEC-2026-0414, wikilinks, an option this
   app does not enable), rustls-webpki 0.103.15 to 0.103.16 (RUSTSEC-2026-0382) and
   webpki-root-certs 1.0.9 to 1.0.10 (RUSTSEC-2026-0383), and ctutils 0.4.3 to 0.4.4
