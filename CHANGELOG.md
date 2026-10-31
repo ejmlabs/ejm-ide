@@ -27,6 +27,10 @@ Changes follow [Semantic Versioning](https://semver.org/). Each repository is ve
 - Use the already locked tempfile package for private config staging and
   failed-write cleanup. Credential formats, Keychain services and the pinned
   shared harness stay unchanged.
+- Patch the undici, DOMPurify, pulldown-cmark, rustls-webpki, webpki-root-certs
+  and ctutils advisories with the smallest compatible bumps. The DOMPurify copy
+  that Monaco bundles is unchanged until Monaco releases a fix. See the
+  [dependency alert notes](docs/package-audit.md#dependency-alert-fixes-october-31-2026).
 
 ### Verification and limits
 
