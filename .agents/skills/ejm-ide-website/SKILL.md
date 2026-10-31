@@ -79,7 +79,7 @@ main commit, runs `wrangler deploy --env staging` to the Worker
 `ejmlabs-ide-staging` at `https://ide-staging.ejmlabs.com`, then deploys the same
 files to `ejmlabs-ide` at `https://ide.ejmlabs.com` once staging succeeds. No one
 approves a deploy; the merge is the human decision. Deploy jobs run the Wrangler
-that the shared repository pins (4.151.3 at the current pin), with the
+that the shared repository pins (4.153.0 at the current pin), with the
 `CLOUDFLARE_API_TOKEN` secret of the `staging` and `production` GitHub
 environments, so CI deploys need no `wrangler login`. Do not deploy from a
 workstation except through the `site:deploy` manual fallback when the owner asks;

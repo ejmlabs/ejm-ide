@@ -137,7 +137,7 @@ The deploy jobs trust nothing in the build artifact. They take the whole
 reviewed commit and stop if the build's copy differs. The account must match,
 the assets must come from `website/dist`, and staging needs its own Worker name
 and routes. Wrangler runs from the lockfile in the shared repository's `deploy`
-directory at the revision `deploy.yml` pins (4.151.3 at the current pin), not from
+directory at the revision `deploy.yml` pins (4.153.0 at the current pin), not from
 this repository's `wrangler` dependency. It receives the `CLOUDFLARE_API_TOKEN`
 environment secret and no GitHub token.
 
@@ -148,7 +148,8 @@ reaches Cloudflare:
 
 - The `staging` and `production` GitHub environments exist, and each has a custom
   deployment branch policy with exactly one branch, `main`. Run
-  `python3 scripts/configure_repositories.py` in `ejmlabs/.github` to create them.
+  `python3 scripts/set_deploy_token.py` in `ejmlabs/.github` to create them and
+  store the token below, for every site repository at once.
 - Each environment holds the `CLOUDFLARE_API_TOKEN` secret. The token needs
   Worker and custom-domain rights on the account that owns `ejmlabs.com`. No
   agent creates, reads or stores it.
