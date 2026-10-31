@@ -14,8 +14,8 @@ const identity = {
   artwork: { src: ideLogoInk, darkSrc: ideLogoPaper, width: 40, height: 40 },
 };
 
-// Every section of the page, in order. The header carries the main ones: seven links do not fit beside the identity at 768 px.
-const sections = [
+// Every section of the page, in order. The header shows them as a list where they fit and as its menu below that width.
+const nav = [
   { label: 'Try it', href: '/#try' },
   { label: 'What it does', href: '/#how' },
   { label: 'Keys', href: '/#keys' },
@@ -24,13 +24,10 @@ const sections = [
   { label: 'Models', href: '/#models' },
   { label: 'Downloads', href: '/#get' },
 ] satisfies NavItem[];
-const mainSections = ['Try it', 'What it does', 'Limits', 'Models', 'Downloads'];
-const nav = sections.filter((item) => mainSections.includes(item.label));
 
 const footer: FooterProps = {
   identity,
   columns: [
-    { heading: 'On this page', links: sections },
     {
       heading: 'Sites',
       links: [

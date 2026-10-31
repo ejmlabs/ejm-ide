@@ -116,10 +116,31 @@ export function Keys() {
         { key: 'action', label: 'Action' },
       ]}
       rows={[
-        { key: <code>⌘ K</code>, action: 'Search files and commands' },
-        { key: <code>⌘ P</code>, action: 'Go to file' },
-        { key: <code>⌘ L</code>, action: 'Add the selection to chat' },
-        { key: <code>Tab</code>, action: 'Accept a prediction' },
+        {
+          key: (
+            <kbd>
+              <kbd>⌘</kbd> <kbd>K</kbd>
+            </kbd>
+          ),
+          action: 'Search files and commands',
+        },
+        {
+          key: (
+            <kbd>
+              <kbd>⌘</kbd> <kbd>P</kbd>
+            </kbd>
+          ),
+          action: 'Go to file',
+        },
+        {
+          key: (
+            <kbd>
+              <kbd>⌘</kbd> <kbd>L</kbd>
+            </kbd>
+          ),
+          action: 'Add the selection to chat',
+        },
+        { key: <kbd>Tab</kbd>, action: 'Accept a prediction' },
       ]}
       rowHeader="key"
       truncate={false}

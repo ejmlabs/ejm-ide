@@ -49,7 +49,7 @@ export default function Home() {
       >
         <ShowcaseFrame
           label="ejm-ide example"
-          note="Simulated demo. Nothing runs on your machine and nothing is sent anywhere."
+          note="Simulated demo. Nothing runs on your machine and nothing is sent anywhere. Edi's replies are scripted, and the editor is read only here."
         >
           <LazyIdeDemo />
         </ShowcaseFrame>
