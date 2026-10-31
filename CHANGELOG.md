@@ -28,6 +28,21 @@ Changes follow [Semantic Versioning](https://semver.org/). Each repository is ve
   failed-write cleanup. Credential formats, Keychain services and the pinned
   shared harness stay unchanged.
 
+### Security
+
+- Update the editor's dompurify override to 3.4.17 for GHSA-cg2g-xh64-v4q7,
+  GHSA-mrv2-3pqr-j5jr and GHSA-c6gr-qvv4-5v3f. Monaco loads it in the app.
+- Override the site tooling's transitive undici to 7.30.1 (wrangler stays at
+  4.151.3, as in ejm-harness/registry) for GHSA-4qv8-2p9j-2685,
+  GHSA-f72v-6w45-q472, GHSA-xjj6-f33q-929c, GHSA-4w7w-5xrc-9h26,
+  GHSA-2m5v-pch6-74hx, GHSA-qrxm-fqhp-jwvm, GHSA-9fm3-97px-rjf6 and
+  GHSA-55wc-3pg8-jfw6. Drop the override once the wrangler pin ships
+  undici 7.30.1 or later (wrangler 4.153.0 and up).
+- Update the native lock to rustls-webpki 0.103.16 and webpki-root-certs 1.0.10
+  for RUSTSEC-2026-0382 and RUSTSEC-2026-0383, pulldown-cmark 0.13.5 for
+  RUSTSEC-2026-0414, and ctutils 0.4.4 for RUSTSEC-2026-0385.
+- No release, installer or site deploy is part of this change.
+
 ### Verification and limits
 
 - The native pending-start and child-cleanup regression, exact-pin native checks,

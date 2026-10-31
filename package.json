@@ -95,7 +95,8 @@
   },
   "overrides": {
     "monaco-editor": {
-      "dompurify": "3.4.16"
-    }
+      "dompurify": "3.4.17"
+    },
+    "undici": "7.30.1"
   }
 }
