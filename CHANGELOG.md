@@ -4,6 +4,9 @@ Changes follow [Semantic Versioning](https://semver.org/). Each repository is ve
 
 ## [Unreleased]
 
+- Move the shared UI source pin to ejm-ui `4dde792`, which fixes the prerender, header and demo cases
+  the website needs on the kit. Nothing in this repository uses the pin yet.
+
 - Move the shared UI source pin to ejm-ui `21f22d5`, the systemic kit with closed components,
   `Section` and the one-plugin site setup. Nothing in this repository uses the pin yet; the website
   moves onto it in the next change.
