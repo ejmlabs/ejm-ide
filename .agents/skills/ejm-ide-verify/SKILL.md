@@ -20,7 +20,7 @@ Run from the project root. `npm run verify` runs all of these in order.
 | `npm run lint:rust` | Clippy with warnings denied |
 | `npm run test:rust` | Native tests |
 | `npm run build` | Production frontend build |
-| `npm run site:check` | Types for the site and Worker |
+| `npm run site:check` | Website types, build, `_headers` check and tests, and the Worker's types (needs `../ejm-ui`) |
 
 Details and the ignored integration tests are in
 [docs/development.md](../../../docs/development.md). Do not weaken a lint rule

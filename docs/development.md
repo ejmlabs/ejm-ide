@@ -63,7 +63,8 @@ The Quality job is credential-free, has no token permissions, and runs on macOS
 with Node 24 and Rust 1.99.1 with Clippy and rustfmt. The repository has no
 `.github/quality` script, so the built-in commands run from `product`:
 `npm ci --ignore-scripts`, `npm run verify`, `npm run site:check` and
-`npm run site:build`. Prepare a local sibling harness checkout at the exact
+`npm run site:build`. The two site commands also install `website/`, which links
+the sibling `ejm-ui`. Prepare a local sibling harness checkout at the exact
 revision in `.github/harness-revision`. The harness is public, so preparation needs
 no private cross-repository token. Cargo Dependabot cannot resolve the sibling
 harness path; review its immutable pin and compatible source separately. Keep the
@@ -154,4 +155,23 @@ from automated verification.
 
 The exact UI revision is recorded in `.github/ui-source.json`. Shared CI reads
 this pin from trusted base and installs the owner workspace with lifecycle
-scripts disabled. Site migration is a separate change after the pin is accepted.
+scripts disabled. Only the website uses it. The desktop app does not depend on
+`ejm-ui`, and the root install does not need it.
+
+## Website
+
+`website/` is its own package with its own lockfile. It links the packages in the
+sibling checkout, `../ejm-ui`, and builds into `website/dist`. Check out the
+revision from `.github/ui-source.json` there and run `npm ci --ignore-scripts`
+inside it first. The root scripts install the website for you:
+
+| Command | Check |
+| --- | --- |
+| `npm run site:dev` | Dev server on port 1422 (run `npm run site:install` once) |
+| `npm run site:build` | Install `website/`, then build `website/dist` |
+| `npm run site:check` | Install, then website types, build, `_headers` check and tests, then the Worker's types |
+
+The root `tsc`, Vitest and Biome do not read `website/`, which has its own
+`tsc`, Vitest and `node_modules`. The shared deploy runs `.github/site-build`,
+which installs `../ejm-ui` and then runs `npm run site:build`. See the
+[website skill](../.agents/skills/ejm-ide-website/SKILL.md).

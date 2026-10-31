@@ -385,60 +385,54 @@ layout and agent behavior should compose those primitives. See
 
 ## Public download site
 
-The public site is "ide" by ejmlabs at `ide.ejmlabs.com`. This readiness snapshot
-builds [website/index.html](website/index.html) with the committed
-[design-kit assets](website/public/design-kit/). Read the
-[site notices](website/public/notices.txt) and
-[font licenses](website/public/design-kit/fonts/). The normal build does not
-require a private brand directory. Historical local paths in
-[the asset manifest](.impeccable/download-site-assets.json) record earlier inputs.
+The public site is "ide" by ejmlabs at `ide.ejmlabs.com`. It is its own package in
+[website/](website/package.json), a prerendered Vite and React site on the pinned
+`ejm-ui` (`@ejm/site`, `@ejm/ssg`, `@ejm/ui` and `@ejm/demos`), the same way the
+ejm-cli site is built. The pin is `.github/ui-source.json`; the site links the
+checkout beside this one (`../ejm-ui`) and has its own lockfile. The desktop app
+does not use `ejm-ui` and does not need it installed.
 
-`ejm-ui` owns active shared tokens, generated themes, reusable visual primitives,
-and site infrastructure through public `@ejm/*` exports. Retained design-kit
-material supports brand assets and earlier references. It does not define a
-second active shared UI system. This guidance does not claim that a new
-shared-package migration is installed or published. See
-[the website skill](.agents/skills/ejm-ide-website/SKILL.md) for the optional
-maintainer asset refresh. The desktop workspace keeps its current committed
-palette and density while shared changes follow their owning public contracts.
+`ejm-ui` owns tokens, fonts, logos, favicons, the social card, themes, components,
+the page head, the security headers and the page checks. The site supplies copy,
+the section order, the release list and the files in `website/public/`
+(`editor.jpg`, `license.txt`, `notices.txt`, `robots.txt`, `sitemap.xml`). It has
+no CSS, `className` or `style` of its own; the build fails on them. A pattern the
+kit lacks is added to `ejm-ui` first. Read the
+[site notices](website/public/notices.txt) for the font and icon licenses.
 
 ### Color, type, and identity
 
-Use Paper `#f6f5ef`, Ink `#202721`, Forest `#29443b`, Sage `#8a9a7b`, and Mist
-`#e8ede3`. Read text only in the kit's approved pairs: Ink on Paper, Paper on
-Forest, and Forest on Mist. Sage is artwork and decoration. Dark mode uses deep
-space `#02070d` with Paper text, as on ejmlabs.com.
+Paper, Ink, Forest, Sage and Mist, the dark ground, Manrope and IBM Plex Mono come
+from `@ejm/tokens` and `@ejm/ui`. The site names none of them. The header and
+footer use the ejm-ide mark from `@ejm/tokens`. Never retype the ejmlabs wordmark.
+The ejmlabs marks are the owner's artwork; the IDE's MIT license does not grant
+rights to them.
 
-Use the committed Manrope (400 body, 600 headings) and IBM Plex Mono 500
-(eyebrows, versions, statuses, short labels) font files with `font-display: swap`,
-and keep both OFL licenses beside them.
-
-Lead with the full ejmlabs logo and put the product name beside it in an
-outlined mono tag. Never retype the ejmlabs wordmark. Use the cropped Sage
-symbol as hero decoration and close with "Small experiments. Useful things."
-Render interface icons from the installed Lucide package at build time.
-
-The editor image shows the actual app. Record each shipped asset's source,
-transform, and SHA-256 in
-[the asset manifest](.impeccable/download-site-assets.json). Keep this guide
+The editor image shows the actual app. Record its source, transform, and SHA-256
+in [the asset manifest](.impeccable/download-site-assets.json). Keep this guide
 and [the website skill](.agents/skills/ejm-ide-website/SKILL.md) current when
-site requirements change. The ejmlabs marks are the owner's artwork; the IDE's
-MIT license does not grant rights to them.
+site requirements change.
 
 ### Page and interaction
 
-The kit calls for no more than eight sections, one H1, and one main action.
-For this site, that action leads to platform downloads. The composition can
-change as the page is redesigned. Use labelled platform choices with keyboard
-navigation, truthful availability states, and readable content with scripts
-off. Start with the system theme and provide a labelled theme control.
+The page is a `Hero` with the one H1, then top-level `Section`s. Each keeps its
+anchor: `try`, `editor`, `how`, `keys`, `languages`, `limits`, `models` and `get`.
+The main action leads to platform downloads. Use labelled platform choices with
+keyboard navigation, truthful availability states, and readable content with
+scripts off. The theme control is the kit's, last in the header, and starts with
+the system theme.
 
-Use static HTML and small native TypeScript modules through Vite. Keep the
-first page load under the brand kit's 200 KB target and measure the built result.
-Preserve the skip link, main landmark, reduced-motion support, canonical URL,
-short description, social metadata, robots file, sitemap, and 404 page.
+Fixed prose is server-rendered with `Static` and is not in the browser bundle.
+Two parts are live: the simulated demo (`LazyIdeDemo`, which loads on approach)
+and the download list. Keep the first page load under 200 KB transferred and
+measure the built result. The kit supplies the skip link, main landmark, canonical
+URL, description and social metadata, and the build checks the first two. The site
+keeps `robots.txt`, `sitemap.xml` and the 404 page.
 
-Only show a working download after its verified installer is published. Keep
-platform, architecture, version, checksum, and unavailable states clear. Show
-provider billing terms beside the free IDE claim. Cloudflare serves the page,
-release metadata, and installers; native build runners produce signed releases.
+Only show a working download after its verified installer is published. The list
+loads `/api/releases` in the browser and shows each installer only when the
+manifest has it. The prerendered page shows every platform as in development and
+links the plain release list for visitors without scripts. Keep platform,
+architecture, version, checksum, and unavailable states clear. Show provider
+billing terms beside the free IDE claim. Cloudflare serves the page, release
+metadata, and installers; native build runners produce signed releases.

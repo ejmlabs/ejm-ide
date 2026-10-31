@@ -102,7 +102,7 @@ storage keys.
 | --- | --- |
 | `app/` | React and TypeScript interface, theme tokens, and web tests |
 | `src-tauri/` | Rust host: language servers, index, Git, terminal, providers, Edi's tools |
-| `website/` | Public site source; `website/dist` is build output |
+| `website/` | Public site package on `ejm-ui`; `website/dist` is build output |
 | `distribution/` | Cloudflare Worker, release manifest, and publisher |
 | `docs/` | Subsystem guides; read the one for the area you change |
 | `extension-template/` | Fixed SDK and sample for local extensions |
@@ -160,10 +160,9 @@ Every surface works in light and dark, and Preferences offers System, Light, and
 Dark. Use theme tokens, never raw colors. Read the
 [theme skill](.agents/skills/ejm-ide-theme/SKILL.md) and [DESIGN.md](DESIGN.md)
 for this source snapshot. `ejm-ui` owns active shared tokens, generated themes,
-and reusable visuals through public `@ejm/*` exports. Retained design-kit assets
-support brand references and earlier source snapshots. Check visible changes in
-both themes. Use the committed logo files and preserve their notices; do not
-type the ejmlabs wordmark.
+and reusable visuals through public `@ejm/*` exports. The website consumes them; the
+desktop app does not yet. Check visible changes in both themes. Use the committed logo
+files and preserve their notices; do not type the ejmlabs wordmark.
 
 ## Ownership and product constraints
 
@@ -190,8 +189,10 @@ The public site is ide.ejmlabs.com (see the
 [website skill](.agents/skills/ejm-ide-website/SKILL.md) and
 [release skill](.agents/skills/ejm-ide-release/SKILL.md)). Use Cloudflare for the public download site, release metadata, and installer
 storage. Add GCP only when a concrete requirement cannot be served by Cloudflare.
-Keep the website build separate from the desktop app and exclude local project
-files, credentials, logs, and development artifacts from public assets.
+Keep the website build separate from the desktop app: `website/` is its own package
+with its own install, built on the pinned `ejm-ui` beside this checkout (`../ejm-ui`).
+Never add `ejm-ui` to the root install. Exclude local project files, credentials,
+logs, and development artifacts from public assets.
 
 Only expose downloads backed by verified release artifacts. Keep platform and
 architecture choices explicit, publish checksums, and show unavailable states

@@ -251,6 +251,8 @@ It builds independently of the desktop UI and uses Cloudflare Worker Static
 Assets with R2 for installers. Platform choices include macOS, Windows, and
 Linux; download links appear only for published, verified release files.
 
+The site is its own package in `website/`, built on the `ejm-ui` checkout beside
+this one (`../ejm-ui`). See [development](docs/development.md#website) for setup.
 See [distribution](docs/distribution.md) for local preview, deployment, release
 publication, and the remaining native-platform release work.
 

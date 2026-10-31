@@ -105,7 +105,8 @@ Worker.
 this public distribution service does not collect IDE sessions or request
 content. It has no application credentials or client login endpoint.
 
-For local review:
+For local review (the website needs `../ejm-ui`, see
+[development](development.md#website)):
 
 ```sh
 npm run site:build
