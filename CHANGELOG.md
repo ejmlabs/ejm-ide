@@ -4,7 +4,7 @@ Changes follow [Semantic Versioning](https://semver.org/). Each repository is ve
 
 ## [Unreleased]
 
-- Move the shared ejmlabs/.github pins to 9f7421b, resync the shared agent files, and link the
+- Move the shared ejmlabs/.github pins to ba109a5, resync the shared agent files, and link the
   shared CI deploy reference from the website docs instead of restating the pipeline.
 
 - Adopt the shared ejmlabs/.github revision with the Ready-for-review gate, resync the shared agent
