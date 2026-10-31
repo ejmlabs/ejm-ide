@@ -40,11 +40,12 @@ only for behavior the shared API cannot yet preserve, and record that gap.
 
 ## CI checkout layout
 
-The PR workflow calls an immutable shared governance workflow. Opening or
-updating a PR starts no checks or AI review. A human maintainer first posts
-`/ready FULL_HEAD_SHA` for the current commit. Comment edits and deletions also
-recheck that admission. See [Contributing](../CONTRIBUTING.md) for approval,
-revocation, and retry rules.
+The PR workflow calls an immutable shared governance workflow. Admission is bound
+to the PR head commit and a draft PR is never admitted. A maintainer's own
+same-repository PR admits itself on open, reopen, push and Ready for review. Any
+other PR is admitted when a current human maintainer marks it Ready for review or
+adds `gate:approve`. Fork PRs are never admitted. See
+[Contributing](../CONTRIBUTING.md) for approval, revocation, and rerun rules.
 
 Both normal callers and the release `standards-ref` use the same immutable
 shared revision, `6717b433c462e01abaed86e2118e4843827598cb`. The release
@@ -62,9 +63,10 @@ A submitted caller does not replace the trusted workflow used to check its own
 PR. A caller update therefore needs fresh admission and normal hosted checks
 before merge; local standards checks do not establish hosted acceptance.
 
-Trusted preparation reads `.github/harness-revision` from the base branch. It
-must contain a full commit SHA for a compatible `ejmlabs/ejm-harness` revision.
-Changing that pin in a PR does not change the harness used to check that PR.
+Trusted preparation reads `.github/harness-revision` from the admitted PR head. It
+must contain one full lowercase commit SHA that is the head of protected
+`ejmlabs/ejm-harness` main or an ancestor of it. A pin change and its lockfile
+travel in one PR, and that PR is checked against the harness it pins.
 The Quality job places the admitted IDE sources at `product` and the pinned
 harness at sibling `ejm-harness` under the runner workspace. npm commands run
 from `product`.
@@ -77,8 +79,7 @@ the sibling harness path; review its immutable pin and compatible source
 separately. Keep the documented unsupported Linux GLib advisory and native
 platform limits in [the dependency audit](package-audit.md#public-readiness-dependency-check).
 
-The installed shared revision keeps this IDE protected-base selection and the
-existing macOS Quality commands. The optional public UI source pin now selects
+The installed shared revision keeps the existing macOS Quality commands. The optional public UI source pin now selects
 protected owner commit `79a1aa8b1075f834717bc0c0299dc2c41a22b966`. Trusted
 preparation reads `.github/ui-source.json` from protected base and places that
 owner at sibling `ejm-ui`; Quality installs it with `npm ci --ignore-scripts`.

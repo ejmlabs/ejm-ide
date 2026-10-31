@@ -220,12 +220,14 @@ npm run tauri build -- --debug --bundles app
 Biome enforces TypeScript, TSX, CSS, and JSON rules. rustfmt and Clippy enforce
 Rust rules. CI runs the same verification command. See [Development checks](docs/development.md).
 
-CI starts after a human maintainer admits the current PR commit with
-`/ready FULL_HEAD_SHA`. The shared workflow uses the full harness revision in
-`.github/harness-revision` from the base branch. The
-[development guide](docs/development.md#ci-checkout-layout) describes the checkout
-and credential boundaries. See [Contributing](CONTRIBUTING.md) for the required
-human approval and two AI review passes.
+CI starts after the shared governance workflow admits the current PR commit. A
+maintainer's own same-repository PR is admitted when it is not a draft. Any other
+PR is admitted when a maintainer marks it Ready for review or adds `gate:approve`.
+The shared workflow uses the full harness revision in `.github/harness-revision`
+from the admitted PR head, and that revision must be on protected `ejm-harness`
+main. The [development guide](docs/development.md#ci-checkout-layout) describes
+the checkout and credential boundaries. See [Contributing](CONTRIBUTING.md) for
+the required human approval.
 
 ## Documentation
 

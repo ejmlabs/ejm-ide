@@ -11,6 +11,10 @@ updates:
     groups:
       compatible-updates:
         update-types: [minor, patch]
+    ignore:
+      # The ejmlabs/.github caller pins move only by hand, with every pin in pr.yml and release.yml in one pull request.
+      # The star also matches reusable workflow paths such as ejmlabs/.github/.github/workflows/governance.yml.
+      - dependency-name: "ejmlabs/.github*"
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
