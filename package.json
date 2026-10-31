@@ -91,11 +91,11 @@
     "vite": "8.3.4",
     "vitest": "^5.0.5",
     "vscode-languageserver-protocol": "3.18.4",
-    "wrangler": "4.151.3"
+    "wrangler": "4.153.0"
   },
   "overrides": {
     "monaco-editor": {
-      "dompurify": "3.4.16"
+      "dompurify": "3.4.17"
     }
   }
 }
