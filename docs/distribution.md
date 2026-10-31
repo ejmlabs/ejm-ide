@@ -125,7 +125,7 @@ jobs in order:
 1. A build job, with `contents: read` and no secrets, builds the website from
    that main commit with `npm ci --ignore-scripts` and `npm run site:build`.
 2. A staging job runs `wrangler deploy --env staging`. It publishes the Worker
-   `ejmlabs-ide-staging` at `ide-staging.ejmlabs.com`, which binds the same
+   `ejmlabs-ide-staging` at `staging.ide.ejmlabs.com`, which binds the same
    R2 bucket `ejmlabs-ide-releases`. The Worker only reads that bucket.
 3. A production job deploys the same built files to the Worker `ejmlabs-ide` at
    `ide.ejmlabs.com` with the top-level config, once staging succeeds. It needs
@@ -153,7 +153,7 @@ reaches Cloudflare:
 - Each environment holds the `CLOUDFLARE_API_TOKEN` secret. The token needs
   Worker and custom-domain rights on the account that owns `ejmlabs.com`. No
   agent creates, reads or stores it.
-- No DNS record for `ide-staging.ejmlabs.com` exists outside Wrangler. If one
+- No DNS record for `staging.ide.ejmlabs.com` exists outside Wrangler. If one
   does, Wrangler prompts in CI and nobody can answer, so remove the record first.
 
 Keep `secrets: inherit` in `deploy.yml`; without it the token is empty. Change
