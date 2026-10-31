@@ -9,6 +9,13 @@ Changes follow [Semantic Versioning](https://semver.org/). Each repository is ve
 
 - Propose the accepted shared UI source pin after complete retained-source review; site migration follows protected pin acceptance.
 
+- Deploy the website from main. The canonical `cache.yml` and `deploy.yml` callers,
+  pinned to the same shared revision as the PR gate, warm the trusted gate cache and
+  deploy each merge to staging, then to production once staging succeeds. The owner
+  creates the `staging` and `production` environments and their
+  `CLOUDFLARE_API_TOKEN` secrets first. See
+  [Website deploys](docs/distribution.md#website-deploys).
+
 - Remove the retained review inputs under `review/dependency-sources/` and
   `.github/review-context/` and their Biome and Vitest exclusions. The AI review
   they fed is gone. Rewrite the CI checkout notes for the current gate.

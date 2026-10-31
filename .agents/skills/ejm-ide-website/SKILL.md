@@ -58,9 +58,11 @@ Forest band with a few honest numbers, a "get" section, and an Ink footer.
 | `npm run site:build` | Build into `website/dist` |
 | `npm run site:check` | Types for the site and Worker |
 | `npm run site:preview` | Worker plus assets on port 1423 (start it detached) |
-| `npm run site:deploy` | Build, check, test, and `wrangler deploy` |
+| `npm run site:deploy` | Manual fallback only, when the owner asks: build, check, test, and `wrangler deploy` to production |
 
-## Before deploying
+## Before merging
+
+A merge to main deploys, so finish these first.
 
 1. Build, check, and run `npm test` (the site's tests live beside the code).
 2. Look at 320, 375, 768, and 1440 px, light and dark. Tab through the page.
@@ -69,8 +71,30 @@ Forest band with a few honest numbers, a "get" section, and an Ink footer.
 5. Keep [the public download site guidance](../../../DESIGN.md#public-download-site)
    and [asset provenance](../../../.impeccable/download-site-assets.json) current.
 
-Deploy needs the user's Cloudflare login (`wrangler` OAuth). If auth fails, ask
-the user to run `wrangler login`; do not retry in a loop. After deploy, request
-`/`, `/api/releases`, `/editor.jpg`, a missing page (404), and the response
-headers, then load the live URL in a browser and read the console. Do not touch
-other Workers on the account (`gerry-marketing`, `gerry-coming-soon`, and others).
+## Deploy
+
+A push to main runs `.github/workflows/deploy.yml`, the canonical caller of the
+shared `ejmlabs/.github` workflow `deploy-site.yml`. It builds the site from that
+main commit, runs `wrangler deploy --env staging` to the Worker
+`ejmlabs-ide-staging` at `https://ide-staging.ejmlabs.com`, then deploys the same
+files to `ejmlabs-ide` at `https://ide.ejmlabs.com` once staging succeeds. No one
+approves a deploy; the merge is the human decision. Deploy jobs run the Wrangler
+that the shared repository pins (4.153.0 at the current pin), with the
+`CLOUDFLARE_API_TOKEN` secret of the `staging` and `production` GitHub
+environments, so CI deploys need no `wrangler login`. Do not deploy from a
+workstation except through the `site:deploy` manual fallback when the owner asks;
+a local `--dry-run` is fine. Staging binds the same R2 bucket
+`ejmlabs-ide-releases`, which the Worker only reads. Installer and manifest
+publishing (`distribution/publish.ts`) is unchanged and separate.
+
+If a run stops before Wrangler runs, read the failing step. A missing
+environment, branch policy or token means the owner has not finished the setup in
+[Before the first deploy](../../../docs/distribution.md#before-the-first-deploy).
+Report it. Do not create environments, secrets or tokens.
+
+After each merge, when the run finishes, request `/`, `/api/releases`,
+`/editor.jpg`, a missing page (404), and the response headers on staging and then
+on production, load each in a browser, and read the console. Keep the commit SHA
+and the Worker version ID from the job log. To roll back, redeploy an earlier
+Worker version in Cloudflare, or revert on main. Do not touch other Workers on
+the account (`gerry-marketing`, `gerry-coming-soon`, and others).
