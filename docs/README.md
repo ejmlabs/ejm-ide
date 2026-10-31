@@ -6,6 +6,7 @@ workspace trust, and use.
 | Guide | Scope |
 | --- | --- |
 | [Development](development.md) | Checks, sibling harness checkout, and shared code changes |
+| [Test reliability](flaky-rust-tests.md) | Repeated frontend and native test evidence |
 | [Architecture](../ARCHITECTURE.md) | Frontend, native host, and shared engine boundaries |
 | [Interface design](../DESIGN.md#interaction-principles) | Setup, editor groups, navigation, and inspectable agent work |
 | [Languages](languages.md) | Language tools, workspace trust, formatting, and limits |

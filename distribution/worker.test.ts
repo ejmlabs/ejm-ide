@@ -113,9 +113,12 @@ describe('Cloudflare distribution Worker', () => {
     expect((await response.json()).error).toBe('not_released');
   });
 
-  it.each([null, object('abcde', { size: 99 })])(
-    'reports a manifest artifact unavailable when its real object is missing or mismatched',
-    async (binary) => {
+  it.each([
+    { case: 'missing', binary: null },
+    { case: 'mismatched', binary: object('abcde', { size: 99 }) },
+  ])(
+    'reports a manifest artifact unavailable when its real object is $case',
+    async ({ binary }) => {
       const { env } = setup(manifest, binary);
       const response = await handleRequest(request(downloadPath), env);
       expect(response.status).toBe(503);

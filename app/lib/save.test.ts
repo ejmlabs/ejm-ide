@@ -49,10 +49,18 @@ describe('save formatting', () => {
   );
 
   it.each([
-    ['/package.json', '{"enabled":true,}'],
-    ['/package.json', '{// comments need JSONC\n"enabled":true}'],
-    ['/settings.jsonc', '{"unfinished":'],
-  ])('saves invalid %s unchanged when formatting cannot safely parse it', async (path, content) => {
+    {
+      case: 'strict JSON with a trailing comma',
+      path: '/package.json',
+      content: '{"enabled":true,}',
+    },
+    {
+      case: 'strict JSON with a comment',
+      path: '/package.json',
+      content: '{// comments need JSONC\n"enabled":true}',
+    },
+    { case: 'unfinished JSONC', path: '/settings.jsonc', content: '{"unfinished":' },
+  ])('saves $case unchanged when formatting cannot safely parse it', async ({ path, content }) => {
     await expect(
       formatDocumentContent(path, content, 3, {
         lsp: false,

@@ -5,7 +5,7 @@ use ejm_ide_lib::{
 use serde_json::{Value, json};
 use std::{
     fs,
-    path::Path,
+    path::{Path, PathBuf},
     thread,
     time::{Duration, Instant},
 };
@@ -32,11 +32,46 @@ fn request_until(
     );
 }
 
+fn copy_fixture(source: &Path, destination: &Path) -> std::io::Result<()> {
+    fs::create_dir_all(destination)?;
+    for entry in fs::read_dir(source)? {
+        let entry = entry?;
+        let kind = entry.file_type()?;
+        let target = destination.join(entry.file_name());
+        if kind.is_dir() {
+            copy_fixture(&entry.path(), &target)?;
+        } else if kind.is_file() {
+            fs::copy(entry.path(), target)?;
+        } else {
+            return Err(std::io::Error::other("unsupported fixture entry"));
+        }
+    }
+    Ok(())
+}
+
+#[test]
+fn language_server_fixture_copy_is_isolated() {
+    let source = tempfile::tempdir().unwrap();
+    let destination = tempfile::tempdir().unwrap();
+    fs::create_dir(source.path().join("nested")).unwrap();
+    fs::write(source.path().join("nested/file"), "original").unwrap();
+    copy_fixture(source.path(), destination.path()).unwrap();
+    fs::write(destination.path().join("nested/file"), "changed").unwrap();
+    assert_eq!(
+        fs::read_to_string(source.path().join("nested/file")).unwrap(),
+        "original"
+    );
+}
+
 fn verify(language: Language, relative: &str, symbol: &str, caller: &str) {
-    let root = Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("../examples/harbor")
+    let source = std::env::var_os("WORKBENCH_LANGUAGE_SERVERS_ROOT")
+        .map(PathBuf::from)
+        .unwrap_or_else(|| Path::new(env!("CARGO_MANIFEST_DIR")).join("../examples/harbor"))
         .canonicalize()
         .unwrap();
+    let workspace = tempfile::tempdir().unwrap();
+    let root = workspace.path().join("harbor");
+    copy_fixture(&source, &root).unwrap();
     let path = root.join(relative);
     let text = fs::read_to_string(&path).unwrap();
     let command = server_command(language, None).unwrap();
