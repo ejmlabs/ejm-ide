@@ -20,7 +20,7 @@
       "name": "ejmlabs-ide-staging",
       "workers_dev": false,
       "preview_urls": false,
-      "routes": [{ "pattern": "ide-staging.ejmlabs.com", "custom_domain": true }],
+      "routes": [{ "pattern": "staging.ide.ejmlabs.com", "custom_domain": true }],
       "assets": {
         "directory": "../website/dist",
         "binding": "ASSETS",

@@ -76,7 +76,7 @@ A merge to main deploys, so finish these first.
 A push to main runs `.github/workflows/deploy.yml`, the canonical caller of the
 shared `ejmlabs/.github` workflow `deploy-site.yml`. It builds the site from that
 main commit, runs `wrangler deploy --env staging` to the Worker
-`ejmlabs-ide-staging` at `https://ide-staging.ejmlabs.com`, then deploys the same
+`ejmlabs-ide-staging` at `https://staging.ide.ejmlabs.com`, then deploys the same
 files to `ejmlabs-ide` at `https://ide.ejmlabs.com` once staging succeeds. No one
 approves a deploy; the merge is the human decision. Deploy jobs run the Wrangler
 that the shared repository pins (4.153.0 at the current pin), with the
