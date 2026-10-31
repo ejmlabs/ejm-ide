@@ -4,6 +4,10 @@ Changes follow [Semantic Versioning](https://semver.org/). Each repository is ve
 
 ## [Unreleased]
 
+- Move the shared UI source pin to ejm-ui `21f22d5`, the systemic kit with closed components,
+  `Section` and the one-plugin site setup. Nothing in this repository uses the pin yet; the website
+  moves onto it in the next change.
+
 - Move the shared ejmlabs/.github pins to ba109a5, resync the shared agent files, and link the
   shared CI deploy reference from the website docs instead of restating the pipeline.
 
