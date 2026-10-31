@@ -157,9 +157,9 @@ Every surface works in light and dark, and Preferences offers System, Light, and
 Dark. Use theme tokens, never raw colors. Read the
 [theme skill](.agents/skills/ejm-ide-theme/SKILL.md) and [DESIGN.md](DESIGN.md)
 for this source snapshot. `ejm-ui` owns active shared tokens, generated themes,
-and reusable visuals through public `@ejm/*` exports. Retained design-kit assets
-support brand references and earlier source snapshots. Check visible changes in
-both themes. Use the committed logo files and preserve their notices; do not
+and reusable visuals through public `@ejm/*` exports. The public site in
+`website/` is built on them; the desktop app keeps its own theme until it moves
+onto ejm-ui. Check visible changes in both themes. Use the committed logo files and preserve their notices; do not
 type the ejmlabs wordmark.
 
 ## Ownership and product constraints

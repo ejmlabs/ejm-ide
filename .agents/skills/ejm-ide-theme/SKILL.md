@@ -14,8 +14,8 @@ adapters listed below.
 `ejm-ui/packages/tokens` owns active shared tokens and generated themes through
 the `@ejm/tokens` public exports. Shared visual primitives belong to `@ejm/ui`.
 Read the owning package contract before a shared change, then adopt its public
-output in the IDE. Retained design-kit assets support brand material and older
-references; they do not define another active shared theme system.
+output in the IDE. The public site already uses it; the desktop app has not moved
+onto it yet.
 
 This readiness snapshot still has the local definitions and adapters below.
 They can be inspected in this checkout without a private brand directory. A

@@ -5,6 +5,7 @@ src-tauri/target/
 .workbench/
 *.tsbuildinfo
 website/dist/
+website/.ejm-ssg/
 distribution/.wrangler/
 distribution/.types/
 target/

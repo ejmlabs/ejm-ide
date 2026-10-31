@@ -16,6 +16,9 @@
     "node": ">=24 <25"
   },
   "type": "module",
+  "workspaces": [
+    "website"
+  ],
   "scripts": {
     "dev": "vite --host 127.0.0.1 --port 1420 --strictPort",
     "build": "tsc -b && vite build",
@@ -31,9 +34,9 @@
     "test:rust": "cargo test --manifest-path src-tauri/Cargo.toml --all-targets --locked",
     "verify": "npm run format:check && npm run lint && npm run check && npm test && npm run lint:rust && npm run test:rust && npm run build",
     "dev:desktop": "tauri dev --no-watch",
-    "site:dev": "vite --config website/vite.config.ts",
-    "site:build": "tsc -b && vite build --config website/vite.config.ts",
-    "site:check": "tsc -b --pretty false && tsc -p distribution/tsconfig.json --noEmit",
+    "site:dev": "npm --workspace website run dev",
+    "site:build": "npm --workspace website run build",
+    "site:check": "tsc -b --pretty false && tsc -p distribution/tsconfig.json --noEmit && npm --workspace website run typecheck",
     "site:preview": "wrangler dev --config distribution/wrangler.jsonc --ip 127.0.0.1 --port 1423",
     "site:deploy": "npm run site:build && npm run site:check && npm test && wrangler deploy --config distribution/wrangler.jsonc"
   },

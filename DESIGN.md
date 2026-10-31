@@ -385,21 +385,18 @@ layout and agent behavior should compose those primitives. See
 
 ## Public download site
 
-The public site is "ide" by ejmlabs at `ide.ejmlabs.com`. This readiness snapshot
-builds [website/index.html](website/index.html) with the committed
-[design-kit assets](website/public/design-kit/). Read the
-[site notices](website/public/notices.txt) and
-[font licenses](website/public/design-kit/fonts/). The normal build does not
-require a private brand directory. Historical local paths in
+The public site is "ide" by ejmlabs at `ide.ejmlabs.com`. It is an ejm-ui site:
+`website/` builds with `ejmlabs({ project: 'ide' })` from `@ejm/site/vite` and
+composes its one page from `Hero`, `Section` and the simulated IDE demo from
+`@ejm/demos`. The brand files, fonts, font licenses, theme script and headers come
+from the `@ejm/*` packages at the revision in `.github/ui-source.json`. Read the
+[site notices](website/public/notices.txt). Historical local paths in
 [the asset manifest](.impeccable/download-site-assets.json) record earlier inputs.
 
 `ejm-ui` owns active shared tokens, generated themes, reusable visual primitives,
-and site infrastructure through public `@ejm/*` exports. Retained design-kit
-material supports brand assets and earlier references. It does not define a
-second active shared UI system. This guidance does not claim that a new
-shared-package migration is installed or published. See
-[the website skill](.agents/skills/ejm-ide-website/SKILL.md) for the optional
-maintainer asset refresh. The desktop workspace keeps its current committed
+and site infrastructure through public `@ejm/*` exports. The page copy, the
+download table and its release data stay in this repository. See
+[the website skill](.agents/skills/ejm-ide-website/SKILL.md). The desktop workspace keeps its current committed
 palette and density while shared changes follow their owning public contracts.
 
 ### Color, type, and identity

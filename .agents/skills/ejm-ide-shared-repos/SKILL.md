@@ -17,10 +17,9 @@ Cargo path dependencies expect the harness beside the IDE.
 | `ejm-ui` | Active shared tokens and generated themes, reusable visuals and interaction primitives, and site infrastructure through public `@ejm/*` exports |
 | `ejmlabs` | Studio content, discovery, brand guidance, and download assembly |
 
-Retained `design-kit/` material supports brand assets and earlier references.
-It is not a second authority for active shared UI. This readiness snapshot's
-committed IDE and site inputs remain usable without a private brand checkout;
-the table does not claim a new shared-package migration or published package.
+The website consumes ejm-ui through `file:` links to a sibling `../ejm-ui`
+checkout at the revision in `.github/ui-source.json`. The desktop app does not
+depend on `@ejm/*` yet. No `@ejm/*` package is published.
 
 The IDE depends on `ejm-harness`, `ejm-harness-auth`, and `ejm-harness-exec` by path, from
 `src-tauri/Cargo.toml` (`../../ejm-harness/crates/...`). Rust code uses

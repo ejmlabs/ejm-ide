@@ -10,7 +10,7 @@ represent another product or organization.
 
 The site fonts are Manrope and IBM Plex Mono Medium. Both use
 the SIL Open Font License 1.1. Their copyright notices and license texts follow
-and also ship in design-kit/fonts/.
+and also ship at the site root as Manrope-OFL.txt and IBMPlexMono-OFL.txt.
 
 
 Manrope

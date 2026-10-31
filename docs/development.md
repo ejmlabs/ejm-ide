@@ -154,4 +154,14 @@ from automated verification.
 
 The exact UI revision is recorded in `.github/ui-source.json`. Shared CI reads
 this pin from trusted base and installs the owner workspace with lifecycle
-scripts disabled. Site migration is a separate change after the pin is accepted.
+scripts disabled. Move the pin in its own PR; a change that needs the new
+revision follows once that PR is on main.
+
+The website is the npm workspace `website/`. Its `@ejm/*` dependencies are
+`file:` links to `../ejm-ui/packages/*`, so the root `npm ci` needs that sibling
+checkout at the pinned revision, with `npm ci --ignore-scripts` run inside it
+first. `npm run site:build` builds with `ejm-ssg` into `website/dist` and checks
+the generated `_headers`. After a build, run
+`node scripts/perf.mjs ../ejm-ide/website/dist --baseline ../ejm-ide/website/perf-baseline.json`
+from the ejm-ui checkout; it fails when a route is a second or more slower than
+its recorded first contentful paint.

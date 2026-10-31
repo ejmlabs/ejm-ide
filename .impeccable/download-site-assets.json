@@ -9,7 +9,7 @@
     "width": 1280,
     "height": 800,
     "bytes": 102533,
-    "transforms": "None after capture. JPEG quality 84. CSS crops nothing on desktop; below 768px the frame scrolls sideways."
+    "transforms": "None after capture. JPEG quality 84. The page scales it to the content column and loads it lazily."
   },
   "website/public/brand/social-card.png": {
     "kind": "ejmlabs-design-kit",

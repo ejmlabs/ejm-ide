@@ -5,9 +5,9 @@ description: Change, check, or deploy the public site at ide.ejmlabs.com. Use fo
 
 # Public site
 
-The site is "ide" by ejmlabs, at `https://ide.ejmlabs.com`. It is static HTML
-with a small TypeScript module, built by Vite from `website/` into
-`website/dist`, and served by the Worker `ejmlabs-ide` (`distribution/`).
+The site is "ide" by ejmlabs, at `https://ide.ejmlabs.com`. It is an ejm-ui
+site, built by ejm-ssg from `website/` into `website/dist`, and served by the
+Worker `ejmlabs-ide` (`distribution/`).
 
 ## Ownership
 
@@ -17,25 +17,25 @@ public `@ejm/*` exports. Read [the shared-repository rules](../ejm-ide-shared-re
 before a shared change. These instructions do not install or publish those
 packages.
 
-For this readiness snapshot, start with [DESIGN.md](../../../DESIGN.md),
-[website/index.html](../../../website/index.html), and the committed
-[design-kit assets](../../../website/public/design-kit/). Read
-[the site notices](../../../website/public/notices.txt) and keep both
-[font licenses](../../../website/public/design-kit/fonts/). These retained files
-support the asset snapshot and earlier references. Active shared UI changes
-belong in `ejm-ui`.
+The site is the npm workspace `website/`, an ejm-ui site built with ejm-ssg.
+`website/vite.config.ts` is `ejmlabs({ project: 'ide' })` plus the dev proxy,
+`website/tsconfig.json` extends `@ejm/ui/tsconfig.json`, and
+`website/src/styles.css` imports `@ejm/ui/styles.css` and `@ejm/demos/ide.css`.
+The `@ejm/*` packages are `file:` links to `../ejm-ui` at the revision in
+`.github/ui-source.json`. Read ejm-ui's `ADOPTION.md` and
+`packages/ui/src/layout/README.md` at that revision before changing a page.
 
-The normal site build uses committed inputs. It needs no private brand checkout
-or asset refresh. `website/scripts/sync-design-kit.sh` is an optional maintainer
-refresh from a reviewed retained brand source. It replaces the committed copy;
-use `DESIGN_KIT` to name that source explicitly, review the resulting diff, and
-preserve its notices and provenance. Do not use this legacy refresh as a second
-source for active shared tokens or primitives.
-
-The sibling pages are cli.ejmlabs.com and harness.ejmlabs.com. Match their
-anatomy and tone: header with the logo and product tag, a hero with an eyebrow,
-one H1 and one action, a product figure, a feature grid, a split section, a
-Forest band with a few honest numbers, a "get" section, and an Ink footer.
+- The page is `website/src/pages/Home.tsx`: a `Hero` and one `Section` per part.
+  The download table and its release state are in `website/src/downloads.tsx`.
+- The design guard rejects `className`, `style`, local CSS and stylesheet links in
+  `website/src`. A missing layout or look is added to ejm-ui, never here.
+- `ejmSite()` writes `_headers`, the favicon set, the social card, the font
+  licenses and the theme script into `website/dist`. Do not add copies to
+  `website/public`. To extend the header policy, pass `headers` to `ejmlabs()`.
+- The build fails unless every page has one `h1`, ordered headings, the skip link
+  first, `main#main`, and `rel="external"` on links to another host.
+- Keep [the site notices](../../../website/public/notices.txt) and the other files
+  in `website/public` (`editor.jpg`, `license.txt`, `robots.txt`, `sitemap.xml`).
 
 ## Content rules
 
@@ -54,9 +54,9 @@ Forest band with a few honest numbers, a "get" section, and an Ink footer.
 
 | Command | Use |
 | --- | --- |
-| `npm run site:dev` | Vite dev server for the page |
-| `npm run site:build` | Build into `website/dist` |
-| `npm run site:check` | Types for the site and Worker |
+| `npm run site:dev` | ejm-ssg dev server for the page, with `/api/` and `/downloads/` proxied to `site:preview` |
+| `npm run site:build` | Build into `website/dist` and check the generated `_headers` |
+| `npm run site:check` | Types for the app, the Worker and the site |
 | `npm run site:preview` | Worker plus assets on port 1423 (start it detached) |
 | `npm run site:deploy` | Manual fallback only, when the owner asks: build, check, test, and `wrangler deploy` to production |
 

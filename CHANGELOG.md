@@ -4,6 +4,13 @@ Changes follow [Semantic Versioning](https://semver.org/). Each repository is ve
 
 ## [Unreleased]
 
+- Rebuild the public site on ejm-ui. `website/` is an npm workspace built with
+  `ejmlabs({ project: 'ide' })`, `Hero` and `Section`, and the simulated IDE demo
+  from `@ejm/demos`. The download table keeps reading `/api/releases`. The copied
+  design kit, `website/scripts/sync-design-kit.sh`, the hand-kept `_headers` and
+  `404.html`, and the `markProductScript` Vite plugin are removed. The page text,
+  the route and the files in `website/public` are unchanged.
+
 - Adopt the shared ejmlabs/.github revision with the Ready-for-review gate, resync the shared agent
   skills and house rules, and read the harness pin from the admitted PR head.
 

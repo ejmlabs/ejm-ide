@@ -100,16 +100,14 @@ Keep findings scoped to the flows actually checked.
 
 For `website/`, use the Public download site section in
 [DESIGN.md](../../../DESIGN.md), [the website skill](../ejm-ide-website/SKILL.md),
-and the committed [site source](../../../website/index.html). This source snapshot
-includes its [brand assets](../../../website/public/design-kit/),
-[font licenses](../../../website/public/design-kit/fonts/), and
-[brand and icon notices](../../../website/public/notices.txt). Contributors need
-no private brand directory. The asset manifest's historical source paths record
-provenance rather than required checkouts.
+and the [site source](../../../website/src/). The site is built on ejm-ui, and its
+brand files and font licenses come from the `@ejm/*` packages. Keep the
+[brand and icon notices](../../../website/public/notices.txt). The asset
+manifest's historical source paths record provenance rather than required
+checkouts.
 
 Active shared tokens, generated themes, reusable visuals, and site infrastructure
-belong to `ejm-ui` public exports. Retained design-kit files support the current
-asset snapshot and earlier references; change shared behavior in its owner. See
+belong to `ejm-ui` public exports; change shared behavior in its owner. See
 [the shared-repository rules](../ejm-ide-shared-repos/SKILL.md). An upstream brand
 asset refresh is an optional maintainer action described in the website skill.
 
