@@ -138,6 +138,41 @@ Linux remains unsupported. Its release gate requires a compatible Tauri/GTK
 upgrade to a fixed glib version and native verification. GTK 0.18 requires
 glib 0.18, so forcing a glib 0.20 override is not a compatible fix.
 
+## Dependency alert fixes, October 31, 2026
+
+A complete `npm audit --package-lock-only` and `cargo audit` on `src-tauri/Cargo.lock`
+found these advisories. Each fix is the smallest bump that clears it. The 14-day age
+rule yields to a security fix.
+
+- undici 7.29.1 to 7.30.1 (published October 15) fixes eight advisories, among them
+  GHSA-2m5v-pch6-74hx, GHSA-4w7w-5xrc-9h26, GHSA-qrxm-fqhp-jwvm and
+  GHSA-xjj6-f33q-929c (high). Miniflare pins undici exactly, so wrangler moves from
+  4.151.3 to 4.153.0 (October 26), the first release whose miniflare pins 7.30.1. This is
+  development tooling for the site Worker; nothing from it reaches the app or the site
+  bundle.
+- The DOMPurify override moves from 3.4.16 to 3.4.17 (published October 12) for
+  GHSA-cg2g-xh64-v4q7 (critical), GHSA-mrv2-3pqr-j5jr (high) and GHSA-c6gr-qvv4-5v3f
+  (low). monaco-editor 0.57.0 imports its own copy of DOMPurify 3.4.15
+  (`esm/vs/base/browser/dompurify/dompurify.js`) from `domSanitize.js`, so the override
+  alone left that copy in the built app. A resolver plugin in `vite.config.ts` points that
+  one import at the dompurify package, for the build and the dev server's dependency
+  optimizer, so the app bundles the version the override pins. `vite.config.test.ts`
+  builds the sanitizer and fails if Monaco imports its copy from anywhere else or the
+  bundle holds another version. Monaco's own sanitize calls set none of `IN_PLACE`,
+  `SAFE_FOR_TEMPLATES` or `PARSER_MEDIA_TYPE`, which the three advisory titles name, and
+  no installer has shipped the old copy. Drop the plugin once a Monaco release imports
+  the dompurify package itself.
+- Cargo: pulldown-cmark 0.13.4 to 0.13.5 (RUSTSEC-2026-0414, wikilinks, an option this
+  app does not enable), rustls-webpki 0.103.15 to 0.103.16 (RUSTSEC-2026-0382) and
+  webpki-root-certs 1.0.9 to 1.0.10 (RUSTSEC-2026-0383), and ctutils 0.4.3 to 0.4.4
+  (RUSTSEC-2026-0385). Only pulldown-cmark and rustls-webpki are in the macOS tree. The
+  re-resolve also moved `cssparser-macros` to syn 2 and tempfile to getrandom 0.3.4, both
+  already in the lock and allowed by those crates.
+
+`cargo audit` now reports no vulnerability. Its warnings remain: glib 0.18.5 (see above)
+and the unmaintained proc-macro-error, zbus_names, zvariant and zvariant_derive. Cargo's
+resolved tree for macOS includes none of the five.
+
 ## Remaining candidates
 
 | Priority | Location | Action and condition |
