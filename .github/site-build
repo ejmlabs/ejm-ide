@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# Builds the website into website/dist for the shared deploy, which runs ./.github/site-build from the
+# repository root with ejm-ui checked out beside it at the revision in .github/ui-source.json.
+# The deploy does not install ejm-ui, so this does, then installs and builds the website.
+# Locally, run it from a checkout that has ../ejm-ui.
+set -euo pipefail
+here=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+root=$(dirname "$here")
+
+command -v npm >/dev/null || { echo "Missing npm" >&2; exit 1; }
+[[ -d "$root/../ejm-ui/packages/ui" ]] || {
+  echo "Missing ../ejm-ui beside this repository (the revision in .github/ui-source.json)" >&2
+  exit 1
+}
+
+cd "$root"
+npm --prefix ../ejm-ui ci --ignore-scripts
+npm run site:build

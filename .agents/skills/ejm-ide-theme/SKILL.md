@@ -14,13 +14,13 @@ adapters listed below.
 `ejm-ui/packages/tokens` owns active shared tokens and generated themes through
 the `@ejm/tokens` public exports. Shared visual primitives belong to `@ejm/ui`.
 Read the owning package contract before a shared change, then adopt its public
-output in the IDE. Retained design-kit assets support brand material and older
-references; they do not define another active shared theme system.
+output in the IDE.
 
-This readiness snapshot still has the local definitions and adapters below.
-They can be inspected in this checkout without a private brand directory. A
-shared-package migration needs its own reviewed change and compatibility checks;
-these instructions do not claim that migration is installed.
+The website already uses those exports. The desktop app still has the local
+definitions and adapters below. They can be inspected in this checkout without a
+private brand directory. Moving the app needs its own reviewed change and
+compatibility checks; these instructions do not claim that migration is
+installed.
 
 ## What the app has today
 

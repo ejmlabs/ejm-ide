@@ -4,6 +4,13 @@ Changes follow [Semantic Versioning](https://semver.org/). Each repository is ve
 
 ## [Unreleased]
 
+- Build the website on the pinned `ejm-ui` packages, the way the ejm-cli site is built, in place of
+  the copied design kit. `website/` is now its own package with its own lockfile, and the desktop
+  app's install is unchanged. The page keeps its copy and anchors. Headers now come from the
+  shared policy (`ejm-site-headers`), and the demo is the shared ejm-ide island. Remove
+  `website/public/design-kit/`, its sync script, and the hand-written `404.html` and `_headers`.
+  Add `.github/site-build` for the shared deploy.
+
 - Move the shared UI source pin to ejm-ui `4dde792`, which fixes the prerender, header and demo cases
   the website needs on the kit. Nothing in this repository uses the pin yet.
 

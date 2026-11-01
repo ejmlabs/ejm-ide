@@ -5,37 +5,42 @@ description: Change, check, or deploy the public site at ide.ejmlabs.com. Use fo
 
 # Public site
 
-The site is "ide" by ejmlabs, at `https://ide.ejmlabs.com`. It is static HTML
-with a small TypeScript module, built by Vite from `website/` into
-`website/dist`, and served by the Worker `ejmlabs-ide` (`distribution/`).
+The site is "ide" by ejmlabs, at `https://ide.ejmlabs.com`. It is a prerendered
+Vite and React site on the pinned `ejm-ui`, built from `website/` into
+`website/dist` and served by the Worker `ejmlabs-ide` (`distribution/`). It is
+built the same way as the ejm-cli site.
 
 ## Ownership
 
-The IDE owns this site's content and composition. `ejm-ui` owns active shared
-tokens, generated themes, reusable visuals, and site infrastructure through
-public `@ejm/*` exports. Read [the shared-repository rules](../ejm-ide-shared-repos/SKILL.md)
-before a shared change. These instructions do not install or publish those
-packages.
+The IDE owns this site's content and composition. `ejm-ui` owns tokens, fonts,
+logos, favicons, the social card, themes, components, the page head, the headers
+and the page checks, through public `@ejm/*` exports. Read
+[the shared-repository rules](../ejm-ide-shared-repos/SKILL.md) before a shared
+change. The site has no CSS, `className` or `style` of its own and copies no kit
+code: the build fails on them. When a pattern is missing, add it to `ejm-ui`,
+then move the pin (`.github/ui-source.json`) in its own change.
 
-For this readiness snapshot, start with [DESIGN.md](../../../DESIGN.md),
-[website/index.html](../../../website/index.html), and the committed
-[design-kit assets](../../../website/public/design-kit/). Read
-[the site notices](../../../website/public/notices.txt) and keep both
-[font licenses](../../../website/public/design-kit/fonts/). These retained files
-support the asset snapshot and earlier references. Active shared UI changes
-belong in `ejm-ui`.
+`website/` is its own package (`website/package.json` and lockfile). It links the
+checkout beside this one, `../ejm-ui`, with `file:` dependencies. Run
+`npm ci --ignore-scripts` in `../ejm-ui` first. The desktop app's root install
+needs neither. Use the same `ejm-ui` revision as the pin.
 
-The normal site build uses committed inputs. It needs no private brand checkout
-or asset refresh. `website/scripts/sync-design-kit.sh` is an optional maintainer
-refresh from a reviewed retained brand source. It replaces the committed copy;
-use `DESIGN_KIT` to name that source explicitly, review the resulting diff, and
-preserve its notices and provenance. Do not use this legacy refresh as a second
-source for active shared tokens or primitives.
+| Path | Holds |
+| --- | --- |
+| `website/src/site.tsx`, `shell.tsx` | Routes, head, header, footer |
+| `website/src/pages/Home.tsx` | The page: `Hero`, then one `Section` per anchor |
+| `website/src/pages/home.server.tsx` | Fixed prose, rendered with `Static` and kept out of the browser bundle |
+| `website/src/Downloads.tsx`, `useReleases.ts`, `release.ts` | The live download list from `/api/releases` |
+| `website/public/` | `editor.jpg`, `license.txt`, `notices.txt`, `robots.txt`, `sitemap.xml` |
+| `website/tests/` | Checks of the built HTML and `_headers` |
 
-The sibling pages are cli.ejmlabs.com and harness.ejmlabs.com. Match their
-anatomy and tone: header with the logo and product tag, a hero with an eyebrow,
-one H1 and one action, a product figure, a feature grid, a split section, a
-Forest band with a few honest numbers, a "get" section, and an Ink footer.
+Keep [the site notices](../../../website/public/notices.txt) with the font and
+icon licenses. Do not hand-edit or keep a copy of `_headers`: it is generated
+from the shared policy. To extend it, pass `headers.extra` to `ejmlabs()`.
+
+The sibling pages are cli.ejmlabs.com and harness.ejmlabs.com. Keep the same
+anatomy and tone: a hero with an eyebrow and one H1, a product demo, alternating
+sections, a "get" section, and the shared footer.
 
 ## Content rules
 
@@ -47,28 +52,37 @@ Forest band with a few honest numbers, a "get" section, and an Ink footer.
   installer is published. Never show a version or link that does not exist.
 - Name the agent Edi and the program ejm-ide. See [the naming skill](../ejm-ide-naming/SKILL.md).
 - No em dashes. One H1, ordered headings, alt text on every image, visible focus,
-  a skip link, and reduced-motion support. Content reads without scripts.
+  a skip link, and reduced-motion support. Content reads without scripts; the
+  build checks the page rules.
 - First load stays under 200 KB transferred. Measure the built result.
 
 ## Commands
 
 | Command | Use |
 | --- | --- |
-| `npm run site:dev` | Vite dev server for the page |
-| `npm run site:build` | Build into `website/dist` |
-| `npm run site:check` | Types for the site and Worker |
+| `npm run site:install` | Install the website's dependencies (`npm ci --ignore-scripts` in `website/`) |
+| `npm run site:dev` | Vite dev server on port 1422. It proxies `/api/` and `/downloads/` to `npm run site:preview` on 1423 |
+| `npm run site:build` | Install, then build into `website/dist` |
+| `npm run site:check` | Install, then website types, build, `ejm-site-headers --check` and tests, then the Worker's types |
 | `npm run site:preview` | Worker plus assets on port 1423 (start it detached) |
 | `npm run site:deploy` | Manual fallback only, when the owner asks: build, check, test, and `wrangler deploy` to production |
+
+`.github/site-build` is what the shared deploy runs. It installs `../ejm-ui`, then
+runs `npm run site:build`. The Quality job runs `npm run site:check` and
+`npm run site:build` with `../ejm-ui` installed.
 
 ## Before merging
 
 A merge to main deploys, so finish these first.
 
-1. Build, check, and run `npm test` (the site's tests live beside the code).
+1. Run `npm run site:check` and `npm run site:build`. The site's tests are in
+   `website/` and run in `site:check`; the root `npm test` does not run them.
 2. Look at 320, 375, 768, and 1440 px, light and dark. Tab through the page.
 3. Confirm `scrollWidth` equals `clientWidth` at 320 and 375.
 4. Recapture the screenshot if the app's labels or theme changed.
-5. Keep [the public download site guidance](../../../DESIGN.md#public-download-site)
+5. The CSP is the shared one from `@ejm/site`. Read `website/dist/_headers` when
+   the pin moves, and compare it with the live headers after a deploy.
+6. Keep [the public download site guidance](../../../DESIGN.md#public-download-site)
    and [asset provenance](../../../.impeccable/download-site-assets.json) current.
 
 ## Deploy

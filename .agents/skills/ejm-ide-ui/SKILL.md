@@ -100,26 +100,23 @@ Keep findings scoped to the flows actually checked.
 
 For `website/`, use the Public download site section in
 [DESIGN.md](../../../DESIGN.md), [the website skill](../ejm-ide-website/SKILL.md),
-and the committed [site source](../../../website/index.html). This source snapshot
-includes its [brand assets](../../../website/public/design-kit/),
-[font licenses](../../../website/public/design-kit/fonts/), and
+and the [site source](../../../website/src/pages/Home.tsx). The site takes its
+brand assets, fonts and components from the pinned `ejm-ui`. It keeps only the
 [brand and icon notices](../../../website/public/notices.txt). Contributors need
-no private brand directory. The asset manifest's historical source paths record
-provenance rather than required checkouts.
+no private brand directory. The asset manifest's historical source path for the
+editor screenshot records provenance rather than a required checkout.
 
 Active shared tokens, generated themes, reusable visuals, and site infrastructure
-belong to `ejm-ui` public exports. Retained design-kit files support the current
-asset snapshot and earlier references; change shared behavior in its owner. See
-[the shared-repository rules](../ejm-ide-shared-repos/SKILL.md). An upstream brand
-asset refresh is an optional maintainer action described in the website skill.
+belong to `ejm-ui` public exports; change shared behavior in its owner. See
+[the shared-repository rules](../ejm-ide-shared-repos/SKILL.md).
 
 Preserve the supplied SVG wordmark, with IDE as a separate suffix. Keep font and
 icon licenses, and distinguish the brand use notice from the IDE's MIT license.
 Record every shipping raster's source and hash in
 [the asset manifest](../../../.impeccable/download-site-assets.json).
 
-Keep the download page static, accessible, and small. Prefer native HTML controls
-for its simple interactions and render Lucide icons at build time. Use real app
-images, honest release states, and one main action. Check light/dark, phone and
+Keep the download page prerendered, accessible, and small. Build it from kit
+components and add none of its own styling. Use real app images, honest release
+states, and one main action. Check light/dark, phone and
 desktop widths, keyboard paths, and scripts-off content before publishing.
 
