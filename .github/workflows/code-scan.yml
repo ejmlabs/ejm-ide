@@ -1,0 +1,17 @@
+name: code-scan
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '23 6 * * 1'
+permissions: {}
+jobs:
+  code-scan:
+    permissions:
+      contents: read
+      actions: read
+      security-events: write
+    uses: ejmlabs/.github/.github/workflows/codeql-analysis.yml@42ec030800f3cb42a4469bdc804b8db3a176838a
+    with:
+      languages: javascript-typescript
