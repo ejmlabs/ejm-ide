@@ -4,6 +4,10 @@ Changes follow [Semantic Versioning](https://semver.org/). Each repository is ve
 
 ## [Unreleased]
 
+- Move the shared ejmlabs/.github pins to 340178d and resync the shared agent files: the CI deploy
+  reference now has agents confirm the live Worker version before a production approval, and the
+  design and TypeScript skills describe the systemic ejm-ui kit.
+
 - Build the website on the pinned `ejm-ui` packages, the way the ejm-cli site is built, in place of
   the copied design kit. `website/` is now its own package with its own lockfile, and the desktop
   app's install is unchanged. The page keeps its copy and anchors. Headers now come from the
