@@ -1,9 +1,11 @@
 // Reads the built site. Pages are parsed with parse5 and never executed, so what is checked is what a visitor gets before any script runs.
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { parse } from 'parse5';
 
-export const root = new URL('..', import.meta.url).pathname;
+// fileURLToPath, not .pathname, so a checkout under a folder with a space or another escaped character still resolves.
+export const root = fileURLToPath(new URL('..', import.meta.url));
 export const dist = join(root, 'dist');
 export const ORIGIN = 'https://ide.ejmlabs.com';
 

@@ -171,7 +171,8 @@ inside it first. The root scripts install the website for you:
 | `npm run site:build` | Install `website/`, then build `website/dist` |
 | `npm run site:check` | Install, then website types, build, `_headers` check and tests, then the Worker's types |
 
-The root `tsc`, Vitest and Biome do not read `website/`, which has its own
-`tsc`, Vitest and `node_modules`. The shared deploy runs `.github/site-build`,
+The root `tsc` and Vitest do not read `website/`, which has its own `tsc`,
+Vitest and `node_modules`. Root Biome still formats and lints the website's
+source. The shared deploy runs `.github/site-build`,
 which installs `../ejm-ui` and then runs `npm run site:build`. See the
 [website skill](../.agents/skills/ejm-ide-website/SKILL.md).
