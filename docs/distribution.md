@@ -118,8 +118,8 @@ fixtures there. Never upload fixtures to the remote release bucket.
 
 ## Website deploys
 
-A push to main deploys staging, then production. The pipeline, what a deploy
-refuses, failures, the owner setup, and rollback steps are in the
+A push to main deploys staging, then production once a maintainer approves it. The
+pipeline, what a deploy refuses, failures, the owner setup, and rollback steps are in the
 [shared CI deploy reference](../.agents/skills/ejmlabs-cloudflare/references/ci-deploys.md).
 This section holds this site's facts.
 

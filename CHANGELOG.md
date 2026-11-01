@@ -4,6 +4,10 @@ Changes follow [Semantic Versioning](https://semver.org/). Each repository is ve
 
 ## [Unreleased]
 
+- Move the shared ejmlabs/.github pins to 90287bb and resync the Cloudflare skill and CI deploy
+  reference. Production deploys now wait for a maintainer to approve them, and deploy only
+  main's newest commit; the deploy docs say so.
+
 - Move the shared ejmlabs/.github pins to 340178d and resync the shared agent files: the CI deploy
   reference now has agents confirm the live Worker version before a production approval, and the
   design and TypeScript skills describe the systemic ejm-ui kit.

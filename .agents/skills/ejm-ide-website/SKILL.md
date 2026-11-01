@@ -87,8 +87,8 @@ A merge to main deploys, so finish these first.
 
 ## Deploy
 
-A push to main deploys staging, then production. The pipeline, its failures, the
-owner setup, and rollback are in
+A push to main deploys staging, then production once a maintainer approves it. The
+pipeline, its failures, the owner setup, and rollback are in
 [the shared CI deploy reference](../ejmlabs-cloudflare/references/ci-deploys.md).
 This site's facts:
 
