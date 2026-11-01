@@ -424,9 +424,8 @@ impl WorkspaceRoot {
                     }
                 })?;
             parent
-                .try_clone()
+                .open(".")
                 .map_err(|error| error.to_string())?
-                .into_std_file()
                 .sync_all()
                 .map_err(|error| format!("Cannot sync file directory: {error}"))?;
             Ok(())
@@ -499,9 +498,8 @@ impl WorkspaceRoot {
                 .rename(&temporary, &parent, name)
                 .map_err(|error| format!("Cannot replace file: {error}"))?;
             parent
-                .try_clone()
+                .open(".")
                 .map_err(|error| error.to_string())?
-                .into_std_file()
                 .sync_all()
                 .map_err(|error| format!("Cannot sync file directory: {error}"))?;
             Ok(())

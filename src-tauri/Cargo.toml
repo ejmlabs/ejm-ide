@@ -28,6 +28,7 @@ eventsource-stream = "0.2.3"
 futures-util = "0.3"
 libc = "0.2"
 ignore = "0.4"
+keyring = "4.2.0"
 pulldown-cmark = { version = "0.13.4", default-features = false }
 reqwest = { version = "0.13.5", default-features = false, features = ["json", "rustls", "stream"] }
 rusqlite = { version = "0.40.2", features = ["bundled"] }
@@ -52,9 +53,6 @@ tree-sitter-typescript = "0.23.2"
 url = "2"
 uuid = { version = "1", features = ["v4"] }
 cap-fs-ext = "3"
-
-[target.'cfg(target_os = "macos")'.dependencies]
-keyring = "4.2.0"
 
 [lints.rust]
 unsafe_code = "deny"
