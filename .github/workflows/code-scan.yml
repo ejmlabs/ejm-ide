@@ -9,8 +9,8 @@ permissions: {}
 jobs:
   code-scan:
     permissions:
-      actions: read
       contents: read
+      actions: read
       security-events: write
     uses: ejmlabs/.github/.github/workflows/codeql-analysis.yml@42ec030800f3cb42a4469bdc804b8db3a176838a
     with:
